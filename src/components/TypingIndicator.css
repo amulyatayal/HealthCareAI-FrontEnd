@@ -1,0 +1,91 @@
+/* Typing Indicator Component */
+.typing-indicator {
+  display: flex;
+  gap: var(--space-md);
+  animation: fadeIn var(--transition-base) ease forwards;
+}
+
+.typing-avatar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--rose-400) 0%, var(--rose-500) 100%);
+  color: white;
+  box-shadow: 0 2px 8px -2px var(--rose-400);
+}
+
+.typing-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.typing-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.typing-role {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.typing-status {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.typing-bubble {
+  padding: var(--space-md) var(--space-lg);
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--space-xs);
+  box-shadow: var(--shadow-sm);
+}
+
+.typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 1.5rem;
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--rose-300);
+  border-radius: var(--radius-full);
+  animation: typing-dot 1.4s ease-in-out infinite;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 160ms;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 320ms;
+}
+
+@keyframes typing-dot {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+

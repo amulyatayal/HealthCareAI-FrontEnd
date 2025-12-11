@@ -1,0 +1,220 @@
+/* Message Bubble Component */
+.message-bubble {
+  display: flex;
+  gap: var(--space-md);
+  animation: slideUp var(--transition-base) ease forwards;
+}
+
+.message-bubble.user {
+  flex-direction: row-reverse;
+}
+
+.message-avatar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-full);
+}
+
+.message-bubble.user .message-avatar {
+  background: linear-gradient(135deg, var(--rose-100) 0%, var(--lavender-100) 100%);
+  color: var(--rose-500);
+}
+
+.message-bubble.assistant .message-avatar {
+  background: linear-gradient(135deg, var(--rose-400) 0%, var(--rose-500) 100%);
+  color: white;
+  box-shadow: 0 2px 8px -2px var(--rose-400);
+}
+
+.message-content {
+  flex: 1;
+  max-width: 85%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.message-bubble.user .message-content {
+  align-items: flex-end;
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.message-bubble.user .message-header {
+  flex-direction: row-reverse;
+}
+
+.message-role {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.message-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.message-text {
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-lg);
+  line-height: 1.6;
+}
+
+.message-bubble.user .message-text {
+  background: linear-gradient(135deg, var(--rose-100) 0%, var(--lavender-100) 100%);
+  border-bottom-right-radius: var(--space-xs);
+}
+
+.message-bubble.assistant .message-text {
+  background: white;
+  border: 1px solid var(--border-light);
+  border-bottom-left-radius: var(--space-xs);
+  box-shadow: var(--shadow-sm);
+}
+
+.message-text p {
+  margin: 0;
+}
+
+.message-text p + p {
+  margin-top: var(--space-sm);
+}
+
+/* Sources */
+.message-sources {
+  margin-top: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--cream-100);
+  border-radius: var(--radius-md);
+}
+
+.sources-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-xs);
+}
+
+.sources-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.source-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-xs) var(--space-sm);
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.source-link:hover {
+  color: var(--rose-500);
+  border-color: var(--rose-200);
+}
+
+/* Suggested Questions */
+.suggested-questions {
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-light);
+}
+
+.suggestions-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-sm);
+}
+
+.suggestions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.suggestion-chip {
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--cream-100);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.suggestion-chip:hover {
+  background: var(--rose-50);
+  border-color: var(--rose-200);
+  color: var(--rose-600);
+}
+
+/* Message Actions */
+.message-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.message-bubble:hover .message-actions {
+  opacity: 1;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-xs) var(--space-sm);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.action-btn:hover {
+  background: var(--cream-100);
+  color: var(--text-secondary);
+}
+
+.action-btn.active {
+  color: var(--rose-500);
+}
+
+.action-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border-light);
+}
+
+@media (max-width: 768px) {
+  .message-content {
+    max-width: 90%;
+  }
+}
+
