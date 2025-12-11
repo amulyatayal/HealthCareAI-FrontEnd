@@ -4,6 +4,7 @@ import { ChatInterface } from './components/ChatInterface'
 import { Sidebar } from './components/Sidebar'
 import { WelcomeScreen } from './components/WelcomeScreen'
 import { TopicsBrowser } from './components/TopicsBrowser'
+import { generateUUID } from './utils/uuid'
 import type { Message } from './types'
 import './styles/App.css'
 
@@ -30,7 +31,7 @@ function App() {
   const handleQuickQuestion = (question: string) => {
     // Trigger the chat with this question
     const syntheticMessage: Message = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       role: 'user',
       content: question,
       timestamp: new Date()

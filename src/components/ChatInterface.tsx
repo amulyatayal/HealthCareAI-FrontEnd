@@ -3,6 +3,7 @@ import { Send, Loader2 } from 'lucide-react'
 import { MessageBubble } from './MessageBubble'
 import { TypingIndicator } from './TypingIndicator'
 import { sendMessage as sendMessageApi } from '../services/api'
+import { generateUUID } from '../utils/uuid'
 import type { Message } from '../types'
 import './ChatInterface.css'
 
@@ -65,7 +66,7 @@ export function ChatInterface({
       console.log('API response:', response)
 
       const assistantMessage: Message = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         role: 'assistant',
         content: response.answer,
         timestamp: new Date(response.timestamp),
@@ -87,7 +88,7 @@ export function ChatInterface({
       }
       
       const errorMessage: Message = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         role: 'assistant',
         content: errorContent,
         timestamp: new Date(),
@@ -104,7 +105,7 @@ export function ChatInterface({
     if (!input.trim() || isLoading) return
 
     const userMessage: Message = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       role: 'user',
       content: input.trim(),
       timestamp: new Date(),

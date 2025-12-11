@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { sendMessage as sendMessageApi, clearChatHistory } from '../services/api'
+import { generateUUID } from '../utils/uuid'
 import type { Message, ChatRequest } from '../types'
 
 interface UseChatOptions {
@@ -13,7 +14,7 @@ export function useChat(options: UseChatOptions = {}) {
 
   const sendMessage = useCallback(async (content: string) => {
     const userMessage: Message = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       role: 'user',
       content,
       timestamp: new Date(),
@@ -31,7 +32,7 @@ export function useChat(options: UseChatOptions = {}) {
       const response = await sendMessageApi(request)
 
       const assistantMessage: Message = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         role: 'assistant',
         content: response.answer,
         timestamp: new Date(response.timestamp),
@@ -48,7 +49,7 @@ export function useChat(options: UseChatOptions = {}) {
       options.onError?.(err)
 
       const errorMessage: Message = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         role: 'assistant',
         content: "I'm sorry, I'm having trouble connecting right now. Please try again in a moment.",
         timestamp: new Date(),
