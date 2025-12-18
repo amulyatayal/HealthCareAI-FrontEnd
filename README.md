@@ -1,6 +1,6 @@
 # Healthcare AI - Healthcare Companion Frontend
 
-A beautiful, compassionate AI companion frontend for breast cancer patient support. This React application provides an intuitive interface to interact with the HealthCareAI backend.
+A beautiful, personal AI companion frontend for breast cancer patient support. This React application provides an intuitive interface to interact with the HealthCareAI backend.
 
 ![Healthcare AI Screenshot](./screenshot.png)
 

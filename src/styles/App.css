@@ -37,3 +37,23 @@
   gap: var(--space-md);
 }
 
+/* App Footer - Always visible disclaimer */
+.app-footer {
+  flex-shrink: 0;
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--cream-100);
+  border-top: 1px solid var(--border-light);
+  text-align: center;
+}
+
+.footer-disclaimer {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.footer-disclaimer strong {
+  color: var(--text-secondary);
+}
+

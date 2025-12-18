@@ -1,0 +1,227 @@
+/* Chat Input Section */
+.chat-input-section {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.chat-input-section.centered {
+  /* Styles for centered mode (welcome screen) */
+}
+
+/* Input Form */
+.chat-input-form {
+  width: 100%;
+}
+
+.chat-input-form .input-wrapper {
+  position: relative;
+  background: white;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg), 0 0 40px -15px var(--rose-200);
+  border: 2px solid transparent;
+  transition: all var(--transition-base);
+}
+
+.chat-input-form .input-wrapper:focus-within {
+  border-color: var(--rose-300);
+  box-shadow: var(--shadow-lg), 0 0 0 4px var(--rose-100);
+}
+
+.chat-input {
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  padding-right: 4rem;
+  border: none;
+  border-radius: var(--radius-xl);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  background: transparent;
+  color: var(--text-primary);
+  resize: none;
+  min-height: 56px;
+  max-height: 150px;
+  line-height: 1.5;
+}
+
+.chat-input:focus {
+  outline: none;
+}
+
+.chat-input::placeholder {
+  color: var(--text-muted);
+}
+
+.chat-input:disabled {
+  opacity: 0.7;
+}
+
+.input-submit {
+  position: absolute;
+  right: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Mode Toggle - Switch Buttons */
+.mode-toggle-container {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.mode-switch-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  background: white;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.mode-switch-option:hover {
+  border-color: var(--gray-300);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.mode-switch-option:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #d1fae5;
+}
+
+.mode-switch-option.active {
+  background: #ecfdf5;
+  border-color: #10b981;
+}
+
+.mode-switch-option.active:hover {
+  border-color: #10b981;
+}
+
+.mode-switch-option.inactive {
+  opacity: 0.6;
+}
+
+.mode-switch-option.inactive:hover {
+  opacity: 0.9;
+}
+
+.mode-switch-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mode-switch-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.mode-switch-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.mode-switch-option.active .mode-switch-icon {
+  color: #10b981;
+}
+
+.mode-switch-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.mode-switch-option.active .mode-switch-label {
+  color: #047857;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  width: 40px;
+  height: 20px;
+  border-radius: 10px;
+  border: none;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  padding: 0 3px;
+  flex-shrink: 0;
+}
+
+.toggle-switch.on {
+  background: #10b981;
+  justify-content: flex-end;
+}
+
+.toggle-switch.off {
+  background: var(--gray-300);
+  justify-content: flex-start;
+}
+
+.toggle-slider {
+  width: 14px;
+  height: 14px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: all var(--transition-fast);
+}
+
+.toggle-state {
+  position: absolute;
+  font-size: 0.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.toggle-switch.on .toggle-state {
+  left: 4px;
+  color: white;
+}
+
+.toggle-switch.off .toggle-state {
+  right: 3px;
+  color: white;
+}
+
+.mode-description {
+  text-align: center;
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  margin: var(--space-xs) 0 0 0;
+  font-weight: 500;
+}
+
+/* Spin animation */
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 640px) {
+  .mode-toggle-container {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+  
+  .mode-switch-option {
+    width: 100%;
+    max-width: 280px;
+    justify-content: space-between;
+  }
+}
+

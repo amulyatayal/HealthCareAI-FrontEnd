@@ -1,10 +1,11 @@
 import { Heart, Sparkles, Shield, Users } from 'lucide-react'
+import type { ReactNode } from 'react'
 import './WelcomeScreen.css'
 
 const features = [
   {
     icon: Heart,
-    title: 'Compassionate Support',
+    title: 'Personal Support',
     description: 'Understanding and empathetic responses tailored to your journey',
     color: 'rose'
   },
@@ -22,7 +23,11 @@ const features = [
   },
 ]
 
-export function WelcomeScreen() {
+interface WelcomeScreenProps {
+  children?: ReactNode
+}
+
+export function WelcomeScreen({ children }: WelcomeScreenProps) {
   return (
     <div className="welcome-screen">
       <div className="welcome-content">
@@ -34,15 +39,22 @@ export function WelcomeScreen() {
             Hello, I'm here to help
           </h1>
           <p className="welcome-subtitle">
-            Your compassionate AI companion for breast cancer
+            Your personal AI companion for breast cancer support
           </p>
         </div>
+
+        {/* Chat input renders here when passed as children */}
+        {children && (
+          <div className="welcome-input-section">
+            {children}
+          </div>
+        )}
 
         <div className="features-grid">
           {features.map((feature) => (
             <div key={feature.title} className={`feature-card feature-${feature.color}`}>
               <div className="feature-icon">
-                <feature.icon size={24} />
+                <feature.icon size={16} />
               </div>
               <h3 className="feature-title">{feature.title}</h3>
               <p className="feature-description">{feature.description}</p>
