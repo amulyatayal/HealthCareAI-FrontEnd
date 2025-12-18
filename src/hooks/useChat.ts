@@ -37,7 +37,10 @@ export function useChat(options: UseChatOptions = {}) {
         content: response.answer,
         timestamp: new Date(response.timestamp),
         sources: response.sources,
-        suggested_questions: response.suggested_questions,
+        disclaimer: response.disclaimer,
+        has_sufficient_evidence: response.has_sufficient_evidence,
+        support_helpline: response.support_helpline,
+        support_helpline_name: response.support_helpline_name,
       }
 
       setMessages(prev => [...prev, assistantMessage])
