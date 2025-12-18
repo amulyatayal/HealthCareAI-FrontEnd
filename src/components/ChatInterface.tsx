@@ -176,35 +176,39 @@ export function ChatInterface({
       )}
 
       <div className="chat-input-container">
-        <fieldset className="mode-toggle">
-          <legend className="mode-toggle-legend">Response Mode</legend>
-          <label className={`mode-radio-label ${strictMode ? 'active' : ''}`}>
-            <input
-              type="radio"
-              name="responseMode"
-              value="strict"
-              checked={strictMode}
-              onChange={() => setStrictMode(true)}
-              className="mode-radio-input"
-            />
-            <span className="mode-radio-custom"></span>
-            <BookOpen size={14} className="mode-radio-icon" />
-            <span className="mode-radio-text">Knowledge Base Only</span>
-          </label>
-          <label className={`mode-radio-label ${!strictMode ? 'active' : ''}`}>
-            <input
-              type="radio"
-              name="responseMode"
-              value="ai"
-              checked={!strictMode}
-              onChange={() => setStrictMode(false)}
-              className="mode-radio-input"
-            />
-            <span className="mode-radio-custom"></span>
-            <Sparkles size={14} className="mode-radio-icon" />
-            <span className="mode-radio-text">AI + Knowledge Base</span>
-          </label>
-        </fieldset>
+        <div className="mode-toggle-container">
+          <button
+            type="button"
+            className={`mode-switch-option ${strictMode ? 'active' : 'inactive'}`}
+            onClick={() => setStrictMode(true)}
+            aria-pressed={strictMode}
+          >
+            <div className="mode-switch-header">
+              <BookOpen size={16} className="mode-switch-icon" />
+              <span className="mode-switch-label">Knowledge Base Only</span>
+            </div>
+            <div className={`toggle-switch ${strictMode ? 'on' : 'off'}`}>
+              <span className="toggle-slider"></span>
+              <span className="toggle-state">{strictMode ? 'ON' : 'OFF'}</span>
+            </div>
+          </button>
+          
+          <button
+            type="button"
+            className={`mode-switch-option ${!strictMode ? 'active' : 'inactive'}`}
+            onClick={() => setStrictMode(false)}
+            aria-pressed={!strictMode}
+          >
+            <div className="mode-switch-header">
+              <Sparkles size={16} className="mode-switch-icon" />
+              <span className="mode-switch-label">AI + Knowledge Base</span>
+            </div>
+            <div className={`toggle-switch ${!strictMode ? 'on' : 'off'}`}>
+              <span className="toggle-slider"></span>
+              <span className="toggle-state">{!strictMode ? 'ON' : 'OFF'}</span>
+            </div>
+          </button>
+        </div>
         <p className="mode-description">
           {strictMode 
             ? "✓ Answers only from verified medical documents" 
