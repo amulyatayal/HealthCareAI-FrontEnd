@@ -7,7 +7,8 @@ import type {
   KnowledgeDocument,
   ChatHistory,
   FeedbackRequest,
-  HealthStatus
+  HealthStatus,
+  IndexesResponse
 } from '../types';
 
 const API_BASE = '/api/v1';
@@ -86,6 +87,11 @@ export async function getDocument(documentId: string): Promise<KnowledgeDocument
 // Health API
 export async function getHealthStatus(): Promise<HealthStatus> {
   return fetchJson<HealthStatus>('/health');
+}
+
+// Indexes API
+export async function getAvailableIndexes(): Promise<IndexesResponse> {
+  return fetchJson<IndexesResponse>(`${API_BASE}/knowledge/indexes`);
 }
 
 export { ApiError };

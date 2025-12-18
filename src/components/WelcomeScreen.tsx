@@ -1,19 +1,6 @@
 import { Heart, Sparkles, Shield, Users } from 'lucide-react'
 import './WelcomeScreen.css'
 
-interface WelcomeScreenProps {
-  onQuickQuestion: (question: string) => void
-}
-
-const suggestedQuestions = [
-  "What should I expect during my first chemotherapy session?",
-  "How can I manage fatigue during treatment?",
-  "What foods are recommended during cancer treatment?",
-  "How do I talk to my family about my diagnosis?",
-  "What are the common side effects I should watch for?",
-  "How can I prepare for surgery?",
-]
-
 const features = [
   {
     icon: Heart,
@@ -35,7 +22,7 @@ const features = [
   },
 ]
 
-export function WelcomeScreen({ onQuickQuestion }: WelcomeScreenProps) {
+export function WelcomeScreen() {
   return (
     <div className="welcome-screen">
       <div className="welcome-content">
@@ -47,8 +34,7 @@ export function WelcomeScreen({ onQuickQuestion }: WelcomeScreenProps) {
             Hello, I'm here to help
           </h1>
           <p className="welcome-subtitle">
-            Your compassionate AI companion for breast cancer support and information. 
-            Ask me anything about your care journey.
+            Your compassionate AI companion for breast cancer
           </p>
         </div>
 
@@ -62,21 +48,6 @@ export function WelcomeScreen({ onQuickQuestion }: WelcomeScreenProps) {
               <p className="feature-description">{feature.description}</p>
             </div>
           ))}
-        </div>
-
-        <div className="suggestions-section">
-          <h2 className="suggestions-title">Common Questions</h2>
-          <div className="suggestions-grid">
-            {suggestedQuestions.map((question) => (
-              <button 
-                key={question} 
-                className="suggestion-btn"
-                onClick={() => onQuickQuestion(question)}
-              >
-                {question}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
     </div>

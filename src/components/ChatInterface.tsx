@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Send, Loader2 } from 'lucide-react'
+import { Send, Loader2, BookOpen, Sparkles } from 'lucide-react'
 import { MessageBubble } from './MessageBubble'
 import { TypingIndicator } from './TypingIndicator'
 import { sendMessage as sendMessageApi } from '../services/api'
@@ -12,16 +12,19 @@ interface ChatInterfaceProps {
   sessionId: string | null
   onSendMessage: (message: Message, sessionId?: string) => void
   showWelcome: boolean
+  selectedIndex: string
 }
 
 export function ChatInterface({ 
   messages, 
   sessionId, 
   onSendMessage, 
-  showWelcome 
+  showWelcome,
+  selectedIndex
 }: ChatInterfaceProps) {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [strictMode, setStrictMode] = useState(true) // Knowledge base only mode
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const processedMessageRef = useRef<string | null>(null)
@@ -58,10 +61,13 @@ export function ChatInterface({
     setIsLoading(true)
 
     try {
-      console.log('Sending message to API:', messageText)
+      console.log('Sending message to API:', messageText, 'Index:', selectedIndex, 'Strict:', strictMode)
       const response = await sendMessageApi({
         message: messageText,
         session_id: sessionId || undefined,
+        index_name: selectedIndex,
+        strict_mode: strictMode,
+        include_sources: true,
       })
       console.log('API response:', response)
 
@@ -71,7 +77,10 @@ export function ChatInterface({
         content: response.answer,
         timestamp: new Date(response.timestamp),
         sources: response.sources,
-        suggested_questions: response.suggested_questions,
+        disclaimer: response.disclaimer,
+        has_sufficient_evidence: response.has_sufficient_evidence,
+        support_helpline: response.support_helpline,
+        support_helpline_name: response.support_helpline_name,
       }
 
       onSendMessage(assistantMessage, response.session_id)
@@ -97,7 +106,7 @@ export function ChatInterface({
     } finally {
       setIsLoading(false)
     }
-  }, [sessionId, onSendMessage])
+  }, [sessionId, onSendMessage, selectedIndex, strictMode])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -124,22 +133,15 @@ export function ChatInterface({
     }
   }
 
-  const handleSuggestedQuestion = (question: string) => {
-    setInput(question)
-    inputRef.current?.focus()
-  }
-
   return (
     <div className={`chat-interface ${showWelcome ? 'with-welcome' : ''}`}>
       {!showWelcome && (
         <div className="messages-container">
           <div className="messages-list">
-            {messages.map((message, index) => (
+            {messages.map((message) => (
               <MessageBubble 
                 key={message.id} 
                 message={message}
-                onSuggestedQuestion={handleSuggestedQuestion}
-                isLatest={index === messages.length - 1}
               />
             ))}
             {isLoading && <TypingIndicator />}
@@ -149,6 +151,41 @@ export function ChatInterface({
       )}
 
       <div className="chat-input-container">
+        <fieldset className="mode-toggle">
+          <legend className="mode-toggle-legend">Response Mode</legend>
+          <label className={`mode-radio-label ${strictMode ? 'active' : ''}`}>
+            <input
+              type="radio"
+              name="responseMode"
+              value="strict"
+              checked={strictMode}
+              onChange={() => setStrictMode(true)}
+              className="mode-radio-input"
+            />
+            <span className="mode-radio-custom"></span>
+            <BookOpen size={14} className="mode-radio-icon" />
+            <span className="mode-radio-text">Knowledge Base Only</span>
+          </label>
+          <label className={`mode-radio-label ${!strictMode ? 'active' : ''}`}>
+            <input
+              type="radio"
+              name="responseMode"
+              value="ai"
+              checked={!strictMode}
+              onChange={() => setStrictMode(false)}
+              className="mode-radio-input"
+            />
+            <span className="mode-radio-custom"></span>
+            <Sparkles size={14} className="mode-radio-icon" />
+            <span className="mode-radio-text">AI + Knowledge Base</span>
+          </label>
+        </fieldset>
+        <p className="mode-description">
+          {strictMode 
+            ? "✓ Answers only from verified medical documents" 
+            : "✓ AI provides guidance with knowledge base context"}
+        </p>
+        
         <form onSubmit={handleSubmit} className="chat-input-form">
           <div className="input-wrapper">
             <textarea
@@ -175,9 +212,6 @@ export function ChatInterface({
             </button>
           </div>
         </form>
-        <p className="chat-disclaimer">
-          HopeAI provides educational information only. Always consult your healthcare team for medical advice.
-        </p>
       </div>
     </div>
   )

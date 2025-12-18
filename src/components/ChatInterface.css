@@ -7,7 +7,8 @@
 }
 
 .chat-interface.with-welcome {
-  justify-content: flex-end;
+  flex: none;
+  /* Only show the input bar, don't grow */
 }
 
 .messages-container {
@@ -26,8 +27,127 @@
 
 /* Chat Input */
 .chat-input-container {
+  flex-shrink: 0;
   padding: var(--space-md) var(--space-lg) var(--space-lg);
-  background: linear-gradient(to top, var(--cream-50) 60%, transparent);
+  background: var(--cream-50);
+}
+
+/* Mode Toggle - Radio Buttons */
+.mode-toggle {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xs);
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  border: none;
+  padding: 0;
+}
+
+.mode-toggle-legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.mode-radio-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: white;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.mode-radio-label:hover {
+  background: var(--gray-50);
+  border-color: var(--gray-300);
+}
+
+.mode-radio-label.active {
+  background: #ecfdf5;
+  border-color: #10b981;
+  color: #047857;
+}
+
+/* Hide the native radio input */
+.mode-radio-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Custom radio circle */
+.mode-radio-custom {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--gray-300);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.mode-radio-custom::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: transparent;
+  transition: all var(--transition-fast);
+}
+
+.mode-radio-label.active .mode-radio-custom {
+  border-color: #10b981;
+}
+
+.mode-radio-label.active .mode-radio-custom::after {
+  background: #10b981;
+}
+
+.mode-radio-icon {
+  flex-shrink: 0;
+}
+
+.mode-radio-label.active .mode-radio-icon {
+  color: #10b981;
+}
+
+.mode-radio-text {
+  white-space: nowrap;
+}
+
+/* Focus styles for accessibility */
+.mode-radio-input:focus-visible + .mode-radio-custom {
+  box-shadow: 0 0 0 3px #d1fae5;
+  border-color: #10b981;
+}
+
+.mode-description {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-sm) 0;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .chat-input-form {
@@ -36,10 +156,11 @@
 }
 
 .chat-input-form .input-wrapper {
+  position: relative;
   background: white;
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg), 0 0 40px -15px var(--rose-200);
-  border: 2px solid transparent;
+  border: none;
   transition: all var(--transition-base);
 }
 

@@ -4,6 +4,7 @@ export interface Source {
   title: string;
   url?: string;
   snippet?: string;
+  source_text?: string;  // Full text from PDF for modal display
   relevance_score?: number;
 }
 
@@ -11,6 +12,9 @@ export interface ChatRequest {
   message: string;
   session_id?: string;
   context?: Record<string, unknown>;
+  index_name?: string;
+  strict_mode?: boolean;
+  include_sources?: boolean;
 }
 
 export interface ChatResponse {
@@ -20,6 +24,9 @@ export interface ChatResponse {
   disclaimer: string;
   suggested_questions: string[];
   timestamp: string;
+  has_sufficient_evidence?: boolean;
+  support_helpline?: string;
+  support_helpline_name?: string;
 }
 
 export interface Message {
@@ -28,7 +35,10 @@ export interface Message {
   content: string;
   timestamp: Date;
   sources?: Source[];
-  suggested_questions?: string[];
+  disclaimer?: string;
+  has_sufficient_evidence?: boolean;
+  support_helpline?: string;
+  support_helpline_name?: string;
 }
 
 export interface KnowledgeSearchRequest {
@@ -88,5 +98,16 @@ export interface HealthStatus {
   version: string;
   environment: string;
   services: Record<string, string>;
+}
+
+export interface IndexInfo {
+  index_name: string;
+  display_name: string;
+  description?: string;
+  document_count: number;
+}
+
+export interface IndexesResponse {
+  indexes: IndexInfo[];
 }
 

@@ -1,13 +1,12 @@
 /* Welcome Screen Component */
 .welcome-screen {
-  position: absolute;
-  inset: 0;
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   overflow-y: auto;
   padding: var(--space-xl) var(--space-lg);
-  z-index: 10;
 }
 
 .welcome-content {
