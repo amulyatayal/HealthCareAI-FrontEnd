@@ -26,6 +26,7 @@ export function ChatInterface({
   const [isLoading, setIsLoading] = useState(false)
   const [strictMode, setStrictMode] = useState(true) // Knowledge base only mode
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const userQuestionRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const processedMessageRef = useRef<string | null>(null)
 
@@ -33,8 +34,22 @@ export function ChatInterface({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  const scrollToUserQuestion = () => {
+    // Scroll to the user's question so they see what they asked + the answer below
+    userQuestionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   useEffect(() => {
-    scrollToBottom()
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1]
+      // For user messages, scroll to bottom (so they see typing indicator)
+      // For assistant messages, scroll to the user's question above it
+      if (lastMessage.role === 'user') {
+        scrollToBottom()
+      } else {
+        scrollToUserQuestion()
+      }
+    }
   }, [messages])
 
   useEffect(() => {
@@ -138,12 +153,22 @@ export function ChatInterface({
       {!showWelcome && (
         <div className="messages-container">
           <div className="messages-list">
-            {messages.map((message) => (
-              <MessageBubble 
-                key={message.id} 
-                message={message}
-              />
-            ))}
+            {messages.map((message, index) => {
+              // Set ref on the user question (second to last when assistant responds)
+              const isUserQuestionBeforeAnswer = 
+                message.role === 'user' && 
+                index === messages.length - 2 &&
+                messages[messages.length - 1]?.role === 'assistant'
+              
+              return (
+                <div 
+                  key={message.id}
+                  ref={isUserQuestionBeforeAnswer ? userQuestionRef : null}
+                >
+                  <MessageBubble message={message} />
+                </div>
+              )
+            })}
             {isLoading && <TypingIndicator />}
             <div ref={messagesEndRef} />
           </div>

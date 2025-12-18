@@ -75,6 +75,14 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             <ReactMarkdown>{message.content}</ReactMarkdown>
           </div>
 
+          {/* Disclaimer */}
+          {!isUser && message.disclaimer && (
+            <div className="disclaimer-section">
+              <AlertTriangle size={16} className="disclaimer-icon" />
+              <p className="disclaimer-text">{message.disclaimer}</p>
+            </div>
+          )}
+
           {/* Sources Section */}
           {message.sources && message.sources.length > 0 && (
             <div className="sources-section">
@@ -101,14 +109,6 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                   </button>
                 ))}
               </div>
-            </div>
-          )}
-
-          {/* Disclaimer */}
-          {!isUser && message.disclaimer && (
-            <div className="disclaimer-section">
-              <AlertTriangle size={16} className="disclaimer-icon" />
-              <p className="disclaimer-text">{message.disclaimer}</p>
             </div>
           )}
 
