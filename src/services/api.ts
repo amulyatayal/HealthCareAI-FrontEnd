@@ -56,15 +56,9 @@ export async function clearChatHistory(sessionId: string): Promise<{ message: st
 }
 
 export async function submitFeedback(request: FeedbackRequest): Promise<{ message: string }> {
-  const params = new URLSearchParams({
-    session_id: request.session_id,
-    message_id: request.message_id,
-    rating: request.rating.toString(),
-    ...(request.feedback && { feedback: request.feedback }),
-  });
-  
-  return fetchJson<{ message: string }>(`${API_BASE}/chat/feedback?${params}`, {
+  return fetchJson<{ message: string }>(`${API_BASE}/chat/feedback`, {
     method: 'POST',
+    body: JSON.stringify(request),
   });
 }
 

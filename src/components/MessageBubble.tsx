@@ -2,6 +2,7 @@ import { User, Heart, BookOpen, ExternalLink, ThumbsUp, ThumbsDown, Copy, Check,
 import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { SourceModal } from './SourceModal'
+import { submitFeedback } from '../services/api'
 import type { Message, Source } from '../types'
 import './MessageBubble.css'
 
@@ -21,7 +22,11 @@ function formatTime(timestamp: Date | string): string {
 
 export function MessageBubble({ message }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false)
-  const [feedback, setFeedback] = useState<'up' | 'down' | null>(null)
+  const [feedback, setFeedback] = useState<'thumbs_up' | 'thumbs_down' | null>(message.feedbackGiven || null)
+  const [showFeedbackInput, setShowFeedbackInput] = useState(false)
+  const [feedbackText, setFeedbackText] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showThanks, setShowThanks] = useState(false)
   const [selectedSource, setSelectedSource] = useState<Source | null>(null)
   const isUser = message.role === 'user'
 
@@ -31,13 +36,80 @@ export function MessageBubble({ message }: MessageBubbleProps) {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleFeedback = (type: 'up' | 'down') => {
-    setFeedback(type)
+  const handleThumbsUp = async () => {
+    if (feedback) return
+    
+    setFeedback('thumbs_up')
+    setShowThanks(true)
+    
+    // Try to submit to API if conversation_id is available
+    if (message.conversation_id && message.conversation_created_at) {
+      try {
+        await submitFeedback({
+          conversation_id: message.conversation_id,
+          created_at: message.conversation_created_at,
+          rating: 'thumbs_up',
+        })
+      } catch (error) {
+        console.error('Failed to submit feedback to API:', error)
+        // Still show thanks - feedback is recorded locally
+      }
+    }
+  }
+
+  const handleThumbsDown = () => {
+    if (feedback) return
+    setFeedback('thumbs_down')
+    setShowFeedbackInput(true)
+  }
+
+  const handleFeedbackSubmit = async () => {
+    setIsSubmitting(true)
+    setShowFeedbackInput(false)
+    setShowThanks(true)
+    
+    // Try to submit to API if conversation_id is available
+    if (message.conversation_id && message.conversation_created_at) {
+      try {
+        await submitFeedback({
+          conversation_id: message.conversation_id,
+          created_at: message.conversation_created_at,
+          rating: 'thumbs_down',
+          feedback_text: feedbackText || undefined,
+        })
+      } catch (error) {
+        console.error('Failed to submit feedback to API:', error)
+      }
+    }
+    setIsSubmitting(false)
+  }
+
+  const handleSkipFeedback = async () => {
+    setIsSubmitting(true)
+    setShowFeedbackInput(false)
+    setShowThanks(true)
+    
+    // Try to submit to API if conversation_id is available
+    if (message.conversation_id && message.conversation_created_at) {
+      try {
+        await submitFeedback({
+          conversation_id: message.conversation_id,
+          created_at: message.conversation_created_at,
+          rating: 'thumbs_down',
+        })
+      } catch (error) {
+        console.error('Failed to submit feedback to API:', error)
+      }
+    }
+    setIsSubmitting(false)
   }
 
   const handleSourceClick = (source: Source) => {
     setSelectedSource(source)
   }
+
+  // Always show feedback buttons for assistant messages
+  const canShowFeedback = !isUser
 
   return (
     <>
@@ -138,21 +210,62 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                 {copied ? <Check size={14} /> : <Copy size={14} />}
                 {copied ? 'Copied' : 'Copy'}
               </button>
-              <div className="action-divider" />
-              <button 
-                className={`action-btn ${feedback === 'up' ? 'active' : ''}`}
-                onClick={() => handleFeedback('up')}
-                aria-label="Helpful"
-              >
-                <ThumbsUp size={14} />
-              </button>
-              <button 
-                className={`action-btn ${feedback === 'down' ? 'active' : ''}`}
-                onClick={() => handleFeedback('down')}
-                aria-label="Not helpful"
-              >
-                <ThumbsDown size={14} />
-              </button>
+              
+              {canShowFeedback && (
+                <>
+                  <div className="action-divider" />
+                  <button 
+                    className={`action-btn ${feedback === 'thumbs_up' ? 'active' : ''}`}
+                    onClick={handleThumbsUp}
+                    disabled={feedback !== null || isSubmitting}
+                    aria-label="Helpful"
+                  >
+                    <ThumbsUp size={14} />
+                  </button>
+                  <button 
+                    className={`action-btn ${feedback === 'thumbs_down' ? 'active' : ''}`}
+                    onClick={handleThumbsDown}
+                    disabled={feedback !== null || isSubmitting}
+                    aria-label="Not helpful"
+                  >
+                    <ThumbsDown size={14} />
+                  </button>
+                  
+                  {showThanks && (
+                    <span className="feedback-thanks">Thanks for your feedback!</span>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Feedback text input (shown after thumbs down) */}
+          {showFeedbackInput && (
+            <div className="feedback-input-container">
+              <textarea
+                value={feedbackText}
+                onChange={(e) => setFeedbackText(e.target.value)}
+                placeholder="Tell us how we can improve..."
+                maxLength={2000}
+                rows={3}
+                className="feedback-textarea"
+              />
+              <div className="feedback-input-actions">
+                <button 
+                  className="feedback-skip-btn"
+                  onClick={handleSkipFeedback}
+                  disabled={isSubmitting}
+                >
+                  Skip
+                </button>
+                <button 
+                  className="feedback-submit-btn"
+                  onClick={handleFeedbackSubmit}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit'}
+                </button>
+              </div>
             </div>
           )}
         </div>

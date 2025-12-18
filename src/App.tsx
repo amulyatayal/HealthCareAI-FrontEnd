@@ -97,6 +97,9 @@ function App() {
         has_sufficient_evidence: response.has_sufficient_evidence,
         support_helpline: response.support_helpline,
         support_helpline_name: response.support_helpline_name,
+        conversation_id: response.conversation_id,
+        conversation_created_at: response.conversation_created_at,
+        feedbackGiven: null,
       }
 
       handleSendMessage(assistantMessage, response.session_id)

@@ -27,6 +27,8 @@ export interface ChatResponse {
   has_sufficient_evidence?: boolean;
   support_helpline?: string;
   support_helpline_name?: string;
+  conversation_id?: string;
+  conversation_created_at?: string;
 }
 
 export interface Message {
@@ -39,6 +41,9 @@ export interface Message {
   has_sufficient_evidence?: boolean;
   support_helpline?: string;
   support_helpline_name?: string;
+  conversation_id?: string;
+  conversation_created_at?: string;
+  feedbackGiven?: 'thumbs_up' | 'thumbs_down' | null;
 }
 
 export interface KnowledgeSearchRequest {
@@ -86,10 +91,10 @@ export interface ChatHistory {
 }
 
 export interface FeedbackRequest {
-  session_id: string;
-  message_id: string;
-  rating: number;
-  feedback?: string;
+  conversation_id: string;
+  created_at: string;
+  rating: 'thumbs_up' | 'thumbs_down';
+  feedback_text?: string;
 }
 
 export interface HealthStatus {
