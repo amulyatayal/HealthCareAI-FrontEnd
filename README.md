@@ -1,8 +1,8 @@
-# HopeAI - Healthcare Companion Frontend
+# Healthcare AI - Healthcare Companion Frontend
 
 A beautiful, compassionate AI companion frontend for breast cancer patient support. This React application provides an intuitive interface to interact with the HealthCareAI backend.
 
-![HopeAI Screenshot](./screenshot.png)
+![Healthcare AI Screenshot](./screenshot.png)
 
 ## Features
 
@@ -79,7 +79,7 @@ src/
 
 ## Design Philosophy
 
-HopeAI is designed with compassion in mind. The interface uses:
+Healthcare AI is designed with compassion in mind. The interface uses:
 
 - **Warm Rose & Lavender tones** - Calming and hopeful
 - **Sage Green accents** - Healing and natural

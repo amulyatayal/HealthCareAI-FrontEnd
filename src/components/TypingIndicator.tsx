@@ -9,7 +9,7 @@ export function TypingIndicator() {
       </div>
       <div className="typing-content">
         <div className="typing-header">
-          <span className="typing-role">HopeAI</span>
+          <span className="typing-role">Healthcare AI</span>
           <span className="typing-status">is thinking...</span>
         </div>
         <div className="typing-bubble">
