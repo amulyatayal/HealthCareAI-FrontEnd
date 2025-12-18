@@ -1,5 +1,6 @@
 import { User, Heart, BookOpen, ExternalLink, ThumbsUp, ThumbsDown, Copy, Check, Phone, AlertTriangle, CheckCircle } from 'lucide-react'
 import { useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 import { SourceModal } from './SourceModal'
 import type { Message, Source } from '../types'
 import './MessageBubble.css'
@@ -70,10 +71,8 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           </div>
           
           {/* Main Answer */}
-          <div className="message-text">
-            {message.content.split('\n').map((paragraph, i) => (
-              <p key={i}>{paragraph}</p>
-            ))}
+          <div className="message-text markdown-content">
+            <ReactMarkdown>{message.content}</ReactMarkdown>
           </div>
 
           {/* Sources Section */}
