@@ -20,16 +20,47 @@ class ApiError extends Error {
   }
 }
 
+// Get auth token from localStorage
+function getAuthToken(): string | null {
+  return localStorage.getItem('auth_token');
+}
+
+// Get user ID from guest token or return null for Google auth
+function getUserId(): string | null {
+  const token = getAuthToken();
+  if (token && token.startsWith('guest:')) {
+    try {
+      const data = JSON.parse(atob(token.substring(6)));
+      return data.id;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
+  const token = getAuthToken();
+  const userId = getUserId();
+  
   const response = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      // For Google auth, send the JWT token
+      // For guest auth, send a custom header with user ID
+      ...(token && !token.startsWith('guest:') && { 'Authorization': `Bearer ${token}` }),
+      ...(userId && { 'X-User-ID': userId }),
       ...options?.headers,
     },
   });
 
   if (!response.ok) {
+    // If unauthorized, clear token and reload to show login
+    if (response.status === 401) {
+      localStorage.removeItem('auth_token');
+      window.location.reload();
+    }
     const error = await response.json().catch(() => ({ message: 'An error occurred' }));
     throw new ApiError(response.status, error.detail || error.message || 'An error occurred');
   }

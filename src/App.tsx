@@ -5,6 +5,8 @@ import { Sidebar } from './components/Sidebar'
 import { WelcomeScreen } from './components/WelcomeScreen'
 import { TopicsBrowser } from './components/TopicsBrowser'
 import { ChatInput, ChatInputHandle } from './components/ChatInput'
+import { LoginPage } from './components/LoginPage'
+import { useAuth } from './contexts/AuthContext'
 import { generateUUID } from './utils/uuid'
 import { getAvailableIndexes, sendMessage as sendMessageApi } from './services/api'
 import type { Message, IndexInfo } from './types'
@@ -13,6 +15,8 @@ import './styles/App.css'
 type View = 'chat' | 'topics'
 
 function App() {
+  const { isAuthenticated, isLoading: authLoading } = useAuth()
+
   const [messages, setMessages] = useState<Message[]>([])
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [currentView, setCurrentView] = useState<View>('chat')
@@ -141,6 +145,20 @@ function App() {
   }
 
   const showWelcome = messages.length === 0
+
+  // Show loading spinner while checking auth
+  if (authLoading) {
+    return (
+      <div className="app-loading">
+        <div className="loading-spinner" />
+      </div>
+    )
+  }
+
+  // Show login page if not authenticated
+  if (!isAuthenticated) {
+    return <LoginPage />
+  }
 
   return (
     <div className="app">

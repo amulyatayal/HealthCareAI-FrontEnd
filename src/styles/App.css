@@ -57,3 +57,27 @@
   color: var(--text-secondary);
 }
 
+/* Auth Loading State */
+.app-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--cream-50) 0%, var(--lavender-50) 100%);
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--rose-100);
+  border-top-color: var(--rose-400);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+

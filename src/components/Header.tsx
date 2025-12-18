@@ -1,5 +1,7 @@
-import { Heart, PanelLeftClose, PanelLeft, Plus } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Heart, PanelLeftClose, PanelLeft, Plus, LogOut, ChevronDown } from 'lucide-react'
 import { IndexSelector } from './IndexSelector'
+import { useAuth } from '../contexts/AuthContext'
 import type { IndexInfo } from '../types'
 import './Header.css'
 
@@ -22,6 +24,21 @@ export function Header({
   availableIndexes,
   indexesLoading
 }: HeaderProps) {
+  const { user, logout } = useAuth()
+  const [showUserMenu, setShowUserMenu] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   return (
     <header className="header">
       <div className="header-left">
@@ -55,8 +72,55 @@ export function Header({
           <Plus size={18} />
           New Chat
         </button>
+
+        {/* User Menu */}
+        {user && (
+          <div className="user-menu-container" ref={menuRef}>
+            <button 
+              className="user-menu-trigger"
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              aria-expanded={showUserMenu}
+            >
+              {user.picture ? (
+                <img 
+                  src={user.picture} 
+                  alt={user.name} 
+                  className="user-avatar"
+                />
+              ) : (
+                <div className="user-avatar-placeholder">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <ChevronDown size={16} className={`menu-arrow ${showUserMenu ? 'open' : ''}`} />
+            </button>
+
+            {showUserMenu && (
+              <div className="user-menu-dropdown">
+                <div className="user-menu-header">
+                  {user.picture ? (
+                    <img src={user.picture} alt={user.name} className="user-avatar-large" />
+                  ) : (
+                    <div className="user-avatar-placeholder large">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="user-info">
+                    <span className="user-name">{user.name}</span>
+                    {user.email && <span className="user-email">{user.email}</span>}
+                    {user.isGuest && <span className="user-guest-badge">Guest</span>}
+                  </div>
+                </div>
+                <div className="user-menu-divider" />
+                <button className="user-menu-item" onClick={logout}>
+                  <LogOut size={16} />
+                  Sign out
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </header>
   )
 }
-
