@@ -6,16 +6,17 @@ import { WelcomeScreen } from './components/WelcomeScreen'
 import { TopicsBrowser } from './components/TopicsBrowser'
 import { ChatInput, ChatInputHandle } from './components/ChatInput'
 import { LoginPage } from './components/LoginPage'
+import { ForumHome } from './components/forum'
 import { useAuth } from './contexts/AuthContext'
 import { generateUUID } from './utils/uuid'
 import { getAvailableIndexes, sendMessage as sendMessageApi } from './services/api'
 import type { Message, IndexInfo } from './types'
 import './styles/App.css'
 
-type View = 'chat' | 'topics'
+type View = 'chat' | 'topics' | 'forum'
 
 function App() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth()
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth()
 
   const [messages, setMessages] = useState<Message[]>([])
   const [sessionId, setSessionId] = useState<string | null>(null)
@@ -204,6 +205,10 @@ function App() {
           
           {currentView === 'topics' && (
             <TopicsBrowser onSelectTopic={handleTopicSelect} />
+          )}
+          
+          {currentView === 'forum' && (
+            <ForumHome currentUserId={user?.id} />
           )}
         </main>
       </div>

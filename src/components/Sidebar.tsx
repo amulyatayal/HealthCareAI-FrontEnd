@@ -1,10 +1,10 @@
-import { MessageCircle, BookOpen, Heart, Sparkles, Users, Activity } from 'lucide-react'
+import { MessageCircle, BookOpen, Heart, Sparkles, Users, Activity, MessagesSquare } from 'lucide-react'
 import './Sidebar.css'
 
 interface SidebarProps {
   isOpen: boolean
-  currentView: 'chat' | 'topics'
-  onViewChange: (view: 'chat' | 'topics') => void
+  currentView: 'chat' | 'topics' | 'forum'
+  onViewChange: (view: 'chat' | 'topics' | 'forum') => void
   onNewChat: () => void
 }
 
@@ -40,6 +40,13 @@ export function Sidebar({ isOpen, currentView, onViewChange }: SidebarProps) {
         >
           <BookOpen size={20} />
           <span>Topics</span>
+        </button>
+        <button 
+          className={`sidebar-nav-item ${currentView === 'forum' ? 'active' : ''}`}
+          onClick={() => onViewChange('forum')}
+        >
+          <MessagesSquare size={20} />
+          <span>Community</span>
         </button>
       </nav>
 
