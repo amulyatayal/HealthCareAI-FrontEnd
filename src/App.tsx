@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { Header } from './components/Header'
 import { ChatInterface } from './components/ChatInterface'
 import { Sidebar } from './components/Sidebar'
@@ -7,22 +8,41 @@ import { TopicsBrowser } from './components/TopicsBrowser'
 import { ChatInput, ChatInputHandle } from './components/ChatInput'
 import { LoginPage } from './components/LoginPage'
 import { ForumHome } from './components/forum'
+import { UserProfile } from './components/UserProfile'
 import { useAuth } from './contexts/AuthContext'
 import { generateUUID } from './utils/uuid'
 import { getAvailableIndexes, sendMessage as sendMessageApi } from './services/api'
 import type { Message, IndexInfo } from './types'
 import './styles/App.css'
 
-type View = 'chat' | 'topics' | 'forum'
+type View = 'chat' | 'topics' | 'forum' | 'profile'
+
+// Map routes to views
+function getViewFromPath(pathname: string): View {
+  switch (pathname) {
+    case '/topics':
+      return 'topics'
+    case '/forum':
+      return 'forum'
+    case '/profile':
+      return 'profile'
+    default:
+      return 'chat'
+  }
+}
 
 function App() {
   const { isAuthenticated, isLoading: authLoading, user } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const [messages, setMessages] = useState<Message[]>([])
   const [sessionId, setSessionId] = useState<string | null>(null)
-  const [currentView, setCurrentView] = useState<View>('chat')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  
+
+  // Derive current view from URL path
+  const currentView = getViewFromPath(location.pathname)
+
   // Index management
   const [availableIndexes, setAvailableIndexes] = useState<IndexInfo[]>([])
   const [selectedIndex, setSelectedIndex] = useState<string>('')
@@ -53,6 +73,7 @@ function App() {
   const handleNewChat = () => {
     setMessages([])
     setSessionId(null)
+    navigate('/')
   }
 
   const handleSelectIndex = (index: string) => {
@@ -60,6 +81,23 @@ function App() {
     // Clear chat when switching indexes
     setMessages([])
     setSessionId(null)
+  }
+
+  // Handle view change - navigate to the correct route
+  const handleViewChange = (view: View) => {
+    switch (view) {
+      case 'topics':
+        navigate('/topics')
+        break
+      case 'forum':
+        navigate('/forum')
+        break
+      case 'profile':
+        navigate('/profile')
+        break
+      default:
+        navigate('/')
+    }
   }
 
   const [isLoading, setIsLoading] = useState(false)
@@ -110,15 +148,15 @@ function App() {
       handleSendMessage(assistantMessage, response.session_id)
     } catch (error) {
       console.error('Failed to send message:', error)
-      
+
       let errorContent = "I'm sorry, I'm having trouble connecting right now. Please try again in a moment."
-      
+
       if (error instanceof TypeError && error.message.includes('fetch')) {
         errorContent = "Unable to connect to the server. Please make sure the backend is running on port 8000."
       } else if (error instanceof Error) {
         errorContent = `Error: ${error.message}`
       }
-      
+
       const errorMessage: Message = {
         id: generateUUID(),
         role: 'assistant',
@@ -132,7 +170,7 @@ function App() {
   }, [sessionId, selectedIndex])
 
   const handleTopicSelect = (topic: string, subtopic?: string) => {
-    const question = subtopic 
+    const question = subtopic
       ? `Tell me about ${subtopic} in the context of ${topic}`
       : `Tell me about ${topic}`
     const syntheticMessage: Message = {
@@ -142,7 +180,7 @@ function App() {
       timestamp: new Date()
     }
     setMessages([syntheticMessage])
-    setCurrentView('chat')
+    navigate('/')
   }
 
   const showWelcome = messages.length === 0
@@ -161,9 +199,32 @@ function App() {
     return <LoginPage />
   }
 
+  // Chat view component
+  const ChatView = () => (
+    <div className="chat-view">
+      {showWelcome ? (
+        <WelcomeScreen>
+          <ChatInput
+            ref={chatInputRef}
+            onSubmit={handleChatSubmit}
+            isLoading={isLoading}
+            centered
+          />
+        </WelcomeScreen>
+      ) : (
+        <ChatInterface
+          messages={messages}
+          onSubmit={handleChatSubmit}
+          isLoading={isLoading}
+        />
+      )}
+    </div>
+  )
+
+
   return (
     <div className="app">
-      <Header 
+      <Header
         onNewChat={handleNewChat}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         sidebarOpen={sidebarOpen}
@@ -172,47 +233,25 @@ function App() {
         availableIndexes={availableIndexes}
         indexesLoading={indexesLoading}
       />
-      
+
       <div className="app-content">
-        <Sidebar 
+        <Sidebar
           isOpen={sidebarOpen}
           currentView={currentView}
-          onViewChange={setCurrentView}
+          onViewChange={handleViewChange}
           onNewChat={handleNewChat}
         />
-        
+
         <main className="main-content">
-          {currentView === 'chat' && (
-            <div className="chat-view">
-              {showWelcome ? (
-                <WelcomeScreen>
-                  <ChatInput 
-                    ref={chatInputRef}
-                    onSubmit={handleChatSubmit}
-                    isLoading={isLoading}
-                    centered
-                  />
-                </WelcomeScreen>
-              ) : (
-                <ChatInterface 
-                  messages={messages}
-                  onSubmit={handleChatSubmit}
-                  isLoading={isLoading}
-                />
-              )}
-            </div>
-          )}
-          
-          {currentView === 'topics' && (
-            <TopicsBrowser onSelectTopic={handleTopicSelect} />
-          )}
-          
-          {currentView === 'forum' && (
-            <ForumHome currentUserId={user?.id} />
-          )}
+          <Routes>
+            <Route path="/" element={<ChatView />} />
+            <Route path="/topics" element={<TopicsBrowser onSelectTopic={handleTopicSelect} />} />
+            <Route path="/forum" element={<ForumHome currentUserId={user?.id} />} />
+            <Route path="/profile" element={<UserProfile />} />
+          </Routes>
         </main>
       </div>
-      
+
       <footer className="app-footer">
         <p className="footer-disclaimer">
           <strong>Remember:</strong> This AI provides information only and is not a substitute for professional medical advice.
@@ -223,4 +262,3 @@ function App() {
 }
 
 export default App
-

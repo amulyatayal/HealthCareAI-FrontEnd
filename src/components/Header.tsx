@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { Heart, PanelLeftClose, PanelLeft, Plus, LogOut, ChevronDown } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Heart, PanelLeftClose, PanelLeft, Plus, LogOut, ChevronDown, User } from 'lucide-react'
 import { IndexSelector } from './IndexSelector'
 import { useAuth } from '../contexts/AuthContext'
 import type { IndexInfo } from '../types'
@@ -15,9 +16,9 @@ interface HeaderProps {
   indexesLoading: boolean
 }
 
-export function Header({ 
-  onNewChat, 
-  onToggleSidebar, 
+export function Header({
+  onNewChat,
+  onToggleSidebar,
   sidebarOpen,
   selectedIndex,
   onSelectIndex,
@@ -25,6 +26,7 @@ export function Header({
   indexesLoading
 }: HeaderProps) {
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
   const [showUserMenu, setShowUserMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -39,17 +41,27 @@ export function Header({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  const handleViewProfile = () => {
+    setShowUserMenu(false)
+    navigate('/profile')
+  }
+
+  const handleLogout = () => {
+    setShowUserMenu(false)
+    logout()
+  }
+
   return (
     <header className="header">
       <div className="header-left">
-        <button 
+        <button
           className="btn btn-ghost btn-icon"
           onClick={onToggleSidebar}
           aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
         >
           {sidebarOpen ? <PanelLeftClose size={20} /> : <PanelLeft size={20} />}
         </button>
-        
+
         <div className="logo">
           <div className="logo-icon">
             <Heart size={22} fill="currentColor" />
@@ -60,9 +72,9 @@ export function Header({
           </div>
         </div>
       </div>
-      
+
       <div className="header-right">
-        <IndexSelector 
+        <IndexSelector
           selectedIndex={selectedIndex}
           onSelectIndex={onSelectIndex}
           availableIndexes={availableIndexes}
@@ -76,15 +88,15 @@ export function Header({
         {/* User Menu */}
         {user && (
           <div className="user-menu-container" ref={menuRef}>
-            <button 
+            <button
               className="user-menu-trigger"
               onClick={() => setShowUserMenu(!showUserMenu)}
               aria-expanded={showUserMenu}
             >
               {user.picture ? (
-                <img 
-                  src={user.picture} 
-                  alt={user.name} 
+                <img
+                  src={user.picture}
+                  alt={user.name}
                   className="user-avatar"
                 />
               ) : (
@@ -112,7 +124,11 @@ export function Header({
                   </div>
                 </div>
                 <div className="user-menu-divider" />
-                <button className="user-menu-item" onClick={logout}>
+                <button className="user-menu-item" onClick={handleViewProfile}>
+                  <User size={16} />
+                  View Profile
+                </button>
+                <button className="user-menu-item logout" onClick={handleLogout}>
                   <LogOut size={16} />
                   Sign out
                 </button>
@@ -124,3 +140,4 @@ export function Header({
     </header>
   )
 }
+
