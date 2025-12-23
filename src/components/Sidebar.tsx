@@ -1,10 +1,10 @@
-import { MessageCircle, BookOpen, Heart, Sparkles, Users, Activity, MessagesSquare } from 'lucide-react'
+import { MessageCircle, BookOpen, Heart, Sparkles, Users, Activity, MessagesSquare, User } from 'lucide-react'
 import './Sidebar.css'
 
 interface SidebarProps {
   isOpen: boolean
-  currentView: 'chat' | 'topics' | 'forum'
-  onViewChange: (view: 'chat' | 'topics' | 'forum') => void
+  currentView: 'chat' | 'topics' | 'forum' | 'profile'
+  onViewChange: (view: 'chat' | 'topics' | 'forum' | 'profile') => void
   onNewChat: () => void
 }
 
@@ -27,26 +27,33 @@ export function Sidebar({ isOpen, currentView, onViewChange }: SidebarProps) {
   return (
     <aside className="sidebar">
       <nav className="sidebar-nav">
-        <button 
+        <button
           className={`sidebar-nav-item ${currentView === 'chat' ? 'active' : ''}`}
           onClick={() => onViewChange('chat')}
         >
           <MessageCircle size={20} />
           <span>Chat</span>
         </button>
-        <button 
+        <button
           className={`sidebar-nav-item ${currentView === 'topics' ? 'active' : ''}`}
           onClick={() => onViewChange('topics')}
         >
           <BookOpen size={20} />
           <span>Topics</span>
         </button>
-        <button 
+        <button
           className={`sidebar-nav-item ${currentView === 'forum' ? 'active' : ''}`}
           onClick={() => onViewChange('forum')}
         >
           <MessagesSquare size={20} />
           <span>Community</span>
+        </button>
+        <button
+          className={`sidebar-nav-item ${currentView === 'profile' ? 'active' : ''}`}
+          onClick={() => onViewChange('profile')}
+        >
+          <User size={20} />
+          <span>Profile</span>
         </button>
       </nav>
 
@@ -54,8 +61,8 @@ export function Sidebar({ isOpen, currentView, onViewChange }: SidebarProps) {
         <h3 className="sidebar-section-title">Quick Topics</h3>
         <div className="quick-topics">
           {quickTopics.map((topic) => (
-            <button 
-              key={topic.label} 
+            <button
+              key={topic.label}
               className={`quick-topic-btn quick-topic-${topic.color}`}
             >
               <topic.icon size={16} />
@@ -83,7 +90,7 @@ export function Sidebar({ isOpen, currentView, onViewChange }: SidebarProps) {
       <div className="sidebar-footer">
         <div className="sidebar-disclaimer">
           <p>
-            <strong>Remember:</strong> This AI provides information only and is not a substitute 
+            <strong>Remember:</strong> This AI provides information only and is not a substitute
             for professional medical advice.
           </p>
         </div>

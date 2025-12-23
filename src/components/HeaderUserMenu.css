@@ -1,0 +1,126 @@
+.header-user-menu {
+    position: relative;
+}
+
+.header-user-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem;
+    background: transparent;
+    border: none;
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.header-user-btn:hover {
+    background-color: var(--gray-100, #f3f4f6);
+}
+
+.header-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.header-avatar-initials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--rose-400, #fb7185) 0%, var(--rose-500, #f43f5e) 100%);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.header-chevron {
+    color: var(--gray-500, #6b7280);
+    transition: transform 0.2s ease;
+}
+
+.header-chevron.open {
+    transform: rotate(180deg);
+}
+
+/* Dropdown Menu */
+.header-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    min-width: 220px;
+    background: white;
+    border: 1px solid var(--gray-200, #e5e7eb);
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    z-index: 100;
+    animation: dropdownFade 0.15s ease;
+}
+
+@keyframes dropdownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.header-dropdown-user {
+    padding: 0.85rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.header-dropdown-name {
+    font-weight: 600;
+    color: var(--gray-900, #111827);
+    font-size: 0.95rem;
+}
+
+.header-dropdown-email {
+    font-size: 0.8rem;
+    color: var(--gray-500, #6b7280);
+}
+
+.header-dropdown-divider {
+    height: 1px;
+    background-color: var(--gray-200, #e5e7eb);
+    margin: 0;
+}
+
+.header-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--gray-700, #374151);
+    transition: background-color 0.15s ease;
+}
+
+.header-dropdown-item:hover {
+    background-color: var(--gray-50, #f9fafb);
+}
+
+.header-dropdown-item:first-of-type {
+    border-radius: 0;
+}
+
+.header-dropdown-item:last-child {
+    border-radius: 0 0 0.75rem 0.75rem;
+}
+
+.header-dropdown-logout:hover {
+    background-color: var(--rose-50, #fff1f2);
+    color: var(--rose-600, #e11d48);
+}
