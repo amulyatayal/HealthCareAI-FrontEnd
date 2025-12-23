@@ -55,6 +55,41 @@ function parseGuestToken(token: string): User | null {
   }
 }
 
+// Sync user with backend on login
+async function syncUserToBackend(
+  token: string,
+  name: string,
+  email?: string,
+  picture?: string,
+  isGuest: boolean = false
+): Promise<void> {
+  try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
+
+    if (isGuest) {
+      // Guest user - use X-User-ID header
+      const guestData = parseGuestToken(token)
+      if (guestData) {
+        headers['X-User-ID'] = guestData.id
+      }
+    } else {
+      // Google user - use Authorization header
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
+    await fetch('/api/v1/users/sync', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ name, email, picture })
+    })
+  } catch (error) {
+    console.error('Failed to sync user with backend:', error)
+    // Don't block login if sync fails
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
@@ -98,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false)
   }, [])
 
-  const login = (credential: string) => {
+  const login = async (credential: string) => {
     try {
       const decoded = jwtDecode<GoogleUser>(credential)
       setToken(credential)
@@ -110,18 +145,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isGuest: false
       })
       localStorage.setItem('auth_token', credential)
+
+      // Sync user with backend
+      await syncUserToBackend(
+        credential,
+        decoded.name,
+        decoded.email,
+        decoded.picture,
+        false
+      )
     } catch (error) {
       console.error('Failed to decode token:', error)
     }
   }
 
-  const loginAsGuest = (username: string) => {
+  const loginAsGuest = async (username: string) => {
     const guestToken = generateGuestToken(username)
     const guestUser = parseGuestToken(guestToken)
     if (guestUser) {
       setToken(guestToken)
       setUser(guestUser)
       localStorage.setItem('auth_token', guestToken)
+      // Guest users are client-only sessions - not synced to backend
     }
   }
 
@@ -132,12 +177,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      token, 
-      login, 
+    <AuthContext.Provider value={{
+      user,
+      token,
+      login,
       loginAsGuest,
-      logout, 
+      logout,
       isAuthenticated: !!user,
       isLoading
     }}>
