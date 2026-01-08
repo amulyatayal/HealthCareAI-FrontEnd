@@ -55,7 +55,10 @@ export function Header({
             <Heart size={22} fill="currentColor" />
           </div>
           <div className="logo-text">
-            <span className="logo-name">Healthcare AI</span>
+            <span className="logo-name">
+              Healthcare AI
+              <span className="beta-badge">Beta</span>
+            </span>
             <span className="logo-tagline">Your Healthcare Companion</span>
           </div>
         </div>

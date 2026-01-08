@@ -31,6 +31,14 @@ export function WelcomeScreen({ children }: WelcomeScreenProps) {
   return (
     <div className="welcome-screen">
       <div className="welcome-content">
+        {/* Beta Notice Banner */}
+        <div className="beta-notice">
+          <span className="beta-notice-badge">Beta</span>
+          <span className="beta-notice-text">
+            This is a test deployment only. Not for production use.
+          </span>
+        </div>
+
         <div className="welcome-hero">
           <div className="welcome-icon">
             <Sparkles size={32} />
