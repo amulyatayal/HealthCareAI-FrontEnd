@@ -6,6 +6,7 @@ interface ChatInputProps {
   onSubmit: (message: string, strictMode: boolean) => Promise<void>
   isLoading: boolean
   centered?: boolean
+  showStrictToggle?: boolean
 }
 
 export interface ChatInputHandle {
@@ -13,7 +14,7 @@ export interface ChatInputHandle {
 }
 
 export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
-  function ChatInput({ onSubmit, isLoading, centered = false }, ref) {
+  function ChatInput({ onSubmit, isLoading, centered = false, showStrictToggle = true }, ref) {
     const [input, setInput] = useState('')
     const [strictMode, setStrictMode] = useState(true)
     const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -73,45 +74,49 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
           </div>
         </form>
 
-        <div className="mode-toggle-container">
-          <button
-            type="button"
-            className={`mode-switch-option ${strictMode ? 'active' : 'inactive'}`}
-            onClick={() => setStrictMode(true)}
-            aria-pressed={strictMode}
-          >
-            <div className="mode-switch-header">
-              <BookOpen size={12} className="mode-switch-icon" />
-              <span className="mode-switch-label">Knowledge Base Only</span>
+        {showStrictToggle && (
+          <>
+            <div className="mode-toggle-container">
+              <button
+                type="button"
+                className={`mode-switch-option ${strictMode ? 'active' : 'inactive'}`}
+                onClick={() => setStrictMode(true)}
+                aria-pressed={strictMode}
+              >
+                <div className="mode-switch-header">
+                  <BookOpen size={12} className="mode-switch-icon" />
+                  <span className="mode-switch-label">Knowledge Base Only</span>
+                </div>
+                <div className={`toggle-switch ${strictMode ? 'on' : 'off'}`}>
+                  <span className="toggle-slider"></span>
+                  <span className="toggle-state">{strictMode ? 'ON' : 'OFF'}</span>
+                </div>
+              </button>
+              
+              <button
+                type="button"
+                className={`mode-switch-option ${!strictMode ? 'active' : 'inactive'}`}
+                onClick={() => setStrictMode(false)}
+                aria-pressed={!strictMode}
+              >
+                <div className="mode-switch-header">
+                  <Sparkles size={12} className="mode-switch-icon" />
+                  <span className="mode-switch-label">AI + Knowledge Base</span>
+                </div>
+                <div className={`toggle-switch ${!strictMode ? 'on' : 'off'}`}>
+                  <span className="toggle-slider"></span>
+                  <span className="toggle-state">{!strictMode ? 'ON' : 'OFF'}</span>
+                </div>
+              </button>
             </div>
-            <div className={`toggle-switch ${strictMode ? 'on' : 'off'}`}>
-              <span className="toggle-slider"></span>
-              <span className="toggle-state">{strictMode ? 'ON' : 'OFF'}</span>
-            </div>
-          </button>
-          
-          <button
-            type="button"
-            className={`mode-switch-option ${!strictMode ? 'active' : 'inactive'}`}
-            onClick={() => setStrictMode(false)}
-            aria-pressed={!strictMode}
-          >
-            <div className="mode-switch-header">
-              <Sparkles size={12} className="mode-switch-icon" />
-              <span className="mode-switch-label">AI + Knowledge Base</span>
-            </div>
-            <div className={`toggle-switch ${!strictMode ? 'on' : 'off'}`}>
-              <span className="toggle-slider"></span>
-              <span className="toggle-state">{!strictMode ? 'ON' : 'OFF'}</span>
-            </div>
-          </button>
-        </div>
-        
-        <p className="mode-description">
-          {strictMode 
-            ? "✓ Answers only from verified medical documents" 
-            : "✓ AI provides guidance with knowledge base context"}
-        </p>
+            
+            <p className="mode-description">
+              {strictMode 
+                ? "✓ Answers only from verified medical documents" 
+                : "✓ AI provides guidance with knowledge base context"}
+            </p>
+          </>
+        )}
       </div>
     )
   }

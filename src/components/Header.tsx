@@ -13,6 +13,8 @@ interface HeaderProps {
   onSelectIndex: (index: string) => void
   availableIndexes: IndexInfo[]
   indexesLoading: boolean
+  apiVersion: 'v1' | 'v2'
+  onApiVersionChange: (version: 'v1' | 'v2') => void
 }
 
 export function Header({ 
@@ -22,7 +24,9 @@ export function Header({
   selectedIndex,
   onSelectIndex,
   availableIndexes,
-  indexesLoading
+  indexesLoading,
+  apiVersion,
+  onApiVersionChange,
 }: HeaderProps) {
   const { user, logout } = useAuth()
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -65,12 +69,30 @@ export function Header({
       </div>
       
       <div className="header-right">
-        <IndexSelector 
-          selectedIndex={selectedIndex}
-          onSelectIndex={onSelectIndex}
-          availableIndexes={availableIndexes}
-          isLoading={indexesLoading}
-        />
+        {apiVersion === 'v1' && (
+          <IndexSelector 
+            selectedIndex={selectedIndex}
+            onSelectIndex={onSelectIndex}
+            availableIndexes={availableIndexes}
+            isLoading={indexesLoading}
+          />
+        )}
+        <div className="api-toggle" role="group" aria-label="Select API version">
+          <button 
+            className={`api-chip ${apiVersion === 'v1' ? 'active' : ''}`}
+            onClick={() => onApiVersionChange('v1')}
+            aria-pressed={apiVersion === 'v1'}
+          >
+            API v1
+          </button>
+          <button 
+            className={`api-chip ${apiVersion === 'v2' ? 'active' : ''}`}
+            onClick={() => onApiVersionChange('v2')}
+            aria-pressed={apiVersion === 'v2'}
+          >
+            API v2
+          </button>
+        </div>
         <button className="btn btn-secondary" onClick={onNewChat}>
           <Plus size={18} />
           New Chat

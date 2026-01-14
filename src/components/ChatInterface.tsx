@@ -9,12 +9,14 @@ interface ChatInterfaceProps {
   messages: Message[]
   onSubmit: (message: string, strictMode: boolean) => Promise<void>
   isLoading: boolean
+  showStrictToggle?: boolean
 }
 
 export function ChatInterface({ 
   messages, 
   onSubmit,
-  isLoading
+  isLoading,
+  showStrictToggle = true,
 }: ChatInterfaceProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const userQuestionRef = useRef<HTMLDivElement>(null)
@@ -66,6 +68,7 @@ export function ChatInterface({
         <ChatInput 
           onSubmit={onSubmit}
           isLoading={isLoading}
+          showStrictToggle={showStrictToggle}
         />
       </div>
     </div>

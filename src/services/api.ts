@@ -1,6 +1,10 @@
 import type {
   ChatRequest,
   ChatResponse,
+  ChatRequestV1,
+  ChatResponseV1,
+  ChatRequestV2,
+  ChatResponseV2,
   KnowledgeSearchRequest,
   KnowledgeSearchResponse,
   TopicsResponse,
@@ -11,7 +15,8 @@ import type {
   IndexesResponse
 } from '../types';
 
-const API_BASE = '/api/v1';
+const API_BASE_V1 = '/api/v1';
+const API_BASE_V2 = '/api/v2';
 
 class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -69,25 +74,39 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
 }
 
 // Chat API
-export async function sendMessage(request: ChatRequest): Promise<ChatResponse> {
-  return fetchJson<ChatResponse>(`${API_BASE}/chat`, {
+// v1 Chat API (kept for compatibility)
+export async function sendMessageV1(request: ChatRequestV1): Promise<ChatResponseV1> {
+  return fetchJson<ChatResponseV1>(`${API_BASE_V1}/chat`, {
     method: 'POST',
     body: JSON.stringify(request),
   });
 }
 
+// v2 Chat API
+export async function sendMessageV2(request: ChatRequestV2): Promise<ChatResponseV2> {
+  return fetchJson<ChatResponseV2>(`${API_BASE_V2}/chat/`, {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+}
+
+// Default export for legacy callers (v1)
+export async function sendMessage(request: ChatRequest): Promise<ChatResponse> {
+  return sendMessageV1(request);
+}
+
 export async function getChatHistory(sessionId: string): Promise<ChatHistory> {
-  return fetchJson<ChatHistory>(`${API_BASE}/chat/history/${sessionId}`);
+  return fetchJson<ChatHistory>(`${API_BASE_V1}/chat/history/${sessionId}`);
 }
 
 export async function clearChatHistory(sessionId: string): Promise<{ message: string }> {
-  return fetchJson<{ message: string }>(`${API_BASE}/chat/history/${sessionId}`, {
+  return fetchJson<{ message: string }>(`${API_BASE_V1}/chat/history/${sessionId}`, {
     method: 'DELETE',
   });
 }
 
 export async function submitFeedback(request: FeedbackRequest): Promise<{ message: string }> {
-  return fetchJson<{ message: string }>(`${API_BASE}/chat/feedback`, {
+  return fetchJson<{ message: string }>(`${API_BASE_V1}/chat/feedback`, {
     method: 'POST',
     body: JSON.stringify(request),
   });
@@ -95,18 +114,18 @@ export async function submitFeedback(request: FeedbackRequest): Promise<{ messag
 
 // Knowledge API
 export async function searchKnowledge(request: KnowledgeSearchRequest): Promise<KnowledgeSearchResponse> {
-  return fetchJson<KnowledgeSearchResponse>(`${API_BASE}/knowledge/search`, {
+  return fetchJson<KnowledgeSearchResponse>(`${API_BASE_V1}/knowledge/search`, {
     method: 'POST',
     body: JSON.stringify(request),
   });
 }
 
 export async function getTopics(): Promise<TopicsResponse> {
-  return fetchJson<TopicsResponse>(`${API_BASE}/knowledge/topics`);
+  return fetchJson<TopicsResponse>(`${API_BASE_V1}/knowledge/topics`);
 }
 
 export async function getDocument(documentId: string): Promise<KnowledgeDocument> {
-  return fetchJson<KnowledgeDocument>(`${API_BASE}/knowledge/document/${documentId}`);
+  return fetchJson<KnowledgeDocument>(`${API_BASE_V1}/knowledge/document/${documentId}`);
 }
 
 // Health API
@@ -116,7 +135,7 @@ export async function getHealthStatus(): Promise<HealthStatus> {
 
 // Indexes API
 export async function getAvailableIndexes(): Promise<IndexesResponse> {
-  return fetchJson<IndexesResponse>(`${API_BASE}/knowledge/indexes`);
+  return fetchJson<IndexesResponse>(`${API_BASE_V1}/knowledge/indexes`);
 }
 
 export { ApiError };
