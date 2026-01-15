@@ -47,7 +47,7 @@ function getUserId(): string | null {
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const token = getAuthToken();
   const userId = getUserId();
-  
+
   const response = await fetch(url, {
     ...options,
     headers: {
@@ -138,5 +138,49 @@ export async function getAvailableIndexes(): Promise<IndexesResponse> {
   return fetchJson<IndexesResponse>(`${API_BASE_V1}/knowledge/indexes`);
 }
 
-export { ApiError };
+// ================================
+// Profile API (v2)
+// ================================
 
+export interface OnboardingStatusResponse {
+  onboarding_completed: boolean;
+  current_stage: string;
+  needs_onboarding: boolean;
+}
+
+export interface OnboardingRequest {
+  current_situation: string;
+  diagnosis_date?: string;
+  diagnosis_type?: string;
+  current_treatments?: string[];
+  treatment_start_date?: string;
+}
+
+export interface ProfileResponse {
+  profile: {
+    user_id: string;
+    current_stage: string;
+    onboarding_completed: boolean;
+  };
+  message: string;
+}
+
+export async function getOnboardingStatus(): Promise<OnboardingStatusResponse> {
+  return fetchJson<OnboardingStatusResponse>(`${API_BASE_V2}/profile/status`);
+}
+
+export async function submitOnboarding(data: OnboardingRequest): Promise<ProfileResponse> {
+  return fetchJson<ProfileResponse>(`${API_BASE_V2}/profile/onboarding`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateStage(newStage: string): Promise<ProfileResponse> {
+  return fetchJson<ProfileResponse>(`${API_BASE_V2}/profile/stage`, {
+    method: 'PUT',
+    body: JSON.stringify({ new_stage: newStage }),
+  });
+}
+
+export { ApiError };
