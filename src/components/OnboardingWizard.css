@@ -123,6 +123,22 @@
 
 .option-icon {
   font-size: 1.25rem;
+  color: #e91e8c;
+  /* Primary pink/purple color */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.situation-option:hover .option-icon {
+  color: #ff4081;
+  /* Brighter on hover */
+  filter: drop-shadow(0 0 4px rgba(233, 30, 140, 0.4));
+}
+
+.situation-option.selected .option-icon {
+  color: #fff;
+  /* White when selected */
 }
 
 .option-label {
@@ -246,14 +262,14 @@
   .onboarding-modal {
     max-height: 95vh;
   }
-  
+
   .onboarding-header,
   .onboarding-content,
   .onboarding-footer {
     padding-left: 1.25rem;
     padding-right: 1.25rem;
   }
-  
+
   .situation-option {
     padding: 0.75rem;
   }

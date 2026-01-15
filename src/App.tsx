@@ -269,6 +269,7 @@ function App() {
         indexesLoading={indexesLoading}
         apiVersion={apiVersion}
         onApiVersionChange={setApiVersion}
+        onUpdateJourney={() => setShowOnboardingWizard(true)}
       />
 
       <div className="app-content">

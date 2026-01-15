@@ -1,43 +1,56 @@
 import { useState } from 'react';
-import { X, ChevronRight, Heart, Calendar, Stethoscope } from 'lucide-react';
+import {
+    X,
+    ChevronRight,
+    Heart,
+    Calendar,
+    Activity, // Symptoms
+    Hourglass, // Waiting
+    ClipboardList, // Diagnosed
+    Stethoscope, // Treatment
+    CheckCircle, // Finished
+    CalendarClock, // Follow-up
+    Shield, // Privacy
+    Lock
+} from 'lucide-react';
 import './OnboardingWizard.css';
 
-// Onboarding situation options
+// Onboarding situation options with patient-centric icons
 const SITUATION_OPTIONS = [
     {
         value: 'worried_about_symptoms',
         label: "I'm worried about symptoms I've noticed",
-        icon: '🔍'
+        Icon: Activity
     },
     {
         value: 'waiting_for_results',
         label: "I'm waiting for test results",
-        icon: '⏳'
+        Icon: Hourglass
     },
     {
         value: 'recently_diagnosed',
         label: "I was recently diagnosed",
-        icon: '📋'
+        Icon: ClipboardList
     },
     {
         value: 'currently_in_treatment',
         label: "I'm currently in treatment",
-        icon: '💊'
+        Icon: Stethoscope
     },
     {
         value: 'finished_treatment',
         label: "I've finished my treatment",
-        icon: '🎉'
+        Icon: CheckCircle
     },
     {
         value: 'long_term_followup',
         label: "I'm in long-term follow-up care",
-        icon: '📅'
+        Icon: CalendarClock
     },
     {
         value: 'prefer_not_to_say',
         label: "I'd prefer not to say",
-        icon: '🔒'
+        Icon: Shield
     },
 ];
 
@@ -121,7 +134,9 @@ export function OnboardingWizard({
                                 }}
                                 type="button"
                             >
-                                <span className="option-icon">{option.icon}</span>
+                                <span className="option-icon">
+                                    <option.Icon size={20} />
+                                </span>
                                 <span className="option-label">{option.label}</span>
                             </button>
                         ))}
@@ -174,7 +189,8 @@ export function OnboardingWizard({
 
                 <div className="onboarding-footer">
                     <p className="privacy-note">
-                        🔒 This information is private and helps us personalize your experience.
+                        <Lock size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+                        This information is private and helps us personalize your experience.
                     </p>
                     <button
                         className="onboarding-submit"
