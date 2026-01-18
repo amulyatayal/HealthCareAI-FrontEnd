@@ -8,7 +8,8 @@ export interface Source {
   relevance_score?: number;
 }
 
-export interface ChatRequest {
+// v1 Chat types
+export interface ChatRequestV1 {
   message: string;
   session_id?: string;
   context?: Record<string, unknown>;
@@ -17,7 +18,7 @@ export interface ChatRequest {
   include_sources?: boolean;
 }
 
-export interface ChatResponse {
+export interface ChatResponseV1 {
   session_id: string;
   answer: string;
   sources: Source[];
@@ -30,6 +31,43 @@ export interface ChatResponse {
   conversation_id?: string;
   conversation_created_at?: string;
 }
+
+// v2 Chat types
+export interface ConversationTurn {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface Citation {
+  source_file: string;
+  section?: string;
+  page_start?: number;
+  page_end?: number;
+}
+
+export interface ChatRequestV2 {
+  message: string;
+  session_id?: string;
+  conversation_history?: ConversationTurn[];
+  include_trace?: boolean;
+}
+
+export interface ChatResponseV2 {
+  session_id?: string;
+  response: string;
+  intent?: string;
+  stage?: string;
+  citations?: Citation[];
+  confidence?: number;
+  abstained?: boolean;
+  disclaimer_included?: boolean;
+  trace?: unknown[];
+  total_latency_ms?: number;
+}
+
+// Backwards-compatible aliases (v1 as default)
+export type ChatRequest = ChatRequestV1;
+export type ChatResponse = ChatResponseV1;
 
 export interface Message {
   id: string;

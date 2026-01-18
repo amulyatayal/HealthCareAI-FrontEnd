@@ -9,11 +9,12 @@ import { LoginPage } from './components/LoginPage'
 import { ForumHome } from './components/forum'
 import { useAuth } from './contexts/AuthContext'
 import { generateUUID } from './utils/uuid'
-import { getAvailableIndexes, sendMessage as sendMessageApi } from './services/api'
-import type { Message, IndexInfo } from './types'
+import { getAvailableIndexes, sendMessageV1, sendMessageV2 } from './services/api'
+import type { Message, IndexInfo, ChatResponseV2 } from './types'
 import './styles/App.css'
 
 type View = 'chat' | 'topics' | 'forum'
+type ChatApiVersion = 'v1' | 'v2'
 
 function App() {
   const { isAuthenticated, isLoading: authLoading, user } = useAuth()
@@ -22,6 +23,7 @@ function App() {
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [currentView, setCurrentView] = useState<View>('chat')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [apiVersion, setApiVersion] = useState<ChatApiVersion>('v2')
   
   // Index management
   const [availableIndexes, setAvailableIndexes] = useState<IndexInfo[]>([])
@@ -72,6 +74,33 @@ function App() {
     }
   }
 
+  const mapV2ResponseToMessage = (response: ChatResponseV2): Message => {
+    const citationsAsSources =
+      response.citations?.map((citation) => ({
+        title: citation.section || citation.source_file || 'Citation',
+        snippet:
+          citation.page_start !== undefined
+            ? `Pages ${citation.page_start}${citation.page_end !== undefined ? `-${citation.page_end}` : ''}`
+            : undefined,
+        source_text: citation.source_file,
+      })) || []
+
+    return {
+      id: generateUUID(),
+      role: 'assistant',
+      content: response.response,
+      timestamp: new Date(),
+      sources: citationsAsSources,
+      has_sufficient_evidence:
+        response.confidence !== undefined ? response.confidence >= 0.65 && !response.abstained : undefined,
+      disclaimer: response.disclaimer_included
+        ? 'This response is auto-generated for test use only. Consult a clinician before acting on it.'
+        : undefined,
+      conversation_id: response.intent || undefined,
+      feedbackGiven: null,
+    }
+  }
+
   const handleChatSubmit = useCallback(async (messageText: string, strictMode: boolean) => {
     // Add user message
     const userMessage: Message = {
@@ -84,30 +113,45 @@ function App() {
     setIsLoading(true)
 
     try {
-      const response = await sendMessageApi({
-        message: messageText,
-        session_id: sessionId || undefined,
-        index_name: selectedIndex,
-        strict_mode: strictMode,
-        include_sources: true,
-      })
+      if (apiVersion === 'v1') {
+        const response = await sendMessageV1({
+          message: messageText,
+          session_id: sessionId || undefined,
+          index_name: selectedIndex,
+          strict_mode: strictMode,
+          include_sources: true,
+        })
 
-      const assistantMessage: Message = {
-        id: generateUUID(),
-        role: 'assistant',
-        content: response.answer,
-        timestamp: new Date(response.timestamp),
-        sources: response.sources,
-        disclaimer: response.disclaimer,
-        has_sufficient_evidence: response.has_sufficient_evidence,
-        support_helpline: response.support_helpline,
-        support_helpline_name: response.support_helpline_name,
-        conversation_id: response.conversation_id,
-        conversation_created_at: response.conversation_created_at,
-        feedbackGiven: null,
+        const assistantMessage: Message = {
+          id: generateUUID(),
+          role: 'assistant',
+          content: response.answer,
+          timestamp: new Date(response.timestamp),
+          sources: response.sources,
+          disclaimer: response.disclaimer,
+          has_sufficient_evidence: response.has_sufficient_evidence,
+          support_helpline: response.support_helpline,
+          support_helpline_name: response.support_helpline_name,
+          conversation_id: response.conversation_id,
+          conversation_created_at: response.conversation_created_at,
+          feedbackGiven: null,
+        }
+
+        handleSendMessage(assistantMessage, response.session_id)
+      } else {
+        const response = await sendMessageV2({
+          message: messageText,
+          session_id: sessionId || undefined,
+          conversation_history: messages.map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
+          include_trace: false,
+        })
+
+        const assistantMessage = mapV2ResponseToMessage(response)
+        handleSendMessage(assistantMessage, response.session_id)
       }
-
-      handleSendMessage(assistantMessage, response.session_id)
     } catch (error) {
       console.error('Failed to send message:', error)
       
@@ -129,7 +173,7 @@ function App() {
     } finally {
       setIsLoading(false)
     }
-  }, [sessionId, selectedIndex])
+  }, [apiVersion, sessionId, selectedIndex, messages])
 
   const handleTopicSelect = (topic: string, subtopic?: string) => {
     const question = subtopic 
@@ -171,6 +215,8 @@ function App() {
         onSelectIndex={handleSelectIndex}
         availableIndexes={availableIndexes}
         indexesLoading={indexesLoading}
+        apiVersion={apiVersion}
+        onApiVersionChange={setApiVersion}
       />
       
       <div className="app-content">
@@ -191,6 +237,7 @@ function App() {
                     onSubmit={handleChatSubmit}
                     isLoading={isLoading}
                     centered
+                    showStrictToggle={apiVersion === 'v1'}
                   />
                 </WelcomeScreen>
               ) : (
@@ -198,6 +245,7 @@ function App() {
                   messages={messages}
                   onSubmit={handleChatSubmit}
                   isLoading={isLoading}
+                  showStrictToggle={apiVersion === 'v1'}
                 />
               )}
             </div>
