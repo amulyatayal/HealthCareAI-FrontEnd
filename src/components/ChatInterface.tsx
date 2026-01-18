@@ -10,13 +10,17 @@ interface ChatInterfaceProps {
   onSubmit: (message: string, strictMode: boolean) => Promise<void>
   isLoading: boolean
   showStrictToggle?: boolean
+  proposalsIgnored?: boolean
+  onIgnoreProposals?: () => void
 }
 
-export function ChatInterface({ 
-  messages, 
+export function ChatInterface({
+  messages,
   onSubmit,
   isLoading,
   showStrictToggle = true,
+  proposalsIgnored = false,
+  onIgnoreProposals,
 }: ChatInterfaceProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const userQuestionRef = useRef<HTMLDivElement>(null)
@@ -45,17 +49,26 @@ export function ChatInterface({
       <div className="messages-container">
         <div className="messages-list">
           {messages.map((message, index) => {
-            const isUserQuestionBeforeAnswer = 
-              message.role === 'user' && 
+            const isUserQuestionBeforeAnswer =
+              message.role === 'user' &&
               index === messages.length - 2 &&
               messages[messages.length - 1]?.role === 'assistant'
-            
+
+            const isLastAssistantMessage =
+              message.role === 'assistant' &&
+              index === messages.length - 1
+
             return (
-              <div 
+              <div
                 key={message.id}
                 ref={isUserQuestionBeforeAnswer ? userQuestionRef : null}
               >
-                <MessageBubble message={message} />
+                <MessageBubble
+                  message={message}
+                  isLastMessage={isLastAssistantMessage}
+                  hideProposals={proposalsIgnored}
+                  onIgnoreProposal={onIgnoreProposals}
+                />
               </div>
             )
           })}
@@ -65,7 +78,7 @@ export function ChatInterface({
       </div>
 
       <div className="chat-input-container">
-        <ChatInput 
+        <ChatInput
           onSubmit={onSubmit}
           isLoading={isLoading}
           showStrictToggle={showStrictToggle}

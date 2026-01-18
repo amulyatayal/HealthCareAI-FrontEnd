@@ -52,6 +52,13 @@ export interface ChatRequestV2 {
   include_trace?: boolean;
 }
 
+export interface ModificationProposal {
+  stage_id: string;
+  stage_name: string;
+  confidence: number;
+  message: string;
+}
+
 export interface ChatResponseV2 {
   session_id?: string;
   response: string;
@@ -66,6 +73,7 @@ export interface ChatResponseV2 {
   // Profile/onboarding fields
   needs_onboarding?: boolean;
   sign_in_suggestion?: string;
+  modification_proposal?: ModificationProposal;
 }
 
 // Backwards-compatible aliases (v1 as default)
@@ -85,6 +93,7 @@ export interface Message {
   conversation_id?: string;
   conversation_created_at?: string;
   feedbackGiven?: 'thumbs_up' | 'thumbs_down' | null;
+  modification_proposal?: ModificationProposal;
 }
 
 export interface KnowledgeSearchRequest {

@@ -9,9 +9,11 @@ import { LoginPage } from './components/LoginPage'
 import { ForumHome } from './components/forum'
 import { OnboardingWizard } from './components/OnboardingWizard'
 import { SignInToast } from './components/SignInToast'
+import { ProfileReminder } from './components/ProfileReminder'
+import { SessionExpiredModal } from './components/SessionExpiredModal'
 import { useAuth } from './contexts/AuthContext'
 import { generateUUID } from './utils/uuid'
-import { getAvailableIndexes, sendMessageV1, sendMessageV2, submitOnboarding } from './services/api'
+import { getAvailableIndexes, sendMessageV1, sendMessageV2, submitOnboarding, getOnboardingStatus } from './services/api'
 import type { Message, IndexInfo, ChatResponseV2 } from './types'
 import type { OnboardingData } from './components/OnboardingWizard'
 import './styles/App.css'
@@ -19,8 +21,25 @@ import './styles/App.css'
 type View = 'chat' | 'topics' | 'forum'
 type ChatApiVersion = 'v1' | 'v2'
 
+// How often to show reminder (every N messages)
+const REMINDER_INTERVAL = 3
+
 function App() {
   const { isAuthenticated, isLoading: authLoading, user } = useAuth()
+
+  const [showSessionExpiredModal, setShowSessionExpiredModal] = useState(false)
+
+  // Listen for session expiration events from API
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      setShowSessionExpiredModal(true)
+    }
+
+    window.addEventListener('auth:session-expired', handleSessionExpired)
+    return () => {
+      window.removeEventListener('auth:session-expired', handleSessionExpired)
+    }
+  }, [])
 
   const [messages, setMessages] = useState<Message[]>([])
   const [sessionId, setSessionId] = useState<string | null>(null)
@@ -33,12 +52,40 @@ function App() {
   const [selectedIndex, setSelectedIndex] = useState<string>('')
   const [indexesLoading, setIndexesLoading] = useState(true)
 
-  // Onboarding & Sign-in prompt state
   const [showOnboardingWizard, setShowOnboardingWizard] = useState(false)
   const [showSignInToast, setShowSignInToast] = useState(false)
   const [signInToastDismissed, setSignInToastDismissed] = useState(false)
   const [guestMessageCount, setGuestMessageCount] = useState(0)
   const [onboardingSubmitting, setOnboardingSubmitting] = useState(false)
+
+  // Proposal card ignore state (session-scoped)
+  const [proposalsIgnoredForSession, setProposalsIgnoredForSession] = useState(false)
+
+  // Profile reminder state
+  const [profileComplete, setProfileComplete] = useState<boolean | null>(null)
+  const [authMessageCount, setAuthMessageCount] = useState(0)
+  const [showProfileReminder, setShowProfileReminder] = useState(false)
+  const [reminderDismissedUntil, setReminderDismissedUntil] = useState(0)
+
+  // Check onboarding status on mount for authenticated users
+  useEffect(() => {
+    async function checkOnboardingStatus() {
+      if (!isAuthenticated || user?.isGuest) return
+
+      try {
+        const status = await getOnboardingStatus()
+        setProfileComplete(status.onboarding_completed)
+
+        // Show onboarding on first login if not completed
+        if (status.needs_onboarding) {
+          setShowOnboardingWizard(true)
+        }
+      } catch (error) {
+        console.error('Failed to check onboarding status:', error)
+      }
+    }
+    checkOnboardingStatus()
+  }, [isAuthenticated, user?.isGuest])
 
   // Fetch available indexes on mount
   useEffect(() => {
@@ -108,6 +155,7 @@ function App() {
         : undefined,
       conversation_id: response.intent || undefined,
       feedbackGiven: null,
+      modification_proposal: response.modification_proposal
     }
   }
 
@@ -175,6 +223,15 @@ function App() {
           if (newCount === 3 && !signInToastDismissed) {
             setShowSignInToast(true)
           }
+        } else {
+          // Track authenticated user message count for profile reminder
+          const newAuthCount = authMessageCount + 1
+          setAuthMessageCount(newAuthCount)
+
+          // Show reminder every N messages if profile incomplete
+          if (!profileComplete && newAuthCount >= reminderDismissedUntil && newAuthCount % REMINDER_INTERVAL === 0) {
+            setShowProfileReminder(true)
+          }
         }
       }
     } catch (error) {
@@ -206,12 +263,26 @@ function App() {
     try {
       await submitOnboarding(data)
       setShowOnboardingWizard(false)
+      setProfileComplete(true)  // Mark profile as complete
+      setShowProfileReminder(false)  // Hide reminder if showing
     } catch (error) {
       console.error('Failed to save onboarding:', error)
       throw error
     } finally {
       setOnboardingSubmitting(false)
     }
+  }
+
+  // Handle profile reminder actions
+  const handleReminderComplete = () => {
+    setShowProfileReminder(false)
+    setShowOnboardingWizard(true)
+  }
+
+  const handleReminderDismiss = () => {
+    setShowProfileReminder(false)
+    // Don't show again for next N messages
+    setReminderDismissedUntil(authMessageCount + REMINDER_INTERVAL)
   }
 
   // Handle sign-in toast dismiss
@@ -259,6 +330,10 @@ function App() {
 
   return (
     <div className="app">
+      <SessionExpiredModal
+        isOpen={showSessionExpiredModal}
+        onClose={() => setShowSessionExpiredModal(false)}
+      />
       <Header
         onNewChat={handleNewChat}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
@@ -283,6 +358,14 @@ function App() {
         <main className="main-content">
           {currentView === 'chat' && (
             <div className="chat-view">
+              {/* Profile reminder banner */}
+              {showProfileReminder && (
+                <ProfileReminder
+                  onComplete={handleReminderComplete}
+                  onDismiss={handleReminderDismiss}
+                />
+              )}
+
               {showWelcome ? (
                 <WelcomeScreen>
                   <ChatInput
@@ -299,6 +382,8 @@ function App() {
                   onSubmit={handleChatSubmit}
                   isLoading={isLoading}
                   showStrictToggle={apiVersion === 'v1'}
+                  proposalsIgnored={proposalsIgnoredForSession}
+                  onIgnoreProposals={() => setProposalsIgnoredForSession(true)}
                 />
               )}
             </div>

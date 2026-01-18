@@ -257,6 +257,124 @@
   cursor: not-allowed;
 }
 
+/* Link Account Styles */
+.link-account-trigger {
+  background: none;
+  border: none;
+  color: #e91e8c;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: opacity 0.2s;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.link-account-trigger:hover {
+  opacity: 0.8;
+}
+
+.link-account-view {
+  padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.link-title {
+  color: white;
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.link-desc {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Detailed Selection Styling */
+.embedded-stage-selector {
+  margin-top: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.detailed-selection-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  margin-left: auto;
+  font-weight: 500;
+}
+
+.link-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.primary-btn,
+.secondary-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.primary-btn {
+  background: #e91e8c;
+  color: white;
+  flex: 2;
+}
+
+.primary-btn:hover:not(:disabled) {
+  background: #c2185b;
+}
+
+.primary-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.secondary-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  flex: 1;
+}
+
+.secondary-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.link-success {
+  background: rgba(46, 125, 50, 0.2);
+  color: #4caf50;
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
 /* Responsive */
 @media (max-width: 480px) {
   .onboarding-modal {
@@ -273,4 +391,240 @@
   .situation-option {
     padding: 0.75rem;
   }
+
+  .quick-profile-row {
+    flex-direction: column;
+  }
+}
+
+/* Quick Profile Row - Age and Postal Code Upfront */
+.quick-profile-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.field-group.compact {
+  flex: 1;
+}
+
+.field-group.compact label {
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.field-group.compact select,
+.field-group.compact input {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+/* Follow-up Section */
+.followup-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.followup-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.treatment-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.treatment-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.875rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+  font-size: 0.85rem;
+}
+
+.treatment-option:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.treatment-option.selected {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%);
+  border-color: #22c55e;
+}
+
+.treatment-option .option-icon {
+  color: #22c55e;
+  flex-shrink: 0;
+}
+
+.treatment-option .option-label {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Step Indicator */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 2rem 0.5rem;
+  gap: 0;
+}
+
+.step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  transition: all 0.3s;
+}
+
+.step-dot.active {
+  background: linear-gradient(135deg, #e91e8c 0%, #9c27b0 100%);
+  border-color: #e91e8c;
+  color: white;
+  box-shadow: 0 0 15px rgba(233, 30, 140, 0.4);
+}
+
+.step-dot.completed {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: white;
+}
+
+.step-line {
+  width: 40px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Compact Header */
+.onboarding-header.compact {
+  padding: 1rem 2rem 0.5rem;
+}
+
+.onboarding-header.compact h2 {
+  font-size: 1.2rem;
+}
+
+/* Stage Content */
+.stage-content {
+  padding: 0;
+}
+
+/* Select Dropdown */
+.field-group select {
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: white;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+  cursor: pointer;
+}
+
+.field-group select:focus {
+  outline: none;
+  border-color: #e91e8c;
+}
+
+.field-group select option {
+  background: #1a1a2e;
+  color: white;
+}
+
+/* Field Hint */
+.field-hint {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 0.25rem;
+}
+
+/* Selected Stage Summary */
+.selected-stage-summary {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Skip Button */
+.skip-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  transition: color 0.2s;
+}
+
+.skip-btn:hover:not(:disabled) {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Footer Navigation */
+.footer-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 1rem;
+}
+
+.back-btn-text {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.2s;
+}
+
+.back-btn-text:hover:not(:disabled) {
+  color: white;
+}
+
+.footer-nav .onboarding-submit {
+  flex: 1;
+  max-width: 200px;
 }

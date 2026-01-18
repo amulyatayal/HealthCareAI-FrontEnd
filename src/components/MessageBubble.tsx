@@ -2,12 +2,16 @@ import { User, Heart, BookOpen, ExternalLink, ThumbsUp, ThumbsDown, Copy, Check,
 import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { SourceModal } from './SourceModal'
+import { ProposalCard } from './ProposalCard'
 import { submitFeedback } from '../services/api'
 import type { Message, Source } from '../types'
 import './MessageBubble.css'
 
 interface MessageBubbleProps {
   message: Message
+  isLastMessage?: boolean
+  hideProposals?: boolean
+  onIgnoreProposal?: () => void
 }
 
 function formatTime(timestamp: Date | string): string {
@@ -20,7 +24,7 @@ function formatTime(timestamp: Date | string): string {
   }
 }
 
-export function MessageBubble({ message }: MessageBubbleProps) {
+export function MessageBubble({ message, isLastMessage = false, hideProposals = false, onIgnoreProposal }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false)
   const [feedback, setFeedback] = useState<'thumbs_up' | 'thumbs_down' | null>(message.feedbackGiven || null)
   const [showFeedbackInput, setShowFeedbackInput] = useState(false)
@@ -38,10 +42,10 @@ export function MessageBubble({ message }: MessageBubbleProps) {
 
   const handleThumbsUp = async () => {
     if (feedback) return
-    
+
     setFeedback('thumbs_up')
     setShowThanks(true)
-    
+
     // Try to submit to API if conversation_id is available
     if (message.conversation_id && message.conversation_created_at) {
       try {
@@ -67,7 +71,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
     setIsSubmitting(true)
     setShowFeedbackInput(false)
     setShowThanks(true)
-    
+
     // Try to submit to API if conversation_id is available
     if (message.conversation_id && message.conversation_created_at) {
       try {
@@ -88,7 +92,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
     setIsSubmitting(true)
     setShowFeedbackInput(false)
     setShowThanks(true)
-    
+
     // Try to submit to API if conversation_id is available
     if (message.conversation_id && message.conversation_created_at) {
       try {
@@ -114,14 +118,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
   return (
     <>
       <div className={`message-bubble ${isUser ? 'user' : 'assistant'}`}>
-        <div className="message-avatar">
-          {isUser ? (
-            <User size={20} />
-          ) : (
-            <Heart size={20} fill="currentColor" />
-          )}
-        </div>
-        
+
         <div className="message-content">
           <div className="message-header">
             <span className="message-role">
@@ -141,11 +138,25 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               </span>
             )}
           </div>
-          
+
           {/* Main Answer */}
           <div className="message-text markdown-content">
             <ReactMarkdown>{message.content}</ReactMarkdown>
           </div>
+
+          {/* Proposal Card - Only show on most recent message and if not ignored */}
+          {!isUser && message.modification_proposal && isLastMessage && !hideProposals && (
+            <div className="message-proposal-container">
+              <ProposalCard
+                proposal={message.modification_proposal}
+                onAction={(accepted) => {
+                  if (!accepted && onIgnoreProposal) {
+                    onIgnoreProposal()
+                  }
+                }}
+              />
+            </div>
+          )}
 
           {/* Disclaimer */}
           {!isUser && message.disclaimer && (
@@ -165,8 +176,8 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               <div className="sources-divider" />
               <div className="sources-list">
                 {message.sources.map((source, index) => (
-                  <button 
-                    key={index} 
+                  <button
+                    key={index}
                     className="source-item"
                     onClick={() => handleSourceClick(source)}
                   >
@@ -187,7 +198,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           {/* Support Helpline */}
           {!isUser && message.support_helpline && (
             <div className="helpline-section">
-              <a 
+              <a
                 href={`tel:${message.support_helpline}`}
                 className="helpline-link"
               >
@@ -199,22 +210,27 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             </div>
           )}
 
+          {/* Proposal Card */}
+          {!isUser && message.modification_proposal && (
+            <ProposalCard proposal={message.modification_proposal} />
+          )}
+
           {/* Actions for assistant messages */}
           {!isUser && (
             <div className="message-actions">
-              <button 
-                className="action-btn" 
+              <button
+                className="action-btn"
                 onClick={handleCopy}
                 aria-label="Copy message"
               >
                 {copied ? <Check size={14} /> : <Copy size={14} />}
                 {copied ? 'Copied' : 'Copy'}
               </button>
-              
+
               {canShowFeedback && (
                 <>
                   <div className="action-divider" />
-                  <button 
+                  <button
                     className={`action-btn ${feedback === 'thumbs_up' ? 'active' : ''}`}
                     onClick={handleThumbsUp}
                     disabled={feedback !== null || isSubmitting}
@@ -222,7 +238,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                   >
                     <ThumbsUp size={14} />
                   </button>
-                  <button 
+                  <button
                     className={`action-btn ${feedback === 'thumbs_down' ? 'active' : ''}`}
                     onClick={handleThumbsDown}
                     disabled={feedback !== null || isSubmitting}
@@ -230,7 +246,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                   >
                     <ThumbsDown size={14} />
                   </button>
-                  
+
                   {showThanks && (
                     <span className="feedback-thanks">Thanks for your feedback!</span>
                   )}
@@ -251,14 +267,14 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                 className="feedback-textarea"
               />
               <div className="feedback-input-actions">
-                <button 
+                <button
                   className="feedback-skip-btn"
                   onClick={handleSkipFeedback}
                   disabled={isSubmitting}
                 >
                   Skip
                 </button>
-                <button 
+                <button
                   className="feedback-submit-btn"
                   onClick={handleFeedbackSubmit}
                   disabled={isSubmitting}
@@ -273,9 +289,9 @@ export function MessageBubble({ message }: MessageBubbleProps) {
 
       {/* Source Modal */}
       {selectedSource && (
-        <SourceModal 
-          source={selectedSource} 
-          onClose={() => setSelectedSource(null)} 
+        <SourceModal
+          source={selectedSource}
+          onClose={() => setSelectedSource(null)}
         />
       )}
     </>
