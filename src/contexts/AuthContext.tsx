@@ -110,6 +110,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isGuest: false
       })
       localStorage.setItem('auth_token', credential)
+      // Set timestamp to prevent 401 handler from clearing during race condition
+      localStorage.setItem('auth_token_set_time', Date.now().toString())
     } catch (error) {
       console.error('Failed to decode token:', error)
     }
@@ -122,6 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(guestToken)
       setUser(guestUser)
       localStorage.setItem('auth_token', guestToken)
+      localStorage.setItem('auth_token_set_time', Date.now().toString())
     }
   }
 
@@ -132,12 +135,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      token, 
-      login, 
+    <AuthContext.Provider value={{
+      user,
+      token,
+      login,
       loginAsGuest,
-      logout, 
+      logout,
       isAuthenticated: !!user,
       isLoading
     }}>

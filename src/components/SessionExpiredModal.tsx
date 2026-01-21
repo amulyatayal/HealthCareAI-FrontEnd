@@ -9,7 +9,7 @@ interface SessionExpiredModalProps {
     onClose: () => void;
 }
 
-const GOOGLE_CLIENT_ID = "937837014603-v254092245233156223403565620245242202.apps.googleusercontent.com" // From App.tsx
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '282021051502-09vacaqf3avjaa4utjv1c9laetcq2jbf.apps.googleusercontent.com'
 
 export function SessionExpiredModal({ isOpen, onClose }: SessionExpiredModalProps) {
     const { login } = useAuth();
