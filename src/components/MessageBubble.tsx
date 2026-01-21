@@ -1,4 +1,4 @@
-import { User, Heart, BookOpen, ExternalLink, ThumbsUp, ThumbsDown, Copy, Check, Phone, AlertTriangle, CheckCircle } from 'lucide-react'
+import { BookOpen, ExternalLink, ThumbsUp, ThumbsDown, Copy, Check, Phone, AlertTriangle, CheckCircle } from 'lucide-react'
 import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { SourceModal } from './SourceModal'
@@ -21,7 +21,7 @@ function formatTime(timestamp: Date | string): string {
   }
 }
 
-export function MessageBubble({ message, isLastMessage = false }: MessageBubbleProps) {
+export function MessageBubble({ message }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false)
   const [feedback, setFeedback] = useState<'thumbs_up' | 'thumbs_down' | null>(message.feedbackGiven || null)
   const [showFeedbackInput, setShowFeedbackInput] = useState(false)

@@ -58,8 +58,7 @@ function App() {
   const [guestMessageCount, setGuestMessageCount] = useState(0)
   const [onboardingSubmitting, setOnboardingSubmitting] = useState(false)
 
-  // Proposal card ignore state (session-scoped)
-  const [proposalsIgnoredForSession, setProposalsIgnoredForSession] = useState(false)
+
 
   // Profile reminder state
   const [profileComplete, setProfileComplete] = useState<boolean | null>(null)
@@ -155,7 +154,6 @@ function App() {
         : undefined,
       conversation_id: response.intent || undefined,
       feedbackGiven: null,
-      modification_proposal: response.modification_proposal
     }
   }
 
@@ -382,8 +380,6 @@ function App() {
                   onSubmit={handleChatSubmit}
                   isLoading={isLoading}
                   showStrictToggle={apiVersion === 'v1'}
-                  proposalsIgnored={proposalsIgnoredForSession}
-                  onIgnoreProposals={() => setProposalsIgnoredForSession(true)}
                 />
               )}
             </div>
