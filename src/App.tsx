@@ -7,28 +7,85 @@ import { TopicsBrowser } from './components/TopicsBrowser'
 import { ChatInput, ChatInputHandle } from './components/ChatInput'
 import { LoginPage } from './components/LoginPage'
 import { ForumHome } from './components/forum'
+import { OnboardingWizard } from './components/OnboardingWizard'
+import { SignInToast } from './components/SignInToast'
+import { ProfileReminder } from './components/ProfileReminder'
+import { SessionExpiredModal } from './components/SessionExpiredModal'
 import { useAuth } from './contexts/AuthContext'
 import { generateUUID } from './utils/uuid'
-import { getAvailableIndexes, sendMessageV1, sendMessageV2 } from './services/api'
+import { getAvailableIndexes, sendMessageV1, sendMessageV2, submitOnboarding, getOnboardingStatus } from './services/api'
 import type { Message, IndexInfo, ChatResponseV2 } from './types'
+import type { OnboardingData } from './components/OnboardingWizard'
 import './styles/App.css'
 
 type View = 'chat' | 'topics' | 'forum'
 type ChatApiVersion = 'v1' | 'v2'
 
+// How often to show reminder (every N messages)
+const REMINDER_INTERVAL = 3
+
 function App() {
   const { isAuthenticated, isLoading: authLoading, user } = useAuth()
+
+  const [showSessionExpiredModal, setShowSessionExpiredModal] = useState(false)
+
+  // Listen for session expiration events from API
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      setShowSessionExpiredModal(true)
+    }
+
+    window.addEventListener('auth:session-expired', handleSessionExpired)
+    return () => {
+      window.removeEventListener('auth:session-expired', handleSessionExpired)
+    }
+  }, [])
 
   const [messages, setMessages] = useState<Message[]>([])
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [currentView, setCurrentView] = useState<View>('chat')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [apiVersion, setApiVersion] = useState<ChatApiVersion>('v2')
-  
+
   // Index management
   const [availableIndexes, setAvailableIndexes] = useState<IndexInfo[]>([])
   const [selectedIndex, setSelectedIndex] = useState<string>('')
   const [indexesLoading, setIndexesLoading] = useState(true)
+
+  const [showOnboardingWizard, setShowOnboardingWizard] = useState(false)
+  const [showSignInToast, setShowSignInToast] = useState(false)
+  const [signInToastDismissed, setSignInToastDismissed] = useState(false)
+  const [guestMessageCount, setGuestMessageCount] = useState(0)
+  const [onboardingSubmitting, setOnboardingSubmitting] = useState(false)
+
+  // Proposal card ignore state (session-scoped)
+  const [proposalsIgnoredForSession, setProposalsIgnoredForSession] = useState(false)
+
+  // Profile reminder state
+  const [profileComplete, setProfileComplete] = useState<boolean | null>(null)
+  const [authMessageCount, setAuthMessageCount] = useState(0)
+  const [showProfileReminder, setShowProfileReminder] = useState(false)
+  const [reminderDismissedUntil, setReminderDismissedUntil] = useState(0)
+
+  // Check onboarding status on mount for authenticated users
+  useEffect(() => {
+    async function checkOnboardingStatus() {
+      if (!isAuthenticated || user?.isGuest) return
+
+      try {
+        const status = await getOnboardingStatus()
+        setProfileComplete(status.onboarding_completed)
+
+        // Show onboarding on first login if not completed
+        if (status.needs_onboarding) {
+          setShowOnboardingWizard(true)
+        }
+      } catch (error) {
+        console.error('Failed to check onboarding status:', error)
+      }
+    }
+    checkOnboardingStatus()
+  }, [isAuthenticated, user?.isGuest])
 
   // Fetch available indexes on mount
   useEffect(() => {
@@ -98,6 +155,7 @@ function App() {
         : undefined,
       conversation_id: response.intent || undefined,
       feedbackGiven: null,
+      modification_proposal: response.modification_proposal
     }
   }
 
@@ -151,18 +209,42 @@ function App() {
 
         const assistantMessage = mapV2ResponseToMessage(response)
         handleSendMessage(assistantMessage, response.session_id)
+
+        // Handle onboarding prompt for authenticated users
+        if (response.needs_onboarding && !user?.isGuest) {
+          setShowOnboardingWizard(true)
+        }
+
+        // Track guest message count for sign-in toast (Option B)
+        if (user?.isGuest) {
+          const newCount = guestMessageCount + 1
+          setGuestMessageCount(newCount)
+          // Show toast after 3rd message if not dismissed
+          if (newCount === 3 && !signInToastDismissed) {
+            setShowSignInToast(true)
+          }
+        } else {
+          // Track authenticated user message count for profile reminder
+          const newAuthCount = authMessageCount + 1
+          setAuthMessageCount(newAuthCount)
+
+          // Show reminder every N messages if profile incomplete
+          if (!profileComplete && newAuthCount >= reminderDismissedUntil && newAuthCount % REMINDER_INTERVAL === 0) {
+            setShowProfileReminder(true)
+          }
+        }
       }
     } catch (error) {
       console.error('Failed to send message:', error)
-      
+
       let errorContent = "I'm sorry, I'm having trouble connecting right now. Please try again in a moment."
-      
+
       if (error instanceof TypeError && error.message.includes('fetch')) {
         errorContent = "Unable to connect to the server. Please make sure the backend is running on port 8000."
       } else if (error instanceof Error) {
         errorContent = `Error: ${error.message}`
       }
-      
+
       const errorMessage: Message = {
         id: generateUUID(),
         role: 'assistant',
@@ -173,10 +255,51 @@ function App() {
     } finally {
       setIsLoading(false)
     }
-  }, [apiVersion, sessionId, selectedIndex, messages])
+  }, [apiVersion, sessionId, selectedIndex, messages, user?.isGuest, guestMessageCount, signInToastDismissed])
+
+  // Handle onboarding submission
+  const handleOnboardingComplete = async (data: OnboardingData) => {
+    setOnboardingSubmitting(true)
+    try {
+      await submitOnboarding(data)
+      setShowOnboardingWizard(false)
+      setProfileComplete(true)  // Mark profile as complete
+      setShowProfileReminder(false)  // Hide reminder if showing
+    } catch (error) {
+      console.error('Failed to save onboarding:', error)
+      throw error
+    } finally {
+      setOnboardingSubmitting(false)
+    }
+  }
+
+  // Handle profile reminder actions
+  const handleReminderComplete = () => {
+    setShowProfileReminder(false)
+    setShowOnboardingWizard(true)
+  }
+
+  const handleReminderDismiss = () => {
+    setShowProfileReminder(false)
+    // Don't show again for next N messages
+    setReminderDismissedUntil(authMessageCount + REMINDER_INTERVAL)
+  }
+
+  // Handle sign-in toast dismiss
+  const handleSignInToastDismiss = () => {
+    setShowSignInToast(false)
+    setSignInToastDismissed(true)
+  }
+
+  // Navigate to login
+  const handleNavigateToLogin = () => {
+    // The login page will show if not authenticated
+    // For now, just close the toast - user can use the header login
+    setShowSignInToast(false)
+  }
 
   const handleTopicSelect = (topic: string, subtopic?: string) => {
-    const question = subtopic 
+    const question = subtopic
       ? `Tell me about ${subtopic} in the context of ${topic}`
       : `Tell me about ${topic}`
     const syntheticMessage: Message = {
@@ -207,7 +330,11 @@ function App() {
 
   return (
     <div className="app">
-      <Header 
+      <SessionExpiredModal
+        isOpen={showSessionExpiredModal}
+        onClose={() => setShowSessionExpiredModal(false)}
+      />
+      <Header
         onNewChat={handleNewChat}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         sidebarOpen={sidebarOpen}
@@ -217,22 +344,31 @@ function App() {
         indexesLoading={indexesLoading}
         apiVersion={apiVersion}
         onApiVersionChange={setApiVersion}
+        onUpdateJourney={() => setShowOnboardingWizard(true)}
       />
-      
+
       <div className="app-content">
-        <Sidebar 
+        <Sidebar
           isOpen={sidebarOpen}
           currentView={currentView}
           onViewChange={setCurrentView}
           onNewChat={handleNewChat}
         />
-        
+
         <main className="main-content">
           {currentView === 'chat' && (
             <div className="chat-view">
+              {/* Profile reminder banner */}
+              {showProfileReminder && (
+                <ProfileReminder
+                  onComplete={handleReminderComplete}
+                  onDismiss={handleReminderDismiss}
+                />
+              )}
+
               {showWelcome ? (
                 <WelcomeScreen>
-                  <ChatInput 
+                  <ChatInput
                     ref={chatInputRef}
                     onSubmit={handleChatSubmit}
                     isLoading={isLoading}
@@ -241,31 +377,50 @@ function App() {
                   />
                 </WelcomeScreen>
               ) : (
-                <ChatInterface 
+                <ChatInterface
                   messages={messages}
                   onSubmit={handleChatSubmit}
                   isLoading={isLoading}
                   showStrictToggle={apiVersion === 'v1'}
+                  proposalsIgnored={proposalsIgnoredForSession}
+                  onIgnoreProposals={() => setProposalsIgnoredForSession(true)}
                 />
               )}
             </div>
           )}
-          
+
           {currentView === 'topics' && (
             <TopicsBrowser onSelectTopic={handleTopicSelect} />
           )}
-          
+
           {currentView === 'forum' && (
             <ForumHome currentUserId={user?.id} />
           )}
         </main>
       </div>
-      
+
       <footer className="app-footer">
         <p className="footer-disclaimer">
           <strong>Remember:</strong> This AI provides information only and is not a substitute for professional medical advice.
         </p>
       </footer>
+
+      {/* Onboarding Wizard Modal */}
+      {showOnboardingWizard && (
+        <OnboardingWizard
+          onComplete={handleOnboardingComplete}
+          onClose={() => setShowOnboardingWizard(false)}
+          isSubmitting={onboardingSubmitting}
+        />
+      )}
+
+      {/* Sign-in Toast for Guests */}
+      {showSignInToast && (
+        <SignInToast
+          onSignIn={handleNavigateToLogin}
+          onDismiss={handleSignInToastDismiss}
+        />
+      )}
     </div>
   )
 }

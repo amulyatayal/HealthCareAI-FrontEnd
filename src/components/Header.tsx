@@ -15,11 +15,12 @@ interface HeaderProps {
   indexesLoading: boolean
   apiVersion: 'v1' | 'v2'
   onApiVersionChange: (version: 'v1' | 'v2') => void
+  onUpdateJourney: () => void
 }
 
-export function Header({ 
-  onNewChat, 
-  onToggleSidebar, 
+export function Header({
+  onNewChat,
+  onToggleSidebar,
   sidebarOpen,
   selectedIndex,
   onSelectIndex,
@@ -27,6 +28,7 @@ export function Header({
   indexesLoading,
   apiVersion,
   onApiVersionChange,
+  onUpdateJourney,
 }: HeaderProps) {
   const { user, logout } = useAuth()
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -46,14 +48,14 @@ export function Header({
   return (
     <header className="header">
       <div className="header-left">
-        <button 
+        <button
           className="btn btn-ghost btn-icon"
           onClick={onToggleSidebar}
           aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
         >
           {sidebarOpen ? <PanelLeftClose size={20} /> : <PanelLeft size={20} />}
         </button>
-        
+
         <div className="logo">
           <div className="logo-icon">
             <Heart size={22} fill="currentColor" />
@@ -67,10 +69,10 @@ export function Header({
           </div>
         </div>
       </div>
-      
+
       <div className="header-right">
         {apiVersion === 'v1' && (
-          <IndexSelector 
+          <IndexSelector
             selectedIndex={selectedIndex}
             onSelectIndex={onSelectIndex}
             availableIndexes={availableIndexes}
@@ -78,14 +80,14 @@ export function Header({
           />
         )}
         <div className="api-toggle" role="group" aria-label="Select API version">
-          <button 
+          <button
             className={`api-chip ${apiVersion === 'v1' ? 'active' : ''}`}
             onClick={() => onApiVersionChange('v1')}
             aria-pressed={apiVersion === 'v1'}
           >
             API v1
           </button>
-          <button 
+          <button
             className={`api-chip ${apiVersion === 'v2' ? 'active' : ''}`}
             onClick={() => onApiVersionChange('v2')}
             aria-pressed={apiVersion === 'v2'}
@@ -101,15 +103,15 @@ export function Header({
         {/* User Menu */}
         {user && (
           <div className="user-menu-container" ref={menuRef}>
-            <button 
+            <button
               className="user-menu-trigger"
               onClick={() => setShowUserMenu(!showUserMenu)}
               aria-expanded={showUserMenu}
             >
               {user.picture ? (
-                <img 
-                  src={user.picture} 
-                  alt={user.name} 
+                <img
+                  src={user.picture}
+                  alt={user.name}
                   className="user-avatar"
                 />
               ) : (
@@ -136,6 +138,14 @@ export function Header({
                     {user.isGuest && <span className="user-guest-badge">Guest</span>}
                   </div>
                 </div>
+                <div className="user-menu-divider" />
+                <button className="user-menu-item" onClick={() => {
+                  setShowUserMenu(false)
+                  onUpdateJourney()
+                }}>
+                  <Heart size={16} />
+                  Update Journey
+                </button>
                 <div className="user-menu-divider" />
                 <button className="user-menu-item" onClick={logout}>
                   <LogOut size={16} />

@@ -47,7 +47,7 @@ function getUserId(): string | null {
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const token = getAuthToken();
   const userId = getUserId();
-  
+
   const response = await fetch(url, {
     ...options,
     headers: {
@@ -61,10 +61,10 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    // If unauthorized, clear token and reload to show login
+    // If unauthorized, signal session expiration
     if (response.status === 401) {
-      localStorage.removeItem('auth_token');
-      window.location.reload();
+      window.dispatchEvent(new CustomEvent('auth:session-expired'));
+      // We still throw so the caller knows it failed, but the UI will handle the modal
     }
     const error = await response.json().catch(() => ({ message: 'An error occurred' }));
     throw new ApiError(response.status, error.detail || error.message || 'An error occurred');
@@ -136,6 +136,113 @@ export async function getHealthStatus(): Promise<HealthStatus> {
 // Indexes API
 export async function getAvailableIndexes(): Promise<IndexesResponse> {
   return fetchJson<IndexesResponse>(`${API_BASE_V1}/knowledge/indexes`);
+}
+
+// ================================
+// Profile API (v2)
+// ================================
+
+export interface OnboardingStatusResponse {
+  onboarding_completed: boolean;
+  current_stage: string;
+  needs_onboarding: boolean;
+}
+
+export interface OnboardingRequest {
+  current_situation: string;
+  diagnosis_date?: string;
+  diagnosis_type?: string;
+  current_treatments?: string[];
+  treatment_start_date?: string;
+}
+
+export interface ProfileResponse {
+  profile: {
+    user_id: string;
+    current_stage: string;
+    onboarding_completed: boolean;
+  };
+  message: string;
+}
+
+export async function getOnboardingStatus(): Promise<OnboardingStatusResponse> {
+  return fetchJson<OnboardingStatusResponse>(`${API_BASE_V2}/profile/status`);
+}
+
+export async function submitOnboarding(data: OnboardingRequest): Promise<ProfileResponse> {
+  return fetchJson<ProfileResponse>(`${API_BASE_V2}/profile/onboarding`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateStage(newStage: string): Promise<ProfileResponse> {
+  return fetchJson<ProfileResponse>(`${API_BASE_V2}/profile/stage`, {
+    method: 'PUT',
+    body: JSON.stringify({ new_stage: newStage }),
+  });
+}
+
+// Link an existing account via Patient Reference ID
+export async function linkAccount(patientRefId: string): Promise<ProfileResponse> {
+  return fetchJson<ProfileResponse>(`${API_BASE_V2}/profile/link`, {
+    method: 'POST',
+    body: JSON.stringify({ patient_ref_id: patientRefId }),
+  });
+}
+
+// ================================
+// Treatment Stage API (v2)
+// ================================
+
+export interface TreatmentStage {
+  stage_id: string;
+  name: string;
+  description: string;
+  parent_stage_id: string | null;
+  child_stage_ids: string[];
+  transition_notes: string | null;
+  is_patient_facing: boolean;
+}
+
+export interface StageTreeNode {
+  stage: TreatmentStage;
+  children: StageTreeNode[];
+}
+
+export interface StageTreeResponse {
+  stages: StageTreeNode[];
+  total_count: number;
+}
+
+export interface StageDetailResponse {
+  stage: TreatmentStage;
+  parent: TreatmentStage | null;
+  children: TreatmentStage[];
+  breadcrumb: string[];
+}
+
+// Get hierarchical stage tree for UI selector
+export async function getStageTree(): Promise<StageTreeResponse> {
+  return fetchJson<StageTreeResponse>(`${API_BASE_V2}/profile/stages`);
+}
+
+// Get details for a specific stage
+export async function getStageDetails(stageId: string): Promise<StageDetailResponse> {
+  return fetchJson<StageDetailResponse>(`${API_BASE_V2}/profile/stages/${stageId}`);
+}
+
+// Select a detailed treatment stage
+export async function selectDetailedStage(stageId: string): Promise<{ message: string; stage_id: string; stage_name: string; breadcrumb: string[] }> {
+  return fetchJson(`${API_BASE_V2}/profile/stage/select`, {
+    method: 'PUT',
+    body: JSON.stringify({ stage_id: stageId }),
+  });
+}
+
+// Get current user's stage with context
+export async function getMyStage(): Promise<{ stage_id: string | null; stage_name: string; breadcrumb: string[]; description?: string; ai_context?: string }> {
+  return fetchJson(`${API_BASE_V2}/profile/my-stage`);
 }
 
 export { ApiError };

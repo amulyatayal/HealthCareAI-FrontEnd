@@ -52,6 +52,8 @@ export interface ChatRequestV2 {
   include_trace?: boolean;
 }
 
+
+
 export interface ChatResponseV2 {
   session_id?: string;
   response: string;
@@ -63,6 +65,10 @@ export interface ChatResponseV2 {
   disclaimer_included?: boolean;
   trace?: unknown[];
   total_latency_ms?: number;
+  // Profile/onboarding fields
+  needs_onboarding?: boolean;
+  sign_in_suggestion?: string;
+
 }
 
 // Backwards-compatible aliases (v1 as default)
@@ -82,6 +88,7 @@ export interface Message {
   conversation_id?: string;
   conversation_created_at?: string;
   feedbackGiven?: 'thumbs_up' | 'thumbs_down' | null;
+
 }
 
 export interface KnowledgeSearchRequest {

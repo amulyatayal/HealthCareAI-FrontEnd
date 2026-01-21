@@ -12,8 +12,8 @@ interface ChatInterfaceProps {
   showStrictToggle?: boolean
 }
 
-export function ChatInterface({ 
-  messages, 
+export function ChatInterface({
+  messages,
   onSubmit,
   isLoading,
   showStrictToggle = true,
@@ -45,17 +45,24 @@ export function ChatInterface({
       <div className="messages-container">
         <div className="messages-list">
           {messages.map((message, index) => {
-            const isUserQuestionBeforeAnswer = 
-              message.role === 'user' && 
+            const isUserQuestionBeforeAnswer =
+              message.role === 'user' &&
               index === messages.length - 2 &&
               messages[messages.length - 1]?.role === 'assistant'
-            
+
+            const isLastAssistantMessage =
+              message.role === 'assistant' &&
+              index === messages.length - 1
+
             return (
-              <div 
+              <div
                 key={message.id}
                 ref={isUserQuestionBeforeAnswer ? userQuestionRef : null}
               >
-                <MessageBubble message={message} />
+                <MessageBubble
+                  message={message}
+                  isLastMessage={isLastAssistantMessage}
+                />
               </div>
             )
           })}
@@ -65,12 +72,12 @@ export function ChatInterface({
       </div>
 
       <div className="chat-input-container">
-        <ChatInput 
+        <ChatInput
           onSubmit={onSubmit}
           isLoading={isLoading}
           showStrictToggle={showStrictToggle}
         />
       </div>
-    </div>
+    </div >
   )
 }
