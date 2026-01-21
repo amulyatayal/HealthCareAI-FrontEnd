@@ -139,14 +139,19 @@ export function Header({
                   </div>
                 </div>
                 <div className="user-menu-divider" />
-                <button className="user-menu-item" onClick={() => {
-                  setShowUserMenu(false)
-                  onUpdateJourney()
-                }}>
-                  <Heart size={16} />
-                  Update Journey
-                </button>
-                <div className="user-menu-divider" />
+                {/* Only show Update Journey for authenticated users (not guests) */}
+                {!user.isGuest && (
+                  <>
+                    <button className="user-menu-item" onClick={() => {
+                      setShowUserMenu(false)
+                      onUpdateJourney()
+                    }}>
+                      <Heart size={16} />
+                      Update Journey
+                    </button>
+                    <div className="user-menu-divider" />
+                  </>
+                )}
                 <button className="user-menu-item" onClick={logout}>
                   <LogOut size={16} />
                   Sign out
