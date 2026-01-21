@@ -63,8 +63,19 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   if (!response.ok) {
     // If unauthorized, signal session expiration
     if (response.status === 401) {
+      // Clear the bad token immediately to prevent infinite 401 loops
+      localStorage.removeItem('auth_token');
+
+      // Dispatch event for modal (if listener exists in App.tsx)
       window.dispatchEvent(new CustomEvent('auth:session-expired'));
-      // We still throw so the caller knows it failed, but the UI will handle the modal
+
+      // Force reload to reset app state and redirect to login
+      // Skip reload if already on login page to prevent reload loop
+      if (!window.location.pathname.includes('/login')) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      }
     }
     const error = await response.json().catch(() => ({ message: 'An error occurred' }));
     throw new ApiError(response.status, error.detail || error.message || 'An error occurred');
