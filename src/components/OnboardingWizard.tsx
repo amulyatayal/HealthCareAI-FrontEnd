@@ -22,7 +22,6 @@ import {
 } from 'lucide-react';
 import './OnboardingWizard.css';
 import { linkAccount } from '../services/api';
-import { StageSelector } from './StageSelector';
 
 // Age range options (GDPR compliant)
 const AGE_RANGES = [
@@ -54,7 +53,7 @@ const SITUATION_OPTIONS = [
         value: 'recently_diagnosed',
         label: "I was recently diagnosed",
         Icon: ClipboardList,
-        hasFollowUp: true
+        hasFollowUp: false
     },
     {
         value: 'currently_in_treatment',
@@ -120,18 +119,12 @@ const TREATMENT_FOLLOWUP_OPTIONS = [
         Icon: Shield,
         stageMapping: null
     },
-    {
-        value: 'detailed_selection',
-        label: "I know my specific stage info...",
-        Icon: ListTree,
-        stageMapping: 'DETAILED'
-    },
 ];
 
 export interface OnboardingData {
     current_situation: string;
     treatment_type?: string;
-    detailed_stage_id?: string;
+    // detailed_stage_id removed
     age_range?: string;
     postal_code?: string;
     diagnosis_date?: string;
@@ -156,10 +149,7 @@ export function OnboardingWizard({
     const [showFollowUp, setShowFollowUp] = useState(false);
     const [error, setError] = useState('');
 
-    // Detailed Stage Selection
-    const [showStageSelector, setShowStageSelector] = useState(false);
-    const [detailedStageId, setDetailedStageId] = useState<string | undefined>(undefined);
-    const [detailedStageName, setDetailedStageName] = useState<string>('');
+    // Detailed Stage Selection removed
 
     // Account Linking State
     const [showLinkAccount, setShowLinkAccount] = useState(false);
@@ -202,14 +192,7 @@ export function OnboardingWizard({
         }
     };
 
-    // Handle detailed stage selection from the child component
-    const handleDetailedStageSelected = (stageId: string, stageName: string) => {
-        setDetailedStageId(stageId);
-        setDetailedStageName(stageName);
-        setShowStageSelector(false);
-        // We set treatment type to a special value to show we have a selection
-        setTreatmentType('detailed_selection');
-    };
+
 
     const handleSubmit = async () => {
         if (!situation) {
@@ -219,10 +202,10 @@ export function OnboardingWizard({
 
         setError('');
 
-        // If user selected a simple option, map it. If they used detailed selector, use that ID.
-        let finalStageId = detailedStageId;
+        // If user selected a simple option, map it.
+        let finalStageId: string | undefined = undefined;
 
-        if (treatmentType && treatmentType !== 'detailed_selection') {
+        if (treatmentType) {
             const option = TREATMENT_FOLLOWUP_OPTIONS.find(o => o.value === treatmentType);
             if (option?.stageMapping) {
                 finalStageId = option.stageMapping;
@@ -372,42 +355,23 @@ export function OnboardingWizard({
                                         What type of treatment? (optional)
                                     </label>
 
-                                    {showStageSelector ? (
-                                        <div className="embedded-stage-selector">
-                                            <StageSelector
-                                                onStageSelected={handleDetailedStageSelected}
-                                                onBack={() => setShowStageSelector(false)}
-                                            />
-                                        </div>
-                                    ) : (
-                                        <div className="treatment-options">
-                                            {TREATMENT_FOLLOWUP_OPTIONS.map(option => (
-                                                <button
-                                                    key={option.value}
-                                                    className={`treatment-option ${treatmentType === option.value ? 'selected' : ''}`}
-                                                    onClick={() => {
-                                                        if (option.value === 'detailed_selection') {
-                                                            setShowStageSelector(true);
-                                                        } else {
-                                                            setTreatmentType(option.value);
-                                                            setDetailedStageId(undefined); // Clear detailed selection if switching back
-                                                        }
-                                                    }}
-                                                    type="button"
-                                                >
-                                                    <span className="option-icon">
-                                                        <option.Icon size={18} />
-                                                    </span>
-                                                    <span className="option-label">{option.label}</span>
-                                                    {option.value === 'detailed_selection' && detailedStageId && (
-                                                        <span className="detailed-selection-badge">
-                                                            <CheckCircle size={12} /> {detailedStageName}
-                                                        </span>
-                                                    )}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
+                                    <div className="treatment-options">
+                                        {TREATMENT_FOLLOWUP_OPTIONS.map(option => (
+                                            <button
+                                                key={option.value}
+                                                className={`treatment-option ${treatmentType === option.value ? 'selected' : ''}`}
+                                                onClick={() => {
+                                                    setTreatmentType(option.value);
+                                                }}
+                                                type="button"
+                                            >
+                                                <span className="option-icon">
+                                                    <option.Icon size={18} />
+                                                </span>
+                                                <span className="option-label">{option.label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
 
