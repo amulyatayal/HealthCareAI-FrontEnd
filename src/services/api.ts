@@ -63,11 +63,11 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   if (!response.ok) {
     // If unauthorized, signal session expiration
     if (response.status === 401) {
-      // Check if the token was JUST set (within last 2 seconds)
+      // Check if the token was JUST set (within last 5 seconds)
       // This prevents clearing tokens during OAuth login race condition
       const tokenSetTime = localStorage.getItem('auth_token_set_time');
       const now = Date.now();
-      const isRecentlySet = tokenSetTime && (now - parseInt(tokenSetTime)) < 2000;
+      const isRecentlySet = tokenSetTime && (now - parseInt(tokenSetTime)) < 5000;
 
       if (!isRecentlySet) {
         // Clear the bad token immediately to prevent infinite 401 loops
