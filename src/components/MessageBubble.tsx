@@ -2,7 +2,6 @@ import { User, Heart, BookOpen, ExternalLink, ThumbsUp, ThumbsDown, Copy, Check,
 import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { SourceModal } from './SourceModal'
-import { ProposalCard } from './ProposalCard'
 import { submitFeedback } from '../services/api'
 import type { Message, Source } from '../types'
 import './MessageBubble.css'
@@ -10,8 +9,6 @@ import './MessageBubble.css'
 interface MessageBubbleProps {
   message: Message
   isLastMessage?: boolean
-  hideProposals?: boolean
-  onIgnoreProposal?: () => void
 }
 
 function formatTime(timestamp: Date | string): string {
@@ -24,7 +21,7 @@ function formatTime(timestamp: Date | string): string {
   }
 }
 
-export function MessageBubble({ message, isLastMessage = false, hideProposals = false, onIgnoreProposal }: MessageBubbleProps) {
+export function MessageBubble({ message, isLastMessage = false }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false)
   const [feedback, setFeedback] = useState<'thumbs_up' | 'thumbs_down' | null>(message.feedbackGiven || null)
   const [showFeedbackInput, setShowFeedbackInput] = useState(false)
@@ -144,19 +141,7 @@ export function MessageBubble({ message, isLastMessage = false, hideProposals = 
             <ReactMarkdown>{message.content}</ReactMarkdown>
           </div>
 
-          {/* Proposal Card - Only show on most recent message and if not ignored */}
-          {!isUser && message.modification_proposal && isLastMessage && !hideProposals && (
-            <div className="message-proposal-container">
-              <ProposalCard
-                proposal={message.modification_proposal}
-                onAction={(accepted) => {
-                  if (!accepted && onIgnoreProposal) {
-                    onIgnoreProposal()
-                  }
-                }}
-              />
-            </div>
-          )}
+
 
           {/* Disclaimer */}
           {!isUser && message.disclaimer && (
@@ -210,10 +195,7 @@ export function MessageBubble({ message, isLastMessage = false, hideProposals = 
             </div>
           )}
 
-          {/* Proposal Card */}
-          {!isUser && message.modification_proposal && (
-            <ProposalCard proposal={message.modification_proposal} />
-          )}
+
 
           {/* Actions for assistant messages */}
           {!isUser && (

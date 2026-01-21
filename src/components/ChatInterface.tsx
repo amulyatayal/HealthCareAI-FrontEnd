@@ -10,8 +10,6 @@ interface ChatInterfaceProps {
   onSubmit: (message: string, strictMode: boolean) => Promise<void>
   isLoading: boolean
   showStrictToggle?: boolean
-  proposalsIgnored?: boolean
-  onIgnoreProposals?: () => void
 }
 
 export function ChatInterface({
@@ -19,8 +17,6 @@ export function ChatInterface({
   onSubmit,
   isLoading,
   showStrictToggle = true,
-  proposalsIgnored = false,
-  onIgnoreProposals,
 }: ChatInterfaceProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const userQuestionRef = useRef<HTMLDivElement>(null)
@@ -66,8 +62,6 @@ export function ChatInterface({
                 <MessageBubble
                   message={message}
                   isLastMessage={isLastAssistantMessage}
-                  hideProposals={proposalsIgnored}
-                  onIgnoreProposal={onIgnoreProposals}
                 />
               </div>
             )
@@ -84,6 +78,6 @@ export function ChatInterface({
           showStrictToggle={showStrictToggle}
         />
       </div>
-    </div>
+    </div >
   )
 }
