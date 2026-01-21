@@ -17,8 +17,7 @@ import {
     Pill,
     Zap,
     Radio,
-    Link as LinkIcon,
-    ListTree
+    Link as LinkIcon
 } from 'lucide-react';
 import './OnboardingWizard.css';
 import { linkAccount } from '../services/api';
@@ -202,20 +201,11 @@ export function OnboardingWizard({
 
         setError('');
 
-        // If user selected a simple option, map it.
-        let finalStageId: string | undefined = undefined;
 
-        if (treatmentType) {
-            const option = TREATMENT_FOLLOWUP_OPTIONS.find(o => o.value === treatmentType);
-            if (option?.stageMapping) {
-                finalStageId = option.stageMapping;
-            }
-        }
 
         const data: OnboardingData = {
             current_situation: situation,
             treatment_type: treatmentType,
-            detailed_stage_id: finalStageId,
             age_range: ageRange || undefined,
             postal_code: postalCode || undefined
         };
