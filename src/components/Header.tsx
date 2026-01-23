@@ -57,15 +57,16 @@ export function Header({
         </button>
 
         <div className="logo">
-          <div className="logo-icon">
+          <div className="logo-icon tara-icon">
             <Heart size={22} fill="currentColor" />
+            <span className="sparkle">✦</span>
           </div>
           <div className="logo-text">
-            <span className="logo-name">
-              Healthcare AI
+            <span className="logo-name tara-name">
+              Tara
               <span className="beta-badge">Beta</span>
             </span>
-            <span className="logo-tagline">Your Healthcare Companion</span>
+            <span className="logo-tagline">Your AI Health Companion</span>
           </div>
         </div>
       </div>

@@ -119,7 +119,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         <div className="message-content">
           <div className="message-header">
             <span className="message-role">
-              {isUser ? 'You' : 'Healthcare AI'}
+              {isUser ? 'You' : 'Tara'}
             </span>
             <span className="message-time">
               {formatTime(message.timestamp)}

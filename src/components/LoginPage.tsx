@@ -34,11 +34,12 @@ export function LoginPage() {
       <div className="login-page">
         <div className="login-card">
           <div className="login-header">
-            <div className="login-icon">
+            <div className="login-icon tara-login-icon">
               <Heart size={32} fill="currentColor" />
+              <span className="sparkle">✦</span>
             </div>
-            <h1>Healthcare AI</h1>
-            <p>Your personal AI companion for breast cancer support</p>
+            <h1 className="tara-title">Tara</h1>
+            <p>Your personal AI health companion</p>
           </div>
           
           <div className="login-divider">

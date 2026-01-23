@@ -44,6 +44,34 @@
   margin: 0 0 var(--space-sm) 0;
 }
 
+.login-header h1.tara-title {
+  font-family: 'Poppins', var(--font-sans);
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: #d88a9e;
+  letter-spacing: -0.01em;
+}
+
+.login-icon.tara-login-icon {
+  background: linear-gradient(135deg, #f8a5b8 0%, #e88a9e 100%);
+  box-shadow: 0 8px 32px -8px #e88a9e;
+  position: relative;
+}
+
+.login-icon.tara-login-icon .sparkle {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 0.875rem;
+  color: white;
+  animation: sparkle-login 2s ease-in-out infinite;
+}
+
+@keyframes sparkle-login {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.9); }
+}
+
 .login-header p {
   color: var(--text-secondary);
   margin: 0;

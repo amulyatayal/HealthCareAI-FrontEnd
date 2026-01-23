@@ -34,10 +34,25 @@
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  background: linear-gradient(135deg, var(--rose-400) 0%, var(--rose-500) 100%);
+  background: linear-gradient(135deg, #f8a5b8 0%, #e88a9e 100%);
   color: white;
   border-radius: var(--radius-md);
-  box-shadow: 0 2px 8px -2px var(--rose-400);
+  box-shadow: 0 2px 8px -2px #e88a9e;
+  position: relative;
+}
+
+.logo-icon.tara-icon .sparkle {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  font-size: 0.625rem;
+  color: #f8a5b8;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
 }
 
 .logo-text {
@@ -51,6 +66,14 @@
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--text-primary);
+}
+
+.logo-name.tara-name {
+  font-family: 'Poppins', var(--font-sans);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #d88a9e;
+  letter-spacing: -0.01em;
 }
 
 .beta-badge {

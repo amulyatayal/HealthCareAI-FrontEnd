@@ -44,10 +44,10 @@ export function WelcomeScreen({ children }: WelcomeScreenProps) {
             <Sparkles size={32} />
           </div>
           <h1 className="welcome-title">
-            Hello, I'm here to help
+            Hi, I'm Tara
           </h1>
           <p className="welcome-subtitle">
-            Your personal AI companion for breast cancer support
+            Your personal AI health companion
           </p>
         </div>
 
