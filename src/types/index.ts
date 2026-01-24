@@ -51,6 +51,8 @@ export interface Citation {
   page_start?: number;
   page_end?: number;
   relevance_score?: number;
+  // URL for the source (e.g., link to leaflet/document)
+  url?: string;
   // Video-specific fields
   video_id?: string;
   video_url?: string;
@@ -94,6 +96,8 @@ export interface ChatResponseV2 {
   // Profile/onboarding fields
   needs_onboarding?: boolean;
   sign_in_suggestion?: string;
+  // Controls whether to show sources section in UI (false for citation-only mode)
+  show_sources?: boolean;
 }
 
 // Backwards-compatible aliases (v1 as default)
@@ -114,7 +118,8 @@ export interface Message {
   conversation_id?: string;
   conversation_created_at?: string;
   feedbackGiven?: 'thumbs_up' | 'thumbs_down' | null;
-
+  // Controls whether to show sources section (defaults to true if undefined)
+  show_sources?: boolean;
 }
 
 export interface KnowledgeSearchRequest {

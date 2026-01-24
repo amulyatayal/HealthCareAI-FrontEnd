@@ -139,7 +139,34 @@ export function MessageBubble({ message }: MessageBubbleProps) {
 
           {/* Main Answer */}
           <div className="message-text markdown-content">
-            <ReactMarkdown>{message.content}</ReactMarkdown>
+            <ReactMarkdown
+              components={{
+                a: ({ href, children }) => (
+                  <a
+                    href={href}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (href) {
+                        const width = 800
+                        const height = 600
+                        const left = (window.screen.width - width) / 2
+                        const top = (window.screen.height - height) / 2
+                        window.open(
+                          href,
+                          'sourcePopup',
+                          `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes,menubar=no,toolbar=no,location=no,status=no`
+                        )
+                      }
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {children}
+                  </a>
+                ),
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
           </div>
 
 
@@ -152,8 +179,8 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             </div>
           )}
 
-          {/* Sources Section - shown first */}
-          {message.sources && message.sources.length > 0 && (
+          {/* Sources Section - shown only if show_sources is true (defaults to true) */}
+          {(message.show_sources !== false) && message.sources && message.sources.length > 0 && (
             <div className="sources-section">
               <div className="sources-header">
                 <BookOpen size={16} />
@@ -163,19 +190,60 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               <div className="sources-list">
                 {message.sources.map((source, index) => {
                   const isVideo = source.timestamped_url || source.video_id
+                  const sourceUrl = isVideo ? source.timestamped_url : source.url
                   
+                  // If we have a URL, render as a link that opens in popup; otherwise render as a button
+                  if (sourceUrl) {
+                    const openInPopup = (e: React.MouseEvent) => {
+                      e.preventDefault()
+                      const width = 800
+                      const height = 600
+                      const left = (window.screen.width - width) / 2
+                      const top = (window.screen.height - height) / 2
+                      window.open(
+                        sourceUrl,
+                        'sourcePopup',
+                        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes,menubar=no,toolbar=no,location=no,status=no`
+                      )
+                    }
+                    
+                    return (
+                      <a
+                        key={index}
+                        href={sourceUrl}
+                        onClick={openInPopup}
+                        className={`source-item source-item-link ${isVideo ? 'source-item-video' : ''}`}
+                      >
+                        <div className="source-item-header">
+                          <span className="source-bullet">•</span>
+                          {isVideo && <Youtube size={14} className="source-video-icon" />}
+                          <span className="source-title source-url">{sourceUrl}</span>
+                          <ExternalLink size={12} className="source-icon" />
+                        </div>
+                        {isVideo ? (
+                          <div className="source-video-metadata">
+                            {source.channel && (
+                              <span className="source-channel">{source.channel}</span>
+                            )}
+                            {source.start_timestamp && (
+                              <span className="source-timestamp">At {source.start_timestamp}</span>
+                            )}
+                          </div>
+                        ) : (
+                          source.title && (
+                            <p className="source-snippet">{source.title}</p>
+                          )
+                        )}
+                      </a>
+                    )
+                  }
+                  
+                  // Fallback: no URL, show as button with title
                   return (
                     <button 
                       key={index} 
                       className={`source-item ${isVideo ? 'source-item-video' : ''}`}
-                      onClick={() => {
-                        // If video citation with timestamped URL, open in new tab first
-                        if (isVideo && source.timestamped_url) {
-                          window.open(source.timestamped_url, '_blank', 'noopener,noreferrer')
-                        }
-                        // Also show modal for full details
-                        handleSourceClick(source)
-                      }}
+                      onClick={() => handleSourceClick(source)}
                     >
                       <div className="source-item-header">
                         <span className="source-bullet">•</span>

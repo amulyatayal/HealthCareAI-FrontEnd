@@ -154,6 +154,7 @@ function App() {
           // Document citation
           return {
             title: citation.section || citation.source_file || 'Citation',
+            url: citation.url,
             snippet:
               citation.page_start !== undefined
                 ? `Pages ${citation.page_start}${citation.page_end !== undefined ? `-${citation.page_end}` : ''}`
@@ -178,6 +179,8 @@ function App() {
         : undefined,
       conversation_id: response.intent || undefined,
       feedbackGiven: null,
+      // Pass through show_sources flag (defaults to true if not specified)
+      show_sources: response.show_sources ?? true,
     }
   }
 

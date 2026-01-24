@@ -189,6 +189,23 @@
   transition: color var(--transition-fast);
 }
 
+.source-title.source-url {
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-size: 0.8125rem;
+  color: var(--rose-500);
+  word-break: break-all;
+}
+
+.source-item-link {
+  text-decoration: none;
+}
+
+.source-item-link:hover .source-url {
+  text-decoration: underline;
+  color: var(--rose-600);
+}
+
 .source-icon {
   color: var(--rose-400);
   flex-shrink: 0;
