@@ -80,6 +80,7 @@ export interface ChatRequestV2 {
 
 export interface ChatResponseV2 {
   request_id: string;
+  session_id?: string;
   response: string;
   intent: string;
   stage: string;
@@ -93,7 +94,6 @@ export interface ChatResponseV2 {
   // Profile/onboarding fields
   needs_onboarding?: boolean;
   sign_in_suggestion?: string;
-
 }
 
 // Backwards-compatible aliases (v1 as default)
