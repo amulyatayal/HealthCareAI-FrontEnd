@@ -194,6 +194,38 @@
   flex-shrink: 0;
 }
 
+.source-item-video {
+  border-left: 3px solid #FF0000; /* YouTube red */
+}
+
+.source-item-video:hover {
+  background: rgba(255, 0, 0, 0.05);
+}
+
+.source-video-icon {
+  color: #FF0000;
+  flex-shrink: 0;
+}
+
+.source-video-metadata {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.source-channel {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.source-timestamp {
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+}
+
 .source-snippet {
   font-family: var(--font-serif);
   font-size: 0.8125rem;

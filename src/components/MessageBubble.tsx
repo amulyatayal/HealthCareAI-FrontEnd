@@ -1,7 +1,8 @@
-import { User, Heart, BookOpen, ExternalLink, ThumbsUp, ThumbsDown, Copy, Check, Phone, AlertTriangle, CheckCircle } from 'lucide-react'
+import { User, Heart, BookOpen, ExternalLink, ThumbsUp, ThumbsDown, Copy, Check, Phone, AlertTriangle, CheckCircle, Youtube } from 'lucide-react'
 import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { SourceModal } from './SourceModal'
+import { SuggestedVideos } from './SuggestedVideos'
 import { submitFeedback } from '../services/api'
 import type { Message, Source } from '../types'
 import './MessageBubble.css'
@@ -155,7 +156,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             </div>
           )}
 
-          {/* Sources Section */}
+          {/* Sources Section - shown first */}
           {message.sources && message.sources.length > 0 && (
             <div className="sources-section">
               <div className="sources-header">
@@ -164,24 +165,56 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               </div>
               <div className="sources-divider" />
               <div className="sources-list">
-                {message.sources.map((source, index) => (
-                  <button 
-                    key={index} 
-                    className="source-item"
-                    onClick={() => handleSourceClick(source)}
-                  >
-                    <div className="source-item-header">
-                      <span className="source-bullet">•</span>
-                      <span className="source-title">{source.title}</span>
-                      <ExternalLink size={12} className="source-icon" />
-                    </div>
-                    {source.snippet && (
-                      <p className="source-snippet">"{source.snippet}"</p>
-                    )}
-                  </button>
-                ))}
+                {message.sources.map((source, index) => {
+                  const isVideo = source.timestamped_url || source.video_id
+                  
+                  return (
+                    <button 
+                      key={index} 
+                      className={`source-item ${isVideo ? 'source-item-video' : ''}`}
+                      onClick={() => {
+                        // If video citation with timestamped URL, open in new tab first
+                        if (isVideo && source.timestamped_url) {
+                          window.open(source.timestamped_url, '_blank', 'noopener,noreferrer')
+                        }
+                        // Also show modal for full details
+                        handleSourceClick(source)
+                      }}
+                    >
+                      <div className="source-item-header">
+                        <span className="source-bullet">•</span>
+                        {isVideo && <Youtube size={14} className="source-video-icon" />}
+                        <span className="source-title">{source.title}</span>
+                        {isVideo ? (
+                          <ExternalLink size={12} className="source-icon" />
+                        ) : (
+                          <ExternalLink size={12} className="source-icon" />
+                        )}
+                      </div>
+                      {isVideo ? (
+                        <div className="source-video-metadata">
+                          {source.channel && (
+                            <span className="source-channel">{source.channel}</span>
+                          )}
+                          {source.start_timestamp && (
+                            <span className="source-timestamp">At {source.start_timestamp}</span>
+                          )}
+                        </div>
+                      ) : (
+                        source.snippet && (
+                          <p className="source-snippet">"{source.snippet}"</p>
+                        )
+                      )}
+                    </button>
+                  )
+                })}
               </div>
             </div>
+          )}
+
+          {/* Suggested Videos Section - shown after sources */}
+          {message.suggested_videos && message.suggested_videos.length > 0 && (
+            <SuggestedVideos videos={message.suggested_videos} />
           )}
 
           {/* Support Helpline */}

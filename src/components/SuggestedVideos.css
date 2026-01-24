@@ -1,0 +1,112 @@
+/* Suggested Videos Section */
+.suggested-videos-section {
+  margin-top: var(--space-md, 1rem);
+  padding: var(--space-md, 1rem) var(--space-lg, 1.25rem);
+  background: #fafaf9;
+  border: 1px solid #e7e5e4;
+  border-radius: var(--radius-md, 0.5rem);
+}
+
+.suggested-videos-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: 0.9375rem;
+  font-style: italic;
+  color: #78716c;
+}
+
+.suggested-videos-icon {
+  color: #ff0000; /* YouTube red */
+}
+
+.suggested-videos-divider {
+  height: 1px;
+  background: #d6d3d1;
+  margin: var(--space-sm, 0.5rem) 0;
+}
+
+/* Grid layout for 3 videos side by side */
+.suggested-videos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md, 1rem);
+}
+
+/* Responsive: 2 columns on medium screens, 1 on small */
+@media (max-width: 900px) {
+  .suggested-videos-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .suggested-videos-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Each video card */
+.suggested-video-embed-card {
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border: 1px solid #e7e5e4;
+  border-radius: var(--radius-md, 0.5rem);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.suggested-video-embed-card:hover {
+  border-color: #ff0000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Embed wrapper with 16:9 aspect ratio */
+.suggested-video-embed-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 aspect ratio */
+  background: #000;
+}
+
+.suggested-video-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Video info below the embed */
+.suggested-video-info {
+  padding: var(--space-sm, 0.5rem) var(--space-md, 0.75rem);
+}
+
+.suggested-video-title {
+  margin: 0 0 0.25rem 0;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #1c1917;
+  /* Limit to 2 lines with ellipsis */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.suggested-video-channel {
+  margin: 0 0 0.125rem 0;
+  font-size: 0.75rem;
+  color: #78716c;
+}
+
+.suggested-video-timestamp {
+  margin: 0;
+  font-size: 0.6875rem;
+  color: #a8a29e;
+}
