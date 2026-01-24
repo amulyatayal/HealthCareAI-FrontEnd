@@ -6,6 +6,13 @@ export interface Source {
   snippet?: string;
   source_text?: string;  // Full text from PDF for modal display
   relevance_score?: number;
+  // Video-specific fields
+  video_id?: string;
+  video_url?: string;
+  timestamped_url?: string;  // YouTube URL with timestamp
+  video_title?: string;
+  channel?: string;
+  start_timestamp?: string;  // Human-readable timestamp (e.g., "5:23")
 }
 
 // v1 Chat types
@@ -43,26 +50,44 @@ export interface Citation {
   section?: string;
   page_start?: number;
   page_end?: number;
+  relevance_score?: number;
+  // Video-specific fields
+  video_id?: string;
+  video_url?: string;
+  timestamped_url?: string;  // YouTube URL with timestamp
+  video_title?: string;
+  channel?: string;
+  start_timestamp?: string;  // Human-readable timestamp (e.g., "5:23")
+}
+
+export interface SuggestedVideo {
+  video_id: string;
+  title: string;
+  url: string;  // Full YouTube URL with timestamp if available
+  channel_name: string | null;
+  relevance_note: string | null;  // Brief excerpt from transcript
+  timestamp_seconds: number | null;  // Start time in seconds
 }
 
 export interface ChatRequestV2 {
   message: string;
   session_id?: string;
-  conversation_history?: ConversationTurn[];
+  conversation_history?: ConversationTurn[] | Record<string, string>[];
   include_trace?: boolean;
 }
 
 
 
 export interface ChatResponseV2 {
-  session_id?: string;
+  request_id: string;
   response: string;
-  intent?: string;
-  stage?: string;
+  intent: string;
+  stage: string;
   citations?: Citation[];
   confidence?: number;
   abstained?: boolean;
   disclaimer_included?: boolean;
+  suggested_videos?: SuggestedVideo[];
   trace?: unknown[];
   total_latency_ms?: number;
   // Profile/onboarding fields
@@ -81,6 +106,7 @@ export interface Message {
   content: string;
   timestamp: Date;
   sources?: Source[];
+  suggested_videos?: SuggestedVideo[];
   disclaimer?: string;
   has_sufficient_evidence?: boolean;
   support_helpline?: string;

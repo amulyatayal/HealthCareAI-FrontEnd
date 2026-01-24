@@ -166,7 +166,7 @@ export function ForumHome({ currentUserId }: ForumHomeProps) {
           <select value={sortBy} onChange={e => setSortBy(e.target.value as SortOption)}>
             <option value="new">Newest</option>
             <option value="top">Top Voted</option>
-            <option value="hot">Hot</option>
+            <option value="hot">Trending</option>
           </select>
         </div>
         <button 

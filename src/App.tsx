@@ -132,14 +132,37 @@ function App() {
 
   const mapV2ResponseToMessage = (response: ChatResponseV2): Message => {
     const citationsAsSources =
-      response.citations?.map((citation) => ({
-        title: citation.section || citation.source_file || 'Citation',
-        snippet:
-          citation.page_start !== undefined
-            ? `Pages ${citation.page_start}${citation.page_end !== undefined ? `-${citation.page_end}` : ''}`
-            : undefined,
-        source_text: citation.source_file,
-      })) || []
+      response.citations?.map((citation) => {
+        // Check if this is a video citation
+        if (citation.timestamped_url || citation.video_id) {
+          // Video citation
+          return {
+            title: citation.video_title || citation.source_file || 'Video Citation',
+            url: citation.timestamped_url || citation.video_url,
+            snippet: citation.start_timestamp ? `At ${citation.start_timestamp}` : citation.channel,
+            source_text: citation.source_file || citation.video_title,
+            relevance_score: citation.relevance_score,
+            // Video-specific fields
+            video_id: citation.video_id,
+            video_url: citation.video_url,
+            timestamped_url: citation.timestamped_url,
+            video_title: citation.video_title,
+            channel: citation.channel,
+            start_timestamp: citation.start_timestamp,
+          }
+        } else {
+          // Document citation
+          return {
+            title: citation.section || citation.source_file || 'Citation',
+            snippet:
+              citation.page_start !== undefined
+                ? `Pages ${citation.page_start}${citation.page_end !== undefined ? `-${citation.page_end}` : ''}`
+                : undefined,
+            source_text: citation.source_file,
+            relevance_score: citation.relevance_score,
+          }
+        }
+      }) || []
 
     return {
       id: generateUUID(),
@@ -147,6 +170,7 @@ function App() {
       content: response.response,
       timestamp: new Date(),
       sources: citationsAsSources,
+      suggested_videos: response.suggested_videos,
       has_sufficient_evidence:
         response.confidence !== undefined ? response.confidence >= 0.65 && !response.abstained : undefined,
       disclaimer: response.disclaimer_included

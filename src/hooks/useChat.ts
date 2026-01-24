@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
-import { sendMessage as sendMessageApi, clearChatHistory } from '../services/api'
+import { sendMessageV2, clearChatHistory } from '../services/api'
 import { generateUUID } from '../utils/uuid'
-import type { Message, ChatRequest } from '../types'
+import type { Message, ChatRequestV2, ConversationTurn } from '../types'
 
 interface UseChatOptions {
   onError?: (error: Error) => void
@@ -24,27 +24,43 @@ export function useChat(options: UseChatOptions = {}) {
     setIsLoading(true)
 
     try {
-      const request: ChatRequest = {
+      // Build conversation history for V2 API
+      const conversationHistory: ConversationTurn[] = messages.map(m => ({
+        role: m.role,
+        content: m.content
+      }))
+
+      const request: ChatRequestV2 = {
         message: content,
         session_id: sessionId || undefined,
+        conversation_history: conversationHistory,
       }
 
-      const response = await sendMessageApi(request)
+      const response = await sendMessageV2(request)
+
+      // Convert V2 citations to sources format for display
+      const sources = response.citations?.map(c => ({
+        title: c.source_file,
+        snippet: c.section || '',
+        relevance_score: c.relevance_score,
+      })) || []
 
       const assistantMessage: Message = {
         id: generateUUID(),
         role: 'assistant',
-        content: response.answer,
-        timestamp: new Date(response.timestamp),
-        sources: response.sources,
-        disclaimer: response.disclaimer,
-        has_sufficient_evidence: response.has_sufficient_evidence,
-        support_helpline: response.support_helpline,
-        support_helpline_name: response.support_helpline_name,
+        content: response.response,
+        timestamp: new Date(),
+        sources: sources,
+        suggested_videos: response.suggested_videos,
+        disclaimer: response.disclaimer_included ? 'This information is educational and not a substitute for medical advice.' : undefined,
+        has_sufficient_evidence: !response.abstained,
       }
 
       setMessages(prev => [...prev, assistantMessage])
-      setSessionId(response.session_id)
+      // Use request_id as session_id for V2
+      if (!sessionId) {
+        setSessionId(response.request_id)
+      }
 
       return assistantMessage
     } catch (error) {
@@ -63,7 +79,7 @@ export function useChat(options: UseChatOptions = {}) {
     } finally {
       setIsLoading(false)
     }
-  }, [sessionId, options])
+  }, [sessionId, messages, options])
 
   const clearChat = useCallback(async () => {
     if (sessionId) {
