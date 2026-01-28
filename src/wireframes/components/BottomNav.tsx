@@ -1,4 +1,4 @@
-import { Home, Users, Heart, User } from 'lucide-react'
+import { Home, Users, Heart, User, MessageCircle } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 export function BottomNav() {
@@ -12,6 +12,14 @@ export function BottomNav() {
         <Home />
         <span className="wf-nav-label">Home</span>
       </NavLink>
+      
+      <a
+        href="/"
+        className="wf-nav-item wf-nav-chat"
+      >
+        <MessageCircle />
+        <span className="wf-nav-label">Ask Tara</span>
+      </a>
       
       <NavLink
         to="/demo/community"

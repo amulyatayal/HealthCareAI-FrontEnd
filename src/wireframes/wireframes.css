@@ -72,6 +72,50 @@
   color: var(--wf-gray-800);
 }
 
+/* Tara Logo */
+.wf-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wf-logo-icon {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--wf-rose-400), var(--wf-rose-500));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 2px 8px -2px var(--wf-rose-400);
+}
+
+.wf-sparkle {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  font-size: 10px;
+  color: #fbbf24;
+  animation: wf-sparkle-pulse 2s ease-in-out infinite;
+}
+
+@keyframes wf-sparkle-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.8); }
+}
+
+.wf-logo-name {
+  font-family: 'Poppins', -apple-system, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--wf-rose-500), var(--wf-rose-600));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .wf-header-back {
   background: none;
   border: none;
@@ -127,6 +171,27 @@
 .wf-nav-item:hover,
 .wf-nav-item.active {
   color: var(--wf-rose-500);
+}
+
+/* Chat tab - special styling */
+.wf-nav-chat {
+  position: relative;
+}
+
+.wf-nav-chat svg {
+  background: linear-gradient(135deg, var(--wf-rose-400), var(--wf-rose-500));
+  color: white;
+  padding: 8px;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  box-shadow: 0 2px 8px rgba(244, 63, 94, 0.4);
+  margin-bottom: 2px;
+}
+
+.wf-nav-chat .wf-nav-label {
+  color: var(--wf-rose-500);
+  font-weight: 600;
 }
 
 .wf-nav-item svg {
