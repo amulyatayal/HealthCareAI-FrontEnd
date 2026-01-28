@@ -3,6 +3,7 @@ import './wireframes.css'
 
 // Pages
 import { DashboardPage } from './pages/DashboardPage'
+import { ChatPage } from './pages/ChatPage'
 import { CommunityChatPage } from './pages/CommunityChatPage'
 import { BasicMoodPage } from './pages/BasicMoodPage'
 import { BuddyPage } from './pages/BuddyPage'
@@ -23,6 +24,7 @@ export function WireframeApp() {
     <Routes>
       {/* Main tabs */}
       <Route path="/" element={<DashboardPage />} />
+      <Route path="/chat" element={<ChatPage />} />
       <Route path="/community" element={<CommunityHub />} />
       <Route path="/health" element={<HealthHub />} />
       <Route path="/profile" element={<ProfilePage />} />

@@ -1,4 +1,5 @@
 export { DashboardPage } from './DashboardPage'
+export { ChatPage } from './ChatPage'
 export { CommunityHub } from './CommunityHub'
 export { HealthHub } from './HealthHub'
 export { ProfilePage } from './ProfilePage'

@@ -13,13 +13,13 @@ export function BottomNav() {
         <span className="wf-nav-label">Home</span>
       </NavLink>
       
-      <a
-        href="/"
-        className="wf-nav-item wf-nav-chat"
+      <NavLink
+        to="/demo/chat"
+        className={({ isActive }) => `wf-nav-item wf-nav-chat ${isActive ? 'active' : ''}`}
       >
         <MessageCircle />
         <span className="wf-nav-label">Ask Tara</span>
-      </a>
+      </NavLink>
       
       <NavLink
         to="/demo/community"

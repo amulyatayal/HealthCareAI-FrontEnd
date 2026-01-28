@@ -54,7 +54,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask me anything about your care journey..."
+              placeholder="Ask me anything..."
               className="chat-input"
               rows={1}
               disabled={isLoading}
