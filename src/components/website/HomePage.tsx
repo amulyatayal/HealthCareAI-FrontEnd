@@ -149,7 +149,7 @@ export function HomePage() {
                 </li>
                 <li>
                   <CheckCircle size={20} />
-                  <span>Evidence-based responses from verified sources</span>
+                  <span>Evidence-based searches from verified sources</span>
                 </li>
                 <li>
                   <CheckCircle size={20} />
