@@ -165,22 +165,51 @@ export function FoundersPage() {
           </div>
 
           <div className="founders-story">
-            <h2>Our Story</h2>
-            <p>
-              Anvega.Ai was founded with a vision to combine cutting-edge AI technology 
-              with deep healthcare expertise. Amulya's extensive experience in building 
-              large-scale AI and data platforms, combined with Dr. Shweta's clinical 
-              insights and understanding of real-world healthcare challenges, creates a 
-              unique foundation for developing AI solutions that truly serve patients 
-              and healthcare providers.
-            </p>
-            <p>
-              Together, they recognized the transformative potential of AI in healthcare 
-              and set out to build solutions that are not just technologically advanced, 
-              but also clinically relevant, ethically sound, and patient-centered. 
-              Anvega.Ai represents this commitment to excellence in both AI innovation 
-              and healthcare delivery.
-            </p>
+            <h2>Why Healthcare AI? Why Now?</h2>
+            <div className="why-section">
+              <h3>Why Healthcare AI?</h3>
+              <p>
+                Patient information gaps are a critical problem in healthcare. Patients need 
+                24/7 access to evidence-based guidance, but healthcare systems struggle to scale 
+                support operations. Current solutions are either too generic, not clinically 
+                validated, or require massive infrastructure rebuilds.
+              </p>
+            </div>
+            <div className="why-section">
+              <h3>Why Now?</h3>
+              <p>
+                The convergence of advanced AI capabilities, growing patient expectations for 
+                digital health, and healthcare systems' need to do more with less creates an 
+                unprecedented opportunity. We can now build AI that understands healthcare's 
+                complexity while maintaining the clinical rigor and safety standards required.
+              </p>
+            </div>
+            <div className="why-section">
+              <h3>Why Us?</h3>
+              <p>
+                <strong>Clinical Credibility:</strong> Dr. Shweta brings real-world clinical 
+                experience and understands patient needs from the front lines of care.
+              </p>
+              <p>
+                <strong>Deep AI/Engineering Experience:</strong> Amulya's 20+ years building 
+                large-scale AI systems at companies like Amazon means we can deliver enterprise-grade 
+                solutions that actually scale.
+              </p>
+              <p>
+                <strong>Vision for Responsible AI:</strong> We're building AI that's not just 
+                technologically advanced, but clinically relevant, ethically sound, and designed 
+                with healthcare's unique regulatory and safety requirements from day one.
+              </p>
+            </div>
+            <div className="why-section">
+              <h3>Our Commitment</h3>
+              <p>
+                Anvega.Ai represents our commitment to excellence in both AI innovation and 
+                healthcare delivery. We're not building another ChatGPT wrapper—we're creating 
+                clinical-grade AI platforms that healthcare systems can trust to support their 
+                patients safely and effectively.
+              </p>
+            </div>
           </div>
         </div>
       </section>

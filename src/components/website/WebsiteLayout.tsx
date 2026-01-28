@@ -23,7 +23,11 @@ export function WebsiteLayout({ children }: WebsiteLayoutProps) {
       <header className="website-header">
         <div className="website-header-content">
           <Link to={getLinkPath('/')} className="website-logo">
-            <span className="logo-text">Anvega.Ai</span>
+            <img 
+              src="/founders/Anvega.AI - Logo.png" 
+              alt="Anvega.Ai" 
+              className="logo-image"
+            />
           </Link>
           
           <nav className="website-nav">
