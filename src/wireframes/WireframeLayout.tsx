@@ -32,7 +32,8 @@ export function WireframeLayout({ children, title, showBack, hideNav }: Wirefram
             <span className="wf-logo-name">Tara</span>
           </div>
         )}
-        {title && <h1 className="wf-header-title">{title}</h1>}
+        {/* Only show title on sub-pages with back button */}
+        {showBack && title && <h1 className="wf-header-title">{title}</h1>}
         <div style={{ width: showBack ? 60 : 40 }} />
       </header>
       

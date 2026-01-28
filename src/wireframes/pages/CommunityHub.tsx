@@ -47,7 +47,7 @@ export function CommunityHub() {
   ]
 
   return (
-    <WireframeLayout title="Community">
+    <WireframeLayout>
       <p style={{ fontSize: '14px', color: 'var(--wf-gray-500)', marginBottom: '16px' }}>
         Connect, share, and support each other
       </p>

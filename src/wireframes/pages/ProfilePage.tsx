@@ -38,7 +38,7 @@ export function ProfilePage() {
   ]
 
   return (
-    <WireframeLayout title="Profile">
+    <WireframeLayout>
       {/* Profile Header */}
       <WireframeCard>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>

@@ -5,7 +5,7 @@ import { WireframeCard } from '../components'
 
 export function DashboardPage() {
   return (
-    <WireframeLayout title="Tara">
+    <WireframeLayout>
       {/* Welcome Section */}
       <WireframeCard>
         <div style={{ textAlign: 'center', padding: '8px 0' }}>

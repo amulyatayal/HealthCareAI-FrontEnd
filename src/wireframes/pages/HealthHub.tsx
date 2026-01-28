@@ -40,7 +40,7 @@ export function HealthHub() {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
   return (
-    <WireframeLayout title="Health">
+    <WireframeLayout>
       {/* Weekly Overview */}
       <WireframeCard title="This Week's Mood">
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
