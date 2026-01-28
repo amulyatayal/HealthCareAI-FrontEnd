@@ -59,7 +59,7 @@ export function FoundersPage() {
                   <div className="highlight-item">
                     <Briefcase size={20} />
                     <div>
-                      <strong>Last Role</strong>
+                      <strong>Experience</strong>
                       <p>Director of Engineering, Amazon</p>
                     </div>
                   </div>
@@ -92,14 +92,14 @@ export function FoundersPage() {
               </div>
             </div>
 
-            {/* Dr. Shweta Aggarwal */}
+            {/* Ms. Shweta Aggarwal */}
             <div className="founder-card">
               <div className="founder-header">
                 <div className="founder-avatar">
                   {shwetaImageSrc ? (
                     <img 
                       src={shwetaImageSrc}
-                      alt="Dr. Shweta Aggarwal"
+                      alt="Ms. Shweta Aggarwal"
                       onError={() => setShwetaImageError(true)}
                     />
                   ) : (
@@ -107,13 +107,13 @@ export function FoundersPage() {
                   )}
                 </div>
                 <div className="founder-title">
-                  <h2>Dr. Shweta Aggarwal</h2>
+                  <h2>Ms. Shweta Aggarwal</h2>
                   <p className="founder-role">Founder & Chief Executive Officer</p>
                 </div>
               </div>
               <div className="founder-content">
                 <p className="founder-bio">
-                  Dr. Shweta Aggarwal is a Board Certified Plastic Surgeon with 
+                  Ms. Shweta Aggarwal is a Board Certified Plastic Surgeon with 
                   extensive clinical experience and a passion for healthcare innovation. 
                   As an NHS Clinical Entrepreneur and Honorary Senior Lecturer at Queen 
                   Mary University of London, she bridges the gap between clinical 
@@ -123,7 +123,7 @@ export function FoundersPage() {
                   <div className="highlight-item">
                     <Briefcase size={20} />
                     <div>
-                      <strong>Current Roles</strong>
+                      <strong>Experience</strong>
                       <p>
                         Consultant Plastic Surgeon, Barts Health NHS Trust<br />
                         Honorary Senior Lecturer, Queen Mary University of London<br />
@@ -187,7 +187,7 @@ export function FoundersPage() {
             <div className="why-section">
               <h3>Why Us?</h3>
               <p>
-                <strong>Clinical Credibility:</strong> Dr. Shweta brings real-world clinical 
+                <strong>Clinical Credibility:</strong> Ms. Shweta brings real-world clinical 
                 experience and understands patient needs from the front lines of care.
               </p>
               <p>

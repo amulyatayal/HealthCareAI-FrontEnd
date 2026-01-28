@@ -3,7 +3,7 @@
 Place the founder profile photos in this directory:
 
 - `amulya-tayal.jpg` - Photo of Amulya Tayal
-- `shweta-aggarwal.jpg` - Photo of Dr. Shweta Aggarwal
+- `shweta-aggarwal.jpg` - Photo of Ms. Shweta Aggarwal
 
 ## Quick Method to Download from LinkedIn:
 

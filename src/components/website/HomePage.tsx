@@ -1,15 +1,30 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, Brain, Shield, Sparkles, Users, TrendingUp, MessageSquare, Building2, Stethoscope, Rocket } from 'lucide-react'
 import { getDomainQueryParam } from '../../utils/domainDetector'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 export function HomePage() {
   const domainQuery = getDomainQueryParam()
   const getLinkPath = (path: string) => `${path}${domainQuery}`
   const [isVisible, setIsVisible] = useState(false)
+  const [taraInView, setTaraInView] = useState(false)
+  const taraSectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     setIsVisible(true)
+  }, [])
+
+  useEffect(() => {
+    const el = taraSectionRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setTaraInView(true)
+      },
+      { threshold: 0.2, rootMargin: '0px 0px -50px 0px' }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
   }, [])
   
   return (
@@ -176,7 +191,7 @@ export function HomePage() {
       <section className="features-section-modern">
         <div className="container">
           <div className="features-modern-grid">
-            <div className="feature-modern-card">
+            <div className="feature-modern-card feature-clinical-ai">
               <div className="feature-modern-header">
                 <h3>Clinical-grade AI</h3>
               </div>
@@ -185,7 +200,7 @@ export function HomePage() {
                 responses aligned with hospital guidelines. Stage-aware conversations that adapt over time.
               </p>
             </div>
-            <div className="feature-modern-card">
+            <div className="feature-modern-card feature-human-loop">
               <div className="feature-modern-header">
                 <h3>Human-in-the-loop ready</h3>
               </div>
@@ -194,7 +209,7 @@ export function HomePage() {
                 your organization's policies and clinical guidelines. Extremely customizable.
               </p>
             </div>
-            <div className="feature-modern-card">
+            <div className="feature-modern-card feature-enterprise">
               <div className="feature-modern-header">
                 <h3>Enterprise-ready architecture</h3>
               </div>
@@ -208,14 +223,20 @@ export function HomePage() {
       </section>
 
       {/* Tara Product Section - Repositioned as Platform */}
-      <section className="tara-product-section">
+      <section ref={taraSectionRef} className="tara-product-section">
         <div className="container">
           <div className="tara-product-header">
             <div className="tara-title-with-icon">
-              <Brain size={48} className="tara-icon" />
-              <h2 className="tara-product-title">Tara</h2>
+              <Brain size={48} className={`tara-icon ${taraInView ? 'tara-icon-visible' : ''}`} />
+              <h2 className={`tara-product-title tara-name-reveal ${taraInView ? 'tara-name-visible' : ''}`}>
+                <span className="tara-name-chars" aria-label="Tara">
+                  {'Tara'.split('').map((char, i) => (
+                    <span key={i} className="tara-char" style={{ animationDelay: `${i * 0.1}s` }}>{char}</span>
+                  ))}
+                </span>
+              </h2>
             </div>
-            <p className="tara-product-subtitle">An AI Patient Support Platform</p>
+            <p className={`tara-product-subtitle ${taraInView ? 'tara-subtitle-visible' : ''}`}>An AI Patient Support Platform</p>
             <p className="tara-product-description">
               A configurable, enterprise-ready AI platform designed to support patients across 
               their care journey. Deploy stage-aware education, treatment guidance, and 
