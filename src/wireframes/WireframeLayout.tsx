@@ -24,6 +24,12 @@ export function WireframeLayout({ children, title, showBack, hideNav }: Wirefram
             Back
           </button>
         ) : (
+          <div style={{ width: 40 }} /> /* Left spacer for centering */
+        )}
+        
+        {showBack && title ? (
+          <h1 className="wf-header-title">{title}</h1>
+        ) : (
           <div className="wf-logo">
             <div className="wf-logo-icon">
               <Heart size={18} fill="currentColor" />
@@ -32,9 +38,8 @@ export function WireframeLayout({ children, title, showBack, hideNav }: Wirefram
             <span className="wf-logo-name">Tara</span>
           </div>
         )}
-        {/* Only show title on sub-pages with back button */}
-        {showBack && title && <h1 className="wf-header-title">{title}</h1>}
-        <div style={{ width: showBack ? 60 : 40 }} />
+        
+        <div style={{ width: showBack ? 60 : 40 }} /> {/* Right spacer */}
       </header>
       
       <main className="wf-main">

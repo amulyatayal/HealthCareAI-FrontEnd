@@ -4,20 +4,20 @@ import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
 
 const myBuddies = [
-  { id: 1, name: 'Emma Thompson', status: 'online', lastMessage: 'Thanks for the support yesterday!' },
-  { id: 2, name: 'Michael Chen', status: 'offline', lastMessage: 'See you at the support group!' },
-  { id: 3, name: 'Lisa Anderson', status: 'online', lastMessage: 'How was your appointment?' },
+  { id: 1, name: 'Emma T.', status: 'online', lastMessage: 'Thanks for the support yesterday!' },
+  { id: 2, name: 'Michael C.', status: 'offline', lastMessage: 'See you at the support group!' },
+  { id: 3, name: 'Lisa A.', status: 'online', lastMessage: 'How was your appointment?' },
 ]
 
 const pendingRequests = [
-  { id: 4, name: 'David Wilson', cancer_type: 'Breast Cancer', stage: 'Stage II' },
-  { id: 5, name: 'Sarah Miller', cancer_type: 'Breast Cancer', stage: 'Stage I' },
+  { id: 4, name: 'David W.', zipcode: 'SW1A 1AA' },
+  { id: 5, name: 'Sarah M.', zipcode: 'M1 1AE' },
 ]
 
 const suggestedBuddies = [
-  { id: 6, name: 'Jennifer Brown', cancer_type: 'Breast Cancer', stage: 'Stage II', match: '92%' },
-  { id: 7, name: 'Robert Taylor', cancer_type: 'Breast Cancer', stage: 'Stage II', match: '87%' },
-  { id: 8, name: 'Amanda White', cancer_type: 'Breast Cancer', stage: 'Stage III', match: '85%' },
+  { id: 6, name: 'Jennifer B.', zipcode: 'B1 1AA', match: '92%' },
+  { id: 7, name: 'Robert T.', zipcode: 'L1 8JQ', match: '87%' },
+  { id: 8, name: 'Amanda W.', zipcode: 'G1 1XQ', match: '85%' },
 ]
 
 export function BuddyPage() {
@@ -59,7 +59,7 @@ export function BuddyPage() {
                     </div>
                     <div className="wf-list-content">
                       <div className="wf-list-title">{request.name}</div>
-                      <div className="wf-list-subtitle">{request.cancer_type} • {request.stage}</div>
+                      <div className="wf-list-subtitle">Near {request.zipcode}</div>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button className="wf-icon-btn" style={{ background: '#dcfce7', color: '#16a34a' }}>
@@ -126,7 +126,7 @@ export function BuddyPage() {
             <input
               type="text"
               className="wf-input"
-              placeholder="Search by name, cancer type..."
+              placeholder="Search by name, zipcode..."
               style={{ paddingLeft: '42px' }}
             />
           </div>
@@ -147,7 +147,7 @@ export function BuddyPage() {
                     <span className="wf-list-title">{buddy.name}</span>
                     <span className="wf-badge wf-badge-success">{buddy.match} match</span>
                   </div>
-                  <div className="wf-list-subtitle">{buddy.cancer_type} • {buddy.stage}</div>
+                  <div className="wf-list-subtitle">Near {buddy.zipcode}</div>
                 </div>
                 <button className="wf-btn wf-btn-outline wf-btn-sm">
                   <UserPlus size={16} />
@@ -163,7 +163,7 @@ export function BuddyPage() {
             textAlign: 'center',
             marginTop: '16px'
           }}>
-            Matches are based on cancer type, treatment stage, and shared interests
+            Matches are based on location, treatment journey, and shared interests
           </p>
         </>
       )}
