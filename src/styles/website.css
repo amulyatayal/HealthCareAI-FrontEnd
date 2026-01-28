@@ -1340,7 +1340,7 @@
 
 .cta-section p {
   font-size: 1.125rem;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.95);
   margin-bottom: var(--space-xl);
 }
 
