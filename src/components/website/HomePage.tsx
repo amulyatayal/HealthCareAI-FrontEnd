@@ -332,8 +332,8 @@ export function HomePage() {
               <div className="stat-icon">
                 <Brain size={40} />
               </div>
-              <div className="stat-value">LLM</div>
-              <div className="stat-label">Advanced Models</div>
+              <div className="stat-value">Agentic</div>
+              <div className="stat-label">AI Systems</div>
             </div>
             <div className="stat-card">
               <div className="stat-icon">
