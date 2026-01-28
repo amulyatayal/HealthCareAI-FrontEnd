@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, Brain, Heart, Shield, Sparkles, Users, TrendingUp, CheckCircle, MessageSquare } from 'lucide-react'
+import { ArrowRight, Brain, Heart, Shield, Sparkles, Users, TrendingUp, MessageSquare } from 'lucide-react'
 import { getDomainQueryParam } from '../../utils/domainDetector'
 import { useState, useEffect } from 'react'
 
@@ -14,173 +14,140 @@ export function HomePage() {
   
   return (
     <div className="home-page">
-      {/* Hero Section */}
+      {/* Hero Section - Giga-inspired */}
       <section className="hero-section">
         <div className="hero-background">
-          <div className="hero-gradient"></div>
-          <div className="hero-shapes">
-            <div className="shape shape-1"></div>
-            <div className="shape shape-2"></div>
-            <div className="shape shape-3"></div>
-          </div>
+          <div className="hero-background-image"></div>
+          <div className="hero-overlay"></div>
         </div>
-        <div className={`hero-content ${isVisible ? 'fade-in' : ''}`}>
-          <div className="hero-badge">
-            <Sparkles size={16} />
-            <span>Transforming Healthcare with AI</span>
-          </div>
-          <h1 className="hero-title">
-            Intelligent Solutions for
-            <span className="highlight"> Better Health</span>
-          </h1>
-          <p className="hero-subtitle">
-            We combine cutting-edge artificial intelligence with deep healthcare expertise
-            to deliver personalized support and evidence-based guidance that empowers patients
-            and supports clinical decision-making.
-          </p>
-          <div className="hero-cta">
-            <Link to={getLinkPath('/services')} className="btn btn-primary">
-              Explore Our Solutions
-              <ArrowRight size={20} />
-            </Link>
-            <Link to={getLinkPath('/contact')} className="btn btn-secondary">
-              Get in Touch
-            </Link>
-          </div>
-          <div className="hero-stats">
-            <div className="stat-item">
-              <div className="stat-number">20+</div>
-              <div className="stat-label">Years Combined Experience</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-number">24/7</div>
-              <div className="stat-label">Always Available</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-number">100%</div>
-              <div className="stat-label">Evidence-Based</div>
-            </div>
-          </div>
-        </div>
-        <div className="hero-image-container">
-          <div className="hero-image-placeholder">
-            <Brain size={120} className="hero-icon" />
-            <div className="floating-elements">
-              <div className="floating-icon floating-1"><Heart size={24} /></div>
-              <div className="floating-icon floating-2"><Shield size={24} /></div>
-              <div className="floating-icon floating-3"><Sparkles size={24} /></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="features-section">
         <div className="container">
-          <div className="section-header">
-            <h2 className="section-title">Why Choose Anvega.Ai?</h2>
-            <p className="section-description">
-              We bring together world-class engineering expertise and clinical insight
-              to create AI solutions that truly understand healthcare
+          <div className={`hero-content-modern ${isVisible ? 'fade-in' : ''}`}>
+            <div className="hero-badge-modern">
+              <Sparkles size={16} />
+              <span>AI-Powered Healthcare Solutions</span>
+            </div>
+            <h1 className="hero-title-modern">
+              AI that understands
+              <br />
+              <span className="highlight"> healthcare.</span>
+            </h1>
+            <h2 className="hero-subtitle-modern">
+              Empowering patients with intelligent support.
+            </h2>
+            <p className="hero-description-modern">
+              We combine cutting-edge AI with deep clinical expertise to deliver
+              personalized healthcare guidance that's always available, evidence-based, and secure.
             </p>
-          </div>
-          <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon">
-                <Brain size={32} />
-              </div>
-              <h3>State-of-the-Art AI</h3>
-              <p>
-                Leveraging the latest in large language models and machine learning
-                to deliver accurate, contextually-aware healthcare insights
-              </p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">
-                <Heart size={32} />
-              </div>
-              <h3>Clinical Expertise</h3>
-              <p>
-                Built by healthcare professionals who understand the real-world challenges
-                of patient care and clinical workflows
-              </p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">
-                <Shield size={32} />
-              </div>
-              <h3>Privacy First</h3>
-              <p>
-                Enterprise-grade security and compliance with healthcare regulations,
-                ensuring your data is always protected
-              </p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">
-                <Sparkles size={32} />
-              </div>
-              <h3>Continuous Learning</h3>
-              <p>
-                Our systems evolve with the latest medical research and clinical guidelines,
-                ensuring you always have access to current best practices
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Showcase Section */}
-      <section className="showcase-section">
-        <div className="container">
-          <div className="showcase-content">
-            <div className="showcase-text">
-              <h2>Introducing Tara</h2>
-              <p className="showcase-subtitle">Your Personal Health Companion</p>
-              <p>
-                Tara represents the future of patient support—an intelligent companion that
-                understands your health journey. Whether you're seeking information, managing
-                symptoms, or navigating treatment options, Tara provides personalized guidance
-                backed by verified medical sources.
-              </p>
-              <ul className="showcase-features">
-                <li>
-                  <CheckCircle size={20} />
-                  <span>Natural language conversations about health</span>
-                </li>
-                <li>
-                  <CheckCircle size={20} />
-                  <span>Evidence-based searches from verified sources</span>
-                </li>
-                <li>
-                  <CheckCircle size={20} />
-                  <span>Personalized guidance based on your profile</span>
-                </li>
-                <li>
-                  <CheckCircle size={20} />
-                  <span>Community support and peer connections</span>
-                </li>
-              </ul>
-              <Link to={getLinkPath('/services')} className="btn btn-primary">
-                Learn More About Tara
+            <div className="hero-cta-modern">
+              <Link to={getLinkPath('/contact')} className="btn btn-primary btn-hero">
+                Talk to us
                 <ArrowRight size={20} />
               </Link>
             </div>
-            <div className="showcase-visual">
-              <div className="showcase-image-placeholder">
-                <div className="showcase-card showcase-card-1">
-                  <MessageSquare size={32} />
-                  <span>AI Chat</span>
-                </div>
-                <div className="showcase-card showcase-card-2">
-                  <Users size={32} />
-                  <span>Community</span>
-                </div>
-                <div className="showcase-card showcase-card-3">
-                  <Heart size={32} />
-                  <span>Support</span>
-                </div>
+            <div className="hero-metrics">
+              <div className="metric-item">
+                <div className="metric-value">20+</div>
+                <div className="metric-label">Years Experience</div>
+              </div>
+              <div className="metric-item">
+                <div className="metric-value">24/7</div>
+                <div className="metric-label">Available</div>
+              </div>
+              <div className="metric-item">
+                <div className="metric-value">100%</div>
+                <div className="metric-label">Evidence-Based</div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Value Proposition Section - Giga-inspired */}
+      <section className="value-prop-section">
+        <div className="container">
+          <div className="value-prop-content">
+            <p className="value-prop-text">
+              Solve your most complex healthcare challenges with AI, 
+              delivering personalized support that scales.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section - Giga-inspired */}
+      <section className="features-section-modern">
+        <div className="container">
+          <div className="features-modern-grid">
+            <div className="feature-modern-card">
+              <div className="feature-modern-header">
+                <h3>Built to handle complexity</h3>
+              </div>
+              <p>
+                Our AI understands medical terminology, clinical workflows, and patient needs.
+                Designed specifically for healthcare's unique challenges.
+              </p>
+            </div>
+            <div className="feature-modern-card">
+              <div className="feature-modern-header">
+                <h3>Extremely customizable</h3>
+              </div>
+              <p>
+                Fine-tune every aspect to match your healthcare organization's needs,
+                policies, and clinical guidelines.
+              </p>
+            </div>
+            <div className="feature-modern-card">
+              <div className="feature-modern-header">
+                <h3>Enterprise-ready</h3>
+              </div>
+              <p>
+                Built with privacy, security, and compliance at the core.
+                Ready for healthcare's strictest regulatory requirements.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Tara Product Section - Giga-inspired */}
+      <section className="tara-product-section">
+        <div className="container">
+          <div className="tara-product-header">
+            <h2 className="tara-product-title">Tara</h2>
+            <p className="tara-product-subtitle">Your Personal Health Companion</p>
+            <p className="tara-product-description">
+              An intelligent AI platform designed to provide personalized healthcare support
+              and information. Built with advanced AI and trained on curated medical knowledge,
+              Tara offers 24/7 access to evidence-based health guidance.
+            </p>
+          </div>
+          <div className="tara-features-grid">
+            <div className="tara-feature-item">
+              <MessageSquare size={32} />
+              <h4>Natural Conversations</h4>
+              <p>Talk about health in natural language</p>
+            </div>
+            <div className="tara-feature-item">
+              <Shield size={32} />
+              <h4>Evidence-Based</h4>
+              <p>Searches from verified medical sources</p>
+            </div>
+            <div className="tara-feature-item">
+              <Heart size={32} />
+              <h4>Personalized</h4>
+              <p>Guidance tailored to your profile</p>
+            </div>
+            <div className="tara-feature-item">
+              <Users size={32} />
+              <h4>Community</h4>
+              <p>Support and peer connections</p>
+            </div>
+          </div>
+          <div className="tara-cta">
+            <Link to={getLinkPath('/services')} className="btn btn-primary">
+              Learn More About Tara
+              <ArrowRight size={20} />
+            </Link>
           </div>
         </div>
       </section>
