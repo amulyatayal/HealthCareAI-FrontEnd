@@ -25,7 +25,7 @@ export function WebsiteLayout({ children }: WebsiteLayoutProps) {
           <Link to={getLinkPath('/')} className="website-logo">
             <img 
               src="/founders/Anvega.AI - Logo.png" 
-              alt="Anvega.Ai" 
+              alt="anvega.ai" 
               className="logo-image"
             />
           </Link>
@@ -97,7 +97,7 @@ export function WebsiteLayout({ children }: WebsiteLayoutProps) {
       <footer className="website-footer">
         <div className="website-footer-content">
           <div className="footer-section">
-            <h3>Anvega.Ai</h3>
+            <h3>anvega.ai</h3>
             <p>AI solutions for healthcare transformation</p>
           </div>
           <div className="footer-section">
@@ -118,7 +118,7 @@ export function WebsiteLayout({ children }: WebsiteLayoutProps) {
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} Anvega.Ai. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} anvega.ai. All rights reserved.</p>
         </div>
       </footer>
     </div>

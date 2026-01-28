@@ -5,7 +5,7 @@ export function AboutPage() {
     <div className="about-page">
       <section className="page-hero">
         <div className="container">
-          <h1>About Anvega.Ai</h1>
+          <h1>About anvega.ai</h1>
           <p className="hero-description">
             Pioneering AI solutions to transform healthcare delivery and patient outcomes
           </p>
@@ -63,7 +63,7 @@ export function AboutPage() {
           <div className="about-section">
             <h2>Our Approach</h2>
             <p>
-              At Anvega.Ai, we combine deep technical expertise in AI and machine 
+              At anvega.ai, we combine deep technical expertise in AI and machine 
               learning with a profound understanding of healthcare challenges. Our 
               solutions are built in collaboration with healthcare professionals, 
               ensuring they meet real-world clinical needs while maintaining the 

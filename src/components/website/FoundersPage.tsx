@@ -204,7 +204,7 @@ export function FoundersPage() {
             <div className="why-section">
               <h3>Our Commitment</h3>
               <p>
-                Anvega.Ai represents our commitment to excellence in both AI innovation and 
+                anvega.ai represents our commitment to excellence in both AI innovation and 
                 healthcare delivery. We're not building another ChatGPT wrapper—we're creating 
                 clinical-grade AI platforms that healthcare systems can trust to support their 
                 patients safely and effectively.

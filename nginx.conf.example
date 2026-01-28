@@ -1,4 +1,4 @@
-# nginx Configuration for Anvega.Ai and MyTara.Care
+# nginx Configuration for anvega.ai and MyTara.Care
 # This configuration serves both domains from the same build directory
 # Place this in /etc/nginx/sites-available/ and create symlinks in sites-enabled/
 

@@ -4,7 +4,7 @@
 
 The simplest way to test the website locally is using query parameters.
 
-### Test the Anvega.Ai Website
+### Test the anvega.ai Website
 ```
 http://localhost:3000?domain=anvega
 ```
