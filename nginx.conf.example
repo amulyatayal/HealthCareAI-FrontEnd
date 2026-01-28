@@ -1,0 +1,143 @@
+# nginx Configuration for Anvega.Ai and MyTara.Care
+# This configuration serves both domains from the same build directory
+# Place this in /etc/nginx/sites-available/ and create symlinks in sites-enabled/
+
+# Server block for anvega.ai
+server {
+    listen 80;
+    listen [::]:80;
+    server_name anvega.ai www.anvega.ai;
+    
+    # Redirect HTTP to HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name anvega.ai www.anvega.ai;
+    
+    # SSL certificates (update paths to your certificate files)
+    # For Let's Encrypt, these would typically be:
+    # ssl_certificate /etc/letsencrypt/live/anvega.ai/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/anvega.ai/privkey.pem;
+    ssl_certificate /etc/ssl/certs/anvega.ai.crt;
+    ssl_certificate_key /etc/ssl/private/anvega.ai.key;
+    
+    # SSL configuration
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    
+    # Root directory (same for both domains)
+    root /var/www/healthcare-ai-frontend/dist;
+    index index.html;
+    
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/xml text/javascript application/javascript application/json;
+    
+    # SPA routing - all routes go to index.html for React Router
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+    
+    # Cache static assets
+    location ~* \.(jpg|jpeg|png|gif|ico|css|js|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+    
+    # Proxy API requests to backend (if needed for website)
+    location /api {
+        proxy_pass http://localhost:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+# Server block for mytara.care
+server {
+    listen 80;
+    listen [::]:80;
+    server_name mytara.care www.mytara.care;
+    
+    # Redirect HTTP to HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name mytara.care www.mytara.care;
+    
+    # SSL certificates (update paths to your certificate files)
+    # For Let's Encrypt, these would typically be:
+    # ssl_certificate /etc/letsencrypt/live/mytara.care/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/mytara.care/privkey.pem;
+    ssl_certificate /etc/ssl/certs/mytara.care.crt;
+    ssl_certificate_key /etc/ssl/private/mytara.care.key;
+    
+    # SSL configuration
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    
+    # Same root directory
+    root /var/www/healthcare-ai-frontend/dist;
+    index index.html;
+    
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/xml text/javascript application/javascript application/json;
+    
+    # SPA routing
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+    
+    # Cache static assets
+    location ~* \.(jpg|jpeg|png|gif|ico|css|js|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+    
+    # Proxy API requests to backend
+    location /api {
+        proxy_pass http://localhost:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+    
+    # Health check endpoint
+    location /health {
+        proxy_pass http://localhost:8000/health;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+}
+
+# Instructions:
+# 1. Update the root path to match your deployment directory
+# 2. Update SSL certificate paths (or use Let's Encrypt)
+# 3. Test configuration: sudo nginx -t
+# 4. Reload nginx: sudo systemctl reload nginx
+# 5. For Let's Encrypt SSL certificates, use certbot:
+#    sudo certbot --nginx -d anvega.ai -d www.anvega.ai
+#    sudo certbot --nginx -d mytara.care -d www.mytara.care
