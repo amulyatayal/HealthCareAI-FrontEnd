@@ -21,7 +21,8 @@ import { ProfilePage } from './pages/ProfilePage'
 
 export function WireframeApp() {
   return (
-    <Routes>
+    <div className="wireframe-viewport">
+      <Routes>
       {/* Main tabs */}
       <Route path="/" element={<DashboardPage />} />
       <Route path="/chat" element={<ChatPage />} />
@@ -46,6 +47,7 @@ export function WireframeApp() {
       {/* Profile features */}
       <Route path="/profile/documents" element={<DocumentsPage />} />
       <Route path="/profile/appointments" element={<AppointmentsPage />} />
-    </Routes>
+      </Routes>
+    </div>
   )
 }

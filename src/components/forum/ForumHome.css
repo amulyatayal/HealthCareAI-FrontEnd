@@ -1,8 +1,10 @@
 .forum-home {
   max-width: 1400px;
   width: 100%;
+  min-width: 0;
   margin: 0 auto;
   padding: 24px 40px;
+  overflow-x: hidden;
 }
 
 /* Header */

@@ -14,17 +14,18 @@ export function WireframeLayout({ children, title, showBack, hideNav }: Wirefram
   const navigate = useNavigate()
 
   return (
-    <div className="wireframe-container">
-      <div className="prototype-badge">Prototype</div>
-      
-      <header className="wf-header">
+    <div className="wireframe-phone-frame">
+      <div className="wireframe-container">
+        <div className="prototype-badge">Prototype</div>
+        
+        <header className="wf-header">
         {showBack ? (
           <button className="wf-header-back" onClick={() => navigate(-1)}>
             <ChevronLeft size={20} />
             Back
           </button>
         ) : (
-          <div style={{ width: 40 }} /> /* Left spacer for centering */
+          <div style={{ width: 40 }} />
         )}
         
         {showBack && title ? (
@@ -42,9 +43,10 @@ export function WireframeLayout({ children, title, showBack, hideNav }: Wirefram
         <div style={{ width: showBack ? 60 : 40 }} /> {/* Right spacer */}
       </header>
       
-      <main className="wf-main">
-        {children}
-      </main>
+        <main className="wf-main">
+          {children}
+        </main>
+      </div>
       
       {!hideNav && <BottomNav />}
     </div>

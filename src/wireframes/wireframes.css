@@ -1,7 +1,8 @@
-/* Wireframe Styles - Mobile-first design */
+/* Wireframe Styles - Mobile-first design, web-friendly on desktop */
 
 :root {
   --wf-max-width: 430px;
+  --wf-phone-width: 430px;
   --wf-nav-height: 70px;
   --wf-header-height: 56px;
   --wf-rose-50: #fff1f2;
@@ -25,14 +26,34 @@
   --wf-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
-/* Main wireframe container */
-.wireframe-container {
+/* Viewport wrapper - centers demo on desktop */
+.wireframe-viewport {
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Phone frame - on desktop shows as a centered device; on mobile full width */
+.wireframe-phone-frame {
+  width: 100%;
   max-width: var(--wf-max-width);
   margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Main wireframe container */
+.wireframe-container {
+  width: 100%;
+  max-width: 100%;
+  flex: 1;
   min-height: 100vh;
   background: var(--wf-gray-50);
   position: relative;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Prototype badge */
@@ -136,7 +157,7 @@
   min-height: calc(100vh - var(--wf-header-height));
 }
 
-/* Bottom Navigation */
+/* Bottom Navigation - fixed on mobile, contained in phone frame on desktop */
 .wf-bottom-nav {
   position: fixed;
   bottom: 0;
@@ -1216,4 +1237,33 @@
   font-size: 11px;
   color: var(--wf-gray-500);
   text-transform: uppercase;
+}
+
+/* Desktop: web-friendly demo - centered phone frame */
+@media (min-width: 768px) {
+  .wireframe-viewport {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 24px 16px 32px;
+    background: var(--wf-gray-300);
+  }
+
+  .wireframe-phone-frame {
+    width: var(--wf-phone-width);
+    max-width: var(--wf-phone-width);
+    min-height: 90vh;
+    border-radius: 32px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    border: 8px solid var(--wf-gray-800);
+  }
+
+  .wireframe-container {
+    border-radius: 24px 24px 0 0;
+  }
+
+  .wf-bottom-nav {
+    border-radius: 0 0 24px 24px;
+  }
 }

@@ -2,8 +2,11 @@
 .topics-browser {
   padding: var(--space-xl) var(--space-lg);
   max-width: 900px;
+  width: 100%;
+  min-width: 0;
   margin: 0 auto;
   overflow-y: auto;
+  overflow-x: hidden;
   height: 100%;
 }
 

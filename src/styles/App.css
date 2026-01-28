@@ -1,16 +1,19 @@
-/* App Layout */
+/* App Layout - consistent width across tabs */
 .app {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   max-height: 100vh;
   overflow: hidden;
+  width: 100%;
+  max-width: 100vw;
 }
 
 .app-content {
   display: flex;
   flex: 1;
   overflow: hidden;
+  min-width: 0;
 }
 
 .main-content {
@@ -18,6 +21,8 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-width: 0;
+  width: 100%;
 }
 
 /* Chat View Container - holds welcome + chat input */
@@ -26,6 +31,8 @@
   flex-direction: column;
   flex: 1;
   overflow: hidden;
+  min-width: 0;
+  width: 100%;
 }
 
 .topics-placeholder {
