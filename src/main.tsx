@@ -6,7 +6,25 @@ import { WireframeApp } from './wireframes/WireframeApp'
 import { WebsiteApp } from './components/website/WebsiteApp'
 import { AuthProvider } from './contexts/AuthContext'
 import { detectDomain } from './utils/domainDetector'
+import { useEffect } from 'react'
 import './styles/index.css'
+
+const FAVICON_ANVEGA = '/favicon.png'
+const FAVICON_TARA = '/heart.svg'
+
+// Set favicon based on domain so mytara shows heart, anvega shows anvega icon
+function FaviconSwitcher() {
+  const location = useLocation()
+  const domain = detectDomain()
+  useEffect(() => {
+    const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+    if (link) {
+      link.href = domain === 'anvega' ? FAVICON_ANVEGA : FAVICON_TARA
+      link.type = domain === 'anvega' ? 'image/png' : 'image/svg+xml'
+    }
+  }, [domain, location.search])
+  return null
+}
 
 // Component that conditionally renders based on domain
 function AppRouter() {
@@ -43,6 +61,7 @@ function AppRouter() {
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
+      <FaviconSwitcher />
       <AuthProvider>
         <AppRouter />
       </AuthProvider>
