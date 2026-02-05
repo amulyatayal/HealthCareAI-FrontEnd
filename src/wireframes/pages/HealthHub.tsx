@@ -31,8 +31,8 @@ export function HealthHub() {
     },
     {
       icon: Timer,
-      title: 'Physical Tests',
-      subtitle: '1 Mile, Sit-to-Stand, Balance',
+      title: 'Physical Tests and Wearable Integration',
+      subtitle: '1 Mile, Sit-to-Stand, Balance, device sync',
       to: '/demo/health/tests',
       iconColor: 'green',
       priority: 'P1'

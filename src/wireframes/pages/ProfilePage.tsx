@@ -1,4 +1,4 @@
-import { FileText, Calendar, Settings, Bell, Shield, LogOut, ChevronRight, User, Compass } from 'lucide-react'
+import { FileText, Calendar, Settings, Bell, Shield, LogOut, ChevronRight, User, Compass, Share2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
@@ -22,6 +22,12 @@ export function ProfilePage() {
       title: 'Appointments',
       subtitle: 'Manage reminders and schedule',
       to: '/demo/profile/appointments',
+    },
+    {
+      icon: Share2,
+      title: 'Share my Data',
+      subtitle: 'Send my data to my clinician',
+      to: '/demo/profile/share',
     },
     {
       icon: Bell,
