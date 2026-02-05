@@ -18,6 +18,7 @@ import { MarketplacePage } from './pages/MarketplacePage'
 import { CommunityHub } from './pages/CommunityHub'
 import { HealthHub } from './pages/HealthHub'
 import { ProfilePage } from './pages/ProfilePage'
+import { StageSelectorPage } from './pages/StageSelectorPage'
 
 export function WireframeApp() {
   return (
@@ -47,6 +48,7 @@ export function WireframeApp() {
       {/* Profile features */}
       <Route path="/profile/documents" element={<DocumentsPage />} />
       <Route path="/profile/appointments" element={<AppointmentsPage />} />
+      <Route path="/profile/stage" element={<StageSelectorPage />} />
       </Routes>
     </div>
   )

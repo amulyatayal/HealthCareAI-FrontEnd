@@ -1,10 +1,16 @@
-import { FileText, Calendar, Settings, Bell, Shield, LogOut, ChevronRight, User } from 'lucide-react'
+import { FileText, Calendar, Settings, Bell, Shield, LogOut, ChevronRight, User, Compass } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
 
 export function ProfilePage() {
   const menuItems = [
+    {
+      icon: Compass,
+      title: 'Treatment pathway',
+      subtitle: 'Where you are in your journey',
+      to: '/demo/profile/stage',
+    },
     {
       icon: FileText,
       title: 'My Documents',

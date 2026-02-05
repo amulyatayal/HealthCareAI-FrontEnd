@@ -1,4 +1,4 @@
-import { Calendar, MessageCircle, Heart, TrendingUp, Bell, ChevronRight, Flame, Sparkles } from 'lucide-react'
+import { Calendar, MessageCircle, Heart, TrendingUp, Bell, ChevronRight, Flame, Sparkles, FileText, UtensilsCrossed, Brain, Dumbbell } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
@@ -133,6 +133,53 @@ export function DashboardPage() {
             <div className="wf-list-subtitle">Jan 25, 9:00 AM</div>
           </div>
           <Bell size={18} style={{ color: 'var(--wf-gray-400)' }} />
+        </div>
+      </WireframeCard>
+
+      {/* Resources for your pathway */}
+      <div className="wf-section-header">
+        <span className="wf-section-title">Resources for your pathway</span>
+      </div>
+      <WireframeCard>
+        <div className="wf-list-item" style={{ marginBottom: '8px', cursor: 'pointer' }}>
+          <div className="wf-list-avatar" style={{ background: 'linear-gradient(135deg, #dbeafe, #eff6ff)' }}>
+            <FileText size={20} style={{ color: '#2563eb' }} />
+          </div>
+          <div className="wf-list-content">
+            <div className="wf-list-title">Informational leaflets</div>
+            <div className="wf-list-subtitle">Guides and factsheets for your journey</div>
+          </div>
+          <ChevronRight size={18} style={{ color: 'var(--wf-gray-400)' }} />
+        </div>
+        <Link to="/demo/chat" className="wf-list-item" style={{ textDecoration: 'none', marginBottom: '8px' }}>
+          <div className="wf-list-avatar" style={{ background: 'linear-gradient(135deg, #dcfce7, #f0fdf4)' }}>
+            <UtensilsCrossed size={20} style={{ color: '#16a34a' }} />
+          </div>
+          <div className="wf-list-content">
+            <div className="wf-list-title">Diet advice</div>
+            <div className="wf-list-subtitle">Ask Tara for nutrition tips</div>
+          </div>
+          <ChevronRight size={18} style={{ color: 'var(--wf-gray-400)' }} />
+        </Link>
+        <div className="wf-list-item" style={{ marginBottom: '8px', cursor: 'pointer' }}>
+          <div className="wf-list-avatar" style={{ background: 'linear-gradient(135deg, #f3e8ff, #faf5ff)' }}>
+            <Brain size={20} style={{ color: '#9333ea' }} />
+          </div>
+          <div className="wf-list-content">
+            <div className="wf-list-title">Mental health videos</div>
+            <div className="wf-list-subtitle">Mindfulness and wellbeing</div>
+          </div>
+          <ChevronRight size={18} style={{ color: 'var(--wf-gray-400)' }} />
+        </div>
+        <div className="wf-list-item" style={{ cursor: 'pointer' }}>
+          <div className="wf-list-avatar" style={{ background: 'linear-gradient(135deg, #fef3c7, #fffbeb)' }}>
+            <Dumbbell size={20} style={{ color: '#d97706' }} />
+          </div>
+          <div className="wf-list-content">
+            <div className="wf-list-title">Exercise videos</div>
+            <div className="wf-list-subtitle">Safe movement for your pathway</div>
+          </div>
+          <ChevronRight size={18} style={{ color: 'var(--wf-gray-400)' }} />
         </div>
       </WireframeCard>
 
