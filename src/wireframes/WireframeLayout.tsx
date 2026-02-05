@@ -1,7 +1,13 @@
-import { ReactNode } from 'react'
+import { ReactNode, useEffect } from 'react'
 import { ChevronLeft, Heart } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { BottomNav } from './components'
+
+const HOSPITAL_STORAGE_KEY = 'wireframe_hospital_logo'
+
+function getShowHospitalLogo(searchParams: URLSearchParams): boolean {
+  return searchParams.get('hospital') === 'apollo'
+}
 
 interface WireframeLayoutProps {
   children: ReactNode
@@ -12,6 +18,20 @@ interface WireframeLayoutProps {
 
 export function WireframeLayout({ children, title, showBack, hideNav }: WireframeLayoutProps) {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const showHospitalLogo = getShowHospitalLogo(searchParams)
+
+  useEffect(() => {
+    try {
+      if (searchParams.get('hospital') === 'apollo') {
+        sessionStorage.setItem(HOSPITAL_STORAGE_KEY, 'apollo')
+      } else {
+        sessionStorage.removeItem(HOSPITAL_STORAGE_KEY)
+      }
+    } catch {
+      // ignore
+    }
+  }, [searchParams])
 
   return (
     <div className="wireframe-phone-frame">
@@ -31,7 +51,14 @@ export function WireframeLayout({ children, title, showBack, hideNav }: Wirefram
         {showBack && title ? (
           <h1 className="wf-header-title">{title}</h1>
         ) : (
-          <div className="wf-logo">
+          <div className="wf-logo" style={{ display: 'flex', alignItems: 'center', gap: showHospitalLogo ? '12px' : undefined }}>
+            {showHospitalLogo && (
+              <img
+                src="/apollo-logo.svg"
+                alt="Hospital"
+                style={{ maxHeight: 36, objectFit: 'contain', width: 'auto' }}
+              />
+            )}
             <div className="wf-logo-icon">
               <Heart size={18} fill="currentColor" />
               <span className="wf-sparkle">✦</span>
