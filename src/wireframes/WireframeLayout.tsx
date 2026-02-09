@@ -7,17 +7,18 @@ const HOSPITAL_STORAGE_KEY = 'wireframe_hospital_logo'
 
 const HOSPITAL_LOGOS: Record<string, string> = {
   apollo: '/apollo-logo.svg',
-  bart: '/bart-logo.svg',
+  bart: '/barts_logo.png',
 }
 
 const HOSPITAL_LABELS: Record<string, string> = {
   apollo: '',
-  bart: 'Bart health',
+  bart: '',
 }
 
-function getHospitalId(searchParams: URLSearchParams): string | null {
+/** Returns hospital id: apollo if ?hospital=apollo, otherwise Barts by default. */
+function getHospitalId(searchParams: URLSearchParams): string {
   const hospital = searchParams.get('hospital')
-  return hospital && HOSPITAL_LOGOS[hospital] ? hospital : null
+  return hospital && HOSPITAL_LOGOS[hospital] ? hospital : 'bart'
 }
 
 interface WireframeLayoutProps {
@@ -34,11 +35,7 @@ export function WireframeLayout({ children, title, showBack, hideNav }: Wirefram
 
   useEffect(() => {
     try {
-      if (hospitalId) {
-        sessionStorage.setItem(HOSPITAL_STORAGE_KEY, hospitalId)
-      } else {
-        sessionStorage.removeItem(HOSPITAL_STORAGE_KEY)
-      }
+      sessionStorage.setItem(HOSPITAL_STORAGE_KEY, hospitalId)
     } catch {
       // ignore
     }
@@ -50,33 +47,34 @@ export function WireframeLayout({ children, title, showBack, hideNav }: Wirefram
         <div className="prototype-badge">Prototype</div>
         
         <header className="wf-header">
+        {/* Left: back button or hospital (Barts) logo */}
         {showBack ? (
           <button className="wf-header-back" onClick={() => navigate(-1)}>
             <ChevronLeft size={20} />
             Back
           </button>
         ) : (
-          <div style={{ width: 40 }} />
+          <div className="wf-header-left">
+            <img
+              src={HOSPITAL_LOGOS[hospitalId]}
+              alt={HOSPITAL_LABELS[hospitalId] || 'Hospital'}
+              style={{ maxHeight: 36, objectFit: 'contain', width: 'auto' }}
+            />
+          </div>
         )}
-        
+
+        {/* Center: page title when showing back */}
         {showBack && title ? (
           <h1 className="wf-header-title">{title}</h1>
         ) : (
-          <div className="wf-logo" style={{ display: 'flex', alignItems: 'center', gap: hospitalId ? '12px' : undefined }}>
-            {hospitalId && (
-              <>
-                <img
-                  src={HOSPITAL_LOGOS[hospitalId]}
-                  alt={HOSPITAL_LABELS[hospitalId] || 'Hospital'}
-                  style={{ maxHeight: 36, objectFit: 'contain', width: 'auto' }}
-                />
-                {HOSPITAL_LABELS[hospitalId] && (
-                  <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--wf-gray-800)' }}>
-                    {HOSPITAL_LABELS[hospitalId]}
-                  </span>
-                )}
-              </>
-            )}
+          <div style={{ flex: 1, minWidth: 0 }} />
+        )}
+
+        {/* Right: Tara logo */}
+        {showBack ? (
+          <div style={{ width: 60 }} />
+        ) : (
+          <div className="wf-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div className="wf-logo-icon">
               <Heart size={18} fill="currentColor" />
               <span className="wf-sparkle">✦</span>
@@ -84,8 +82,6 @@ export function WireframeLayout({ children, title, showBack, hideNav }: Wirefram
             <span className="wf-logo-name">Tara</span>
           </div>
         )}
-        
-        <div style={{ width: showBack ? 60 : 40 }} /> {/* Right spacer */}
       </header>
       
         <main className="wf-main">

@@ -93,6 +93,11 @@
   color: var(--wf-gray-800);
 }
 
+.wf-header-left {
+  display: flex;
+  align-items: center;
+}
+
 /* Tara Logo */
 .wf-logo {
   display: flex;
