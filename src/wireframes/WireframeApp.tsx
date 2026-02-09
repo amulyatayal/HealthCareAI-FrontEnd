@@ -21,6 +21,7 @@ import { ProfilePage } from './pages/ProfilePage'
 import { StageSelectorPage } from './pages/StageSelectorPage'
 import { ShareDataPage } from './pages/ShareDataPage'
 import { ClinicalTeamPage } from './pages/ClinicalTeamPage'
+import { WatchVideoPage } from './pages/WatchVideoPage'
 
 export function WireframeApp() {
   return (
@@ -33,6 +34,7 @@ export function WireframeApp() {
       <Route path="/health" element={<HealthHub />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/team" element={<ClinicalTeamPage />} />
+      <Route path="/watch" element={<WatchVideoPage />} />
       
       {/* Community features */}
       <Route path="/community/chat" element={<CommunityChatPage />} />

@@ -3,6 +3,7 @@ import { Calendar, MessageCircle, Heart, TrendingUp, Bell, ChevronRight, Chevron
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
+import { youtubeToEmbedUrl } from '../utils/youtubeEmbed'
 
 const RESOURCE_CATEGORIES = [
   {
@@ -189,7 +190,7 @@ export function DashboardPage() {
         <span className="wf-section-title">Resources for your pathway</span>
       </div>
       <p style={{ fontSize: '13px', color: 'var(--wf-gray-600)', marginBottom: '12px' }}>
-        Click a category to see videos and leaflets (opens in new tab).
+        Videos play in the app; PDFs and links open in a new tab.
       </p>
       <WireframeCard>
         {RESOURCE_CATEGORIES.map((cat) => {
@@ -217,32 +218,44 @@ export function DashboardPage() {
               </button>
               {isExpanded && (
                 <div style={{ padding: '0 12px 12px 60px' }}>
-                  {cat.links.map((link) => (
-                    <a
-                      key={link.url}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '8px 0',
-                        textDecoration: 'none',
-                        color: 'inherit',
-                        fontSize: '14px',
-                        borderBottom: '1px solid var(--wf-gray-50)',
-                      }}
-                    >
-                      {link.type === 'video' ? (
-                        <Video size={16} style={{ color: 'var(--wf-gray-400)', flexShrink: 0 }} />
-                      ) : (
+                  {cat.links.map((link) => {
+                    const linkStyle = {
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 0',
+                      textDecoration: 'none',
+                      color: 'inherit',
+                      fontSize: '14px',
+                      borderBottom: '1px solid var(--wf-gray-50)',
+                    } as const
+                    if (link.type === 'video') {
+                      const embedUrl = youtubeToEmbedUrl(link.url)
+                      return (
+                        <Link
+                          key={link.url}
+                          to={`/demo/watch?url=${encodeURIComponent(embedUrl)}`}
+                          style={linkStyle}
+                        >
+                          <Video size={16} style={{ color: 'var(--wf-gray-400)', flexShrink: 0 }} />
+                          <span style={{ flex: 1 }}>{link.label}</span>
+                        </Link>
+                      )
+                    }
+                    return (
+                      <a
+                        key={link.url}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={linkStyle}
+                      >
                         <FileText size={16} style={{ color: 'var(--wf-gray-400)', flexShrink: 0 }} />
-                      )}
-                      <span style={{ flex: 1 }}>{link.label}</span>
-                      <ExternalLink size={14} style={{ color: 'var(--wf-gray-400)' }} />
-                    </a>
-                  ))}
+                        <span style={{ flex: 1 }}>{link.label}</span>
+                        <ExternalLink size={14} style={{ color: 'var(--wf-gray-400)' }} />
+                      </a>
+                    )
+                  })}
                 </div>
               )}
             </div>
