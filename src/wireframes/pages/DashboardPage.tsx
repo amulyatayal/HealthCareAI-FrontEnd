@@ -1,9 +1,57 @@
-import { Calendar, MessageCircle, Heart, TrendingUp, Bell, ChevronRight, Flame, Sparkles, FileText, UtensilsCrossed, Brain, Dumbbell } from 'lucide-react'
+import { useState } from 'react'
+import { Calendar, MessageCircle, Heart, TrendingUp, Bell, ChevronRight, ChevronDown, Flame, Sparkles, FileText, UtensilsCrossed, Brain, Video, ExternalLink } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
 
+const RESOURCE_CATEGORIES = [
+  {
+    id: 'procedure',
+    title: 'Information about procedure',
+    iconBg: 'linear-gradient(135deg, #dbeafe, #eff6ff)',
+    iconColor: '#2563eb',
+    Icon: Video,
+    links: [
+      { label: 'Information on the procedure (video)', url: 'https://youtu.be/zeMr6XaoTEM?si=KUcwJsQ7WsNBY_cr', type: 'video' as const },
+    ],
+  },
+  {
+    id: 'exercises',
+    title: 'Exercises',
+    iconBg: 'linear-gradient(135deg, #fef3c7, #fffbeb)',
+    iconColor: '#d97706',
+    Icon: FileText,
+    links: [
+      { label: 'Exercises after breast cancer surgery (PDF)', url: 'https://breastcancernow.org/media-assets/dmbpk1rz/bcc6-excercises-after-breast-cancer-surgery-web-pdf.pdf', type: 'pdf' as const },
+      { label: 'Exercise (short video)', url: 'https://www.youtube.com/shorts/haDyGVRpQzo', type: 'video' as const },
+    ],
+  },
+  {
+    id: 'mental-health',
+    title: 'Mental health',
+    iconBg: 'linear-gradient(135deg, #f3e8ff, #faf5ff)',
+    iconColor: '#9333ea',
+    Icon: Brain,
+    links: [
+      { label: 'Mental health (video)', url: 'https://www.youtube.com/watch?v=AKCmdHN9JX8', type: 'video' as const },
+      { label: 'Body image (Macmillan)', url: 'https://cdn.macmillan.org.uk/dfsmedia/1a6f23537f7f4519bb0cf14c45b2a629/791-source/body-image-mac14192', type: 'link' as const },
+    ],
+  },
+  {
+    id: 'diet',
+    title: 'Diet',
+    iconBg: 'linear-gradient(135deg, #dcfce7, #f0fdf4)',
+    iconColor: '#16a34a',
+    Icon: UtensilsCrossed,
+    links: [
+      { label: 'Diet (PDF leaflet)', url: 'https://sthk.merseywestlancs.nhs.uk/media/.leaflets/606ec25be26520.16511553.pdf', type: 'pdf' as const },
+    ],
+  },
+] as const
+
 export function DashboardPage() {
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
+
   return (
     <WireframeLayout>
       {/* Hero Welcome Section */}
@@ -136,48 +184,87 @@ export function DashboardPage() {
         </div>
       </WireframeCard>
 
-      {/* Resources for your pathway */}
+      {/* Associated leaflets and material */}
       <div className="wf-section-header">
         <span className="wf-section-title">Resources for your pathway</span>
       </div>
+      <p style={{ fontSize: '13px', color: 'var(--wf-gray-600)', marginBottom: '12px' }}>
+        Click a category to see videos and leaflets (opens in new tab).
+      </p>
       <WireframeCard>
-        <div className="wf-list-item" style={{ marginBottom: '8px', cursor: 'pointer' }}>
+        {RESOURCE_CATEGORIES.map((cat) => {
+          const isExpanded = expandedCategory === cat.id
+          return (
+            <div key={cat.id} style={{ borderBottom: '1px solid var(--wf-gray-100)' }}>
+              <button
+                type="button"
+                className="wf-list-item"
+                style={{ width: '100%', border: 'none', textAlign: 'left', marginBottom: 0, cursor: 'pointer' }}
+                onClick={() => setExpandedCategory(isExpanded ? null : cat.id)}
+              >
+                <div className="wf-list-avatar" style={{ background: cat.iconBg }}>
+                  <cat.Icon size={20} style={{ color: cat.iconColor }} />
+                </div>
+                <div className="wf-list-content">
+                  <div className="wf-list-title">{cat.title}</div>
+                  <div className="wf-list-subtitle">{cat.links.length} link{cat.links.length !== 1 ? 's' : ''}</div>
+                </div>
+                {isExpanded ? (
+                  <ChevronDown size={18} style={{ color: 'var(--wf-gray-400)' }} />
+                ) : (
+                  <ChevronRight size={18} style={{ color: 'var(--wf-gray-400)' }} />
+                )}
+              </button>
+              {isExpanded && (
+                <div style={{ padding: '0 12px 12px 60px' }}>
+                  {cat.links.map((link) => (
+                    <a
+                      key={link.url}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 0',
+                        textDecoration: 'none',
+                        color: 'inherit',
+                        fontSize: '14px',
+                        borderBottom: '1px solid var(--wf-gray-50)',
+                      }}
+                    >
+                      {link.type === 'video' ? (
+                        <Video size={16} style={{ color: 'var(--wf-gray-400)', flexShrink: 0 }} />
+                      ) : (
+                        <FileText size={16} style={{ color: 'var(--wf-gray-400)', flexShrink: 0 }} />
+                      )}
+                      <span style={{ flex: 1 }}>{link.label}</span>
+                      <ExternalLink size={14} style={{ color: 'var(--wf-gray-400)' }} />
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </WireframeCard>
+
+      {/* Clinical trials */}
+      <div className="wf-section-header">
+        <span className="wf-section-title">Clinical trials</span>
+      </div>
+      <WireframeCard>
+        <p style={{ fontSize: '14px', color: 'var(--wf-gray-700)', marginBottom: '12px' }}>
+          Find trials that may be relevant to you.
+        </p>
+        <div className="wf-list-item" style={{ cursor: 'pointer' }}>
           <div className="wf-list-avatar" style={{ background: 'linear-gradient(135deg, #dbeafe, #eff6ff)' }}>
             <FileText size={20} style={{ color: '#2563eb' }} />
           </div>
           <div className="wf-list-content">
-            <div className="wf-list-title">Informational leaflets</div>
-            <div className="wf-list-subtitle">Guides and factsheets for your journey</div>
-          </div>
-          <ChevronRight size={18} style={{ color: 'var(--wf-gray-400)' }} />
-        </div>
-        <Link to="/demo/chat" className="wf-list-item" style={{ textDecoration: 'none', marginBottom: '8px' }}>
-          <div className="wf-list-avatar" style={{ background: 'linear-gradient(135deg, #dcfce7, #f0fdf4)' }}>
-            <UtensilsCrossed size={20} style={{ color: '#16a34a' }} />
-          </div>
-          <div className="wf-list-content">
-            <div className="wf-list-title">Diet advice</div>
-            <div className="wf-list-subtitle">Ask Tara for nutrition tips</div>
-          </div>
-          <ChevronRight size={18} style={{ color: 'var(--wf-gray-400)' }} />
-        </Link>
-        <div className="wf-list-item" style={{ marginBottom: '8px', cursor: 'pointer' }}>
-          <div className="wf-list-avatar" style={{ background: 'linear-gradient(135deg, #f3e8ff, #faf5ff)' }}>
-            <Brain size={20} style={{ color: '#9333ea' }} />
-          </div>
-          <div className="wf-list-content">
-            <div className="wf-list-title">Mental health videos</div>
-            <div className="wf-list-subtitle">Mindfulness and wellbeing</div>
-          </div>
-          <ChevronRight size={18} style={{ color: 'var(--wf-gray-400)' }} />
-        </div>
-        <div className="wf-list-item" style={{ cursor: 'pointer' }}>
-          <div className="wf-list-avatar" style={{ background: 'linear-gradient(135deg, #fef3c7, #fffbeb)' }}>
-            <Dumbbell size={20} style={{ color: '#d97706' }} />
-          </div>
-          <div className="wf-list-content">
-            <div className="wf-list-title">Exercise videos</div>
-            <div className="wf-list-subtitle">Safe movement for your pathway</div>
+            <div className="wf-list-title">Browse clinical trials</div>
+            <div className="wf-list-subtitle">See trials that may be suitable</div>
           </div>
           <ChevronRight size={18} style={{ color: 'var(--wf-gray-400)' }} />
         </div>

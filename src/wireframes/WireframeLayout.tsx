@@ -5,8 +5,19 @@ import { BottomNav } from './components'
 
 const HOSPITAL_STORAGE_KEY = 'wireframe_hospital_logo'
 
-function getShowHospitalLogo(searchParams: URLSearchParams): boolean {
-  return searchParams.get('hospital') === 'apollo'
+const HOSPITAL_LOGOS: Record<string, string> = {
+  apollo: '/apollo-logo.svg',
+  bart: '/bart-logo.svg',
+}
+
+const HOSPITAL_LABELS: Record<string, string> = {
+  apollo: '',
+  bart: 'Bart health',
+}
+
+function getHospitalId(searchParams: URLSearchParams): string | null {
+  const hospital = searchParams.get('hospital')
+  return hospital && HOSPITAL_LOGOS[hospital] ? hospital : null
 }
 
 interface WireframeLayoutProps {
@@ -19,19 +30,19 @@ interface WireframeLayoutProps {
 export function WireframeLayout({ children, title, showBack, hideNav }: WireframeLayoutProps) {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const showHospitalLogo = getShowHospitalLogo(searchParams)
+  const hospitalId = getHospitalId(searchParams)
 
   useEffect(() => {
     try {
-      if (searchParams.get('hospital') === 'apollo') {
-        sessionStorage.setItem(HOSPITAL_STORAGE_KEY, 'apollo')
+      if (hospitalId) {
+        sessionStorage.setItem(HOSPITAL_STORAGE_KEY, hospitalId)
       } else {
         sessionStorage.removeItem(HOSPITAL_STORAGE_KEY)
       }
     } catch {
       // ignore
     }
-  }, [searchParams])
+  }, [searchParams, hospitalId])
 
   return (
     <div className="wireframe-phone-frame">
@@ -51,13 +62,20 @@ export function WireframeLayout({ children, title, showBack, hideNav }: Wirefram
         {showBack && title ? (
           <h1 className="wf-header-title">{title}</h1>
         ) : (
-          <div className="wf-logo" style={{ display: 'flex', alignItems: 'center', gap: showHospitalLogo ? '12px' : undefined }}>
-            {showHospitalLogo && (
-              <img
-                src="/apollo-logo.svg"
-                alt="Hospital"
-                style={{ maxHeight: 36, objectFit: 'contain', width: 'auto' }}
-              />
+          <div className="wf-logo" style={{ display: 'flex', alignItems: 'center', gap: hospitalId ? '12px' : undefined }}>
+            {hospitalId && (
+              <>
+                <img
+                  src={HOSPITAL_LOGOS[hospitalId]}
+                  alt={HOSPITAL_LABELS[hospitalId] || 'Hospital'}
+                  style={{ maxHeight: 36, objectFit: 'contain', width: 'auto' }}
+                />
+                {HOSPITAL_LABELS[hospitalId] && (
+                  <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--wf-gray-800)' }}>
+                    {HOSPITAL_LABELS[hospitalId]}
+                  </span>
+                )}
+              </>
             )}
             <div className="wf-logo-icon">
               <Heart size={18} fill="currentColor" />

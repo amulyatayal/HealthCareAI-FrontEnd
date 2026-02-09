@@ -1,4 +1,4 @@
-import { Home, Users, Heart, User, MessageCircle } from 'lucide-react'
+import { Home, Users, Heart, User, MessageCircle, Stethoscope } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 export function BottomNav() {
@@ -35,6 +35,14 @@ export function BottomNav() {
       >
         <Heart />
         <span className="wf-nav-label">Health</span>
+      </NavLink>
+      
+      <NavLink
+        to="/demo/team"
+        className={({ isActive }) => `wf-nav-item ${isActive ? 'active' : ''}`}
+      >
+        <Stethoscope />
+        <span className="wf-nav-label">Team</span>
       </NavLink>
       
       <NavLink

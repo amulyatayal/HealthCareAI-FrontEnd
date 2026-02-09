@@ -131,22 +131,22 @@ export function ChatPage() {
         overflow: 'hidden'
       }}>
         {showWelcome ? (
-          <WireframeWelcome>
-            <ChatInput
+            <WireframeWelcome>
+              <ChatInput
+                onSubmit={handleChatSubmit}
+                isLoading={isLoading}
+                centered
+                showStrictToggle={false}
+              />
+            </WireframeWelcome>
+          ) : (
+            <ChatInterface
+              messages={messages}
               onSubmit={handleChatSubmit}
               isLoading={isLoading}
-              centered
               showStrictToggle={false}
             />
-          </WireframeWelcome>
-        ) : (
-          <ChatInterface
-            messages={messages}
-            onSubmit={handleChatSubmit}
-            isLoading={isLoading}
-            showStrictToggle={false}
-          />
-        )}
+          )}
       </div>
     </WireframeLayout>
   )

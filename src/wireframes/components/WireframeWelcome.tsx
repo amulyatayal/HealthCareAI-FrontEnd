@@ -6,7 +6,7 @@ interface WireframeWelcomeProps {
 }
 
 const suggestions = [
-  { emoji: '💊', text: 'Side effects' },
+  { emoji: '🏃', text: 'Exercise' },
   { emoji: '🥗', text: 'Nutrition' },
   { emoji: '😴', text: 'Fatigue' },
   { emoji: '💜', text: 'Support' },
@@ -116,7 +116,7 @@ export function WireframeWelcome({ children }: WireframeWelcomeProps) {
         maxWidth: '280px',
         lineHeight: 1.5,
       }}>
-        Ask me about symptoms, medications, or anything on your mind
+        This section is for lifestyle advice for educational purpose only. For questions about your treatment please consult your clinical team.
       </p>
 
       {/* Quick suggestions with emojis */}
