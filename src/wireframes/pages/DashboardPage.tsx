@@ -14,6 +14,7 @@ const RESOURCE_CATEGORIES = [
     Icon: Video,
     links: [
       { label: 'Information on the procedure (video)', url: 'https://youtu.be/zeMr6XaoTEM?si=KUcwJsQ7WsNBY_cr', type: 'video' as const },
+      { label: 'Barts chest wall perforator flap PIF (PDF)', url: 'https://drive.google.com/file/d/1TcJlT72dojrOCe8Z3OIxsfTSga4-tYF_/view?usp=drive_link', type: 'pdf' as const },
     ],
   },
   {
