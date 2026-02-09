@@ -131,7 +131,9 @@ export function ChatPage() {
         overflow: 'hidden'
       }}>
         {showWelcome ? (
-            <WireframeWelcome>
+            <WireframeWelcome
+              onSuggestionClick={(text) => handleChatSubmit(`Tell me about ${text}`, false)}
+            >
               <ChatInput
                 onSubmit={handleChatSubmit}
                 isLoading={isLoading}

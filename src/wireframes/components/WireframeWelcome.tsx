@@ -3,16 +3,21 @@ import { Heart, Sparkles } from 'lucide-react'
 
 interface WireframeWelcomeProps {
   children?: ReactNode
+  /** When a suggestion is clicked, called with the topic text (e.g. "Menopause"). */
+  onSuggestionClick?: (text: string) => void
 }
 
 const suggestions = [
   { emoji: '🏃', text: 'Exercise' },
-  { emoji: '🥗', text: 'Nutrition' },
+  { emoji: '🌸', text: 'Menopause' },
   { emoji: '😴', text: 'Fatigue' },
-  { emoji: '💜', text: 'Support' },
+  { emoji: '💧', text: 'Lymphoedema' },
+  { emoji: '✨', text: 'Skin and nails' },
+  { emoji: '💇', text: 'Hair loss' },
+  { emoji: '💜', text: 'Sex and intimacy' },
 ]
 
-export function WireframeWelcome({ children }: WireframeWelcomeProps) {
+export function WireframeWelcome({ children, onSuggestionClick }: WireframeWelcomeProps) {
   return (
     <div style={{
       flex: 1,
@@ -131,6 +136,7 @@ export function WireframeWelcome({ children }: WireframeWelcomeProps) {
         {suggestions.map((suggestion) => (
           <button
             key={suggestion.text}
+            type="button"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -146,6 +152,7 @@ export function WireframeWelcome({ children }: WireframeWelcomeProps) {
               transition: 'all 0.2s ease',
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
             }}
+            onClick={() => onSuggestionClick?.(suggestion.text)}
             onMouseOver={(e) => {
               e.currentTarget.style.borderColor = 'rgba(244, 63, 94, 0.4)'
               e.currentTarget.style.background = 'linear-gradient(135deg, #fff1f2, white)'
