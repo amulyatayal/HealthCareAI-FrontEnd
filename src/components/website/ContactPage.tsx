@@ -69,6 +69,16 @@ export function ContactPage() {
                     <a href="mailto:support@anvega.ai">support@anvega.ai</a>
                   </div>
                 </div>
+
+                <div className="contact-method">
+                  <div className="contact-icon">
+                    <Mail size={24} />
+                  </div>
+                  <div>
+                    <h3>General Inquiries</h3>
+                    <a href="mailto:contact-us@anvega.ai">contact-us@anvega.ai</a>
+                  </div>
+                </div>
               </div>
 
               <div className="contact-note">

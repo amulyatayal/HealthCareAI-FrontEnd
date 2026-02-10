@@ -108,6 +108,9 @@ export function WebsiteLayout({ children }: WebsiteLayoutProps) {
             <p>
               <a href="mailto:support@anvega.ai">support@anvega.ai</a>
             </p>
+            <p>
+              <a href="mailto:contact-us@anvega.ai">contact-us@anvega.ai</a>
+            </p>
           </div>
           <div className="footer-section">
             <h4>Quick Links</h4>
