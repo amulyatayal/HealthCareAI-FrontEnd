@@ -171,6 +171,10 @@ export interface OnboardingStatusResponse {
 
 export interface OnboardingRequest {
   current_situation: string;
+  detailed_stage_id?: string;
+  treatment_type?: string;
+  age_range?: string;
+  postal_code?: string;
   diagnosis_date?: string;
   diagnosis_type?: string;
   current_treatments?: string[];
@@ -224,6 +228,7 @@ export interface TreatmentStage {
   child_stage_ids: string[];
   transition_notes: string | null;
   is_patient_facing: boolean;
+  patient_facing_label?: string;
 }
 
 export interface StageTreeNode {

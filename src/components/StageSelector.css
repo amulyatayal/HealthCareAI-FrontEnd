@@ -1,3 +1,4 @@
+/* ─── Drill-down mode (dark, unchanged) ─── */
 .stage-selector {
   display: flex;
   flex-direction: column;
@@ -25,7 +26,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .stage-header {
@@ -162,4 +165,317 @@
 .select-current-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+
+/* ════════════════════════════════════════════
+   Journey Form — Light Theme (rootOnly mode)
+   ════════════════════════════════════════════ */
+
+.journey-form {
+  position: relative;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.journey-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--warm-gray-400);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  z-index: 1;
+}
+
+.journey-close:hover {
+  background: var(--cream-200);
+  color: var(--warm-gray-600);
+}
+
+/* Header */
+.journey-header {
+  text-align: center;
+  padding: 2rem 2rem 1rem;
+}
+
+.journey-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, var(--rose-400) 0%, var(--lavender-300) 100%);
+  color: white;
+  border-radius: var(--radius-xl);
+  margin-bottom: 0.75rem;
+  box-shadow: 0 8px 24px -8px var(--rose-300);
+}
+
+.journey-title {
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0 0 0.375rem;
+}
+
+.journey-subtitle {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Body */
+.journey-body {
+  padding: 0 2rem;
+}
+
+/* Age & Area row */
+.journey-fields-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.journey-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.journey-field label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.journey-field select,
+.journey-field input {
+  padding: 0.5rem 0.75rem;
+  border: 1.5px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  background: white;
+  transition: all var(--transition-fast);
+}
+
+.journey-field select:focus,
+.journey-field input:focus {
+  outline: none;
+  border-color: var(--rose-300);
+  box-shadow: 0 0 0 3px var(--rose-100);
+}
+
+.journey-field input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Question label */
+.journey-question {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem;
+}
+
+/* Stage options */
+.journey-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.journey-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 0.875rem;
+  background: white;
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  transition: all var(--transition-fast);
+}
+
+.journey-option:hover:not(:disabled) {
+  border-color: var(--rose-200);
+  background: var(--rose-50);
+}
+
+.journey-option.selected {
+  border-color: var(--rose-400);
+  background: var(--rose-50);
+  box-shadow: 0 0 0 3px var(--rose-100);
+}
+
+.journey-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Radio circle */
+.journey-radio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--warm-gray-300);
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.journey-radio.checked {
+  border-color: var(--rose-400);
+  background: transparent;
+}
+
+.journey-radio-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--rose-400);
+  border-radius: 50%;
+  animation: radioIn 0.2s ease;
+}
+
+@keyframes radioIn {
+  from {
+    transform: scale(0);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+.journey-option-label {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.journey-option.selected .journey-option-label {
+  font-weight: 500;
+  color: var(--rose-600);
+}
+
+/* Loading & Error */
+.journey-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.journey-spinner {
+  animation: spin 1s linear infinite;
+}
+
+.journey-error {
+  padding: 0.75rem;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+/* Footer */
+.journey-footer {
+  padding: 1.25rem 2rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.journey-save-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem;
+  background: linear-gradient(135deg, var(--rose-400) 0%, var(--rose-500) 100%);
+  border: none;
+  border-radius: var(--radius-full);
+  color: white;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-md), 0 0 20px -5px var(--rose-300);
+}
+
+.journey-save-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg), 0 0 30px -5px var(--rose-300);
+}
+
+.journey-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.journey-privacy {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .journey-header {
+    padding: 1.5rem 1.25rem 0.75rem;
+  }
+
+  .journey-body {
+    padding: 0 1.25rem;
+  }
+
+  .journey-footer {
+    padding: 1rem 1.25rem 1.5rem;
+  }
+
+  .journey-fields-row {
+    flex-direction: column;
+  }
+
+  .journey-title {
+    font-size: 1.5rem;
+  }
 }

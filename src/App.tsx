@@ -8,12 +8,13 @@ import { ChatInput, ChatInputHandle } from './components/ChatInput'
 import { LoginPage } from './components/LoginPage'
 import { ForumHome } from './components/forum'
 import { OnboardingWizard } from './components/OnboardingWizard'
+import { StageSelector } from './components/StageSelector'
 import { SignInToast } from './components/SignInToast'
 import { ProfileReminder } from './components/ProfileReminder'
 import { SessionExpiredModal } from './components/SessionExpiredModal'
 import { useAuth } from './contexts/AuthContext'
 import { generateUUID } from './utils/uuid'
-import { getAvailableIndexes, sendMessageV1, sendMessageV2, submitOnboarding, getOnboardingStatus } from './services/api'
+import { getAvailableIndexes, sendMessageV1, sendMessageV2, submitOnboarding, getOnboardingStatus, selectDetailedStage } from './services/api'
 import type { Message, IndexInfo, ChatResponseV2 } from './types'
 import type { OnboardingData } from './components/OnboardingWizard'
 import './styles/App.css'
@@ -57,6 +58,7 @@ function App() {
   const [signInToastDismissed, setSignInToastDismissed] = useState(false)
   const [guestMessageCount, setGuestMessageCount] = useState(0)
   const [onboardingSubmitting, setOnboardingSubmitting] = useState(false)
+  const [showStageSelector, setShowStageSelector] = useState(false)
 
 
 
@@ -369,7 +371,7 @@ function App() {
         indexesLoading={indexesLoading}
         apiVersion={apiVersion}
         onApiVersionChange={setApiVersion}
-        onUpdateJourney={() => setShowOnboardingWizard(true)}
+        onUpdateJourney={() => setShowStageSelector(true)}
       />
 
       <div className="app-content">
@@ -443,6 +445,27 @@ function App() {
           onSignIn={handleNavigateToLogin}
           onDismiss={handleSignInToastDismiss}
         />
+      )}
+
+      {/* Stage Selector Modal (Update Journey) */}
+      {showStageSelector && (
+        <div className="stage-selector-overlay" onClick={(e) => e.target === e.currentTarget && setShowStageSelector(false)}>
+          <div className="stage-selector-modal">
+            <StageSelector
+              rootOnly={true}
+              onStageSelected={async (stageId, _stageName, _breadcrumb) => {
+                try {
+                  await selectDetailedStage(stageId);
+                  setShowStageSelector(false);
+                  setProfileComplete(true);
+                } catch (error) {
+                  console.error('Failed to update stage:', error);
+                }
+              }}
+              onBack={() => setShowStageSelector(false)}
+            />
+          </div>
+        </div>
       )}
     </div>
   )
