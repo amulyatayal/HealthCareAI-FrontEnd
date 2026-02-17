@@ -4,7 +4,7 @@ import { useAuth } from './contexts/AuthContext'
 import { WireframeApp } from './wireframes/WireframeApp'
 import { PhoneFrame } from './wireframes/components/PhoneFrame'
 import { DataConsentScreen, getStoredDataConsent } from './components/gdpr/DataConsentScreen'
-import { Heart, User, ArrowRight } from 'lucide-react'
+import { Heart, User, ArrowRight, Building2, KeyRound, ChevronDown } from 'lucide-react'
 
 const GOOGLE_CLIENT_ID =
   import.meta.env.VITE_GOOGLE_CLIENT_ID ||
@@ -74,9 +74,31 @@ function LoginPageWithGoogle({
 }) {
   const [guestName, setGuestName] = useState('')
   const [showGuestForm, setShowGuestForm] = useState(false)
+  const [selectedHospital, setSelectedHospital] = useState('')
+  const [hospitalCode, setHospitalCode] = useState('')
+
+  const HOSPITALS = [
+    { value: 'barts', label: 'Barts Health NHS Trust' },
+    { value: 'apollo', label: 'Apollo Hospitals' },
+    { value: 'uclh', label: 'University College London Hospitals' },
+    { value: 'guys', label: "Guy's and St Thomas' NHS Trust" },
+    { value: 'imperial', label: 'Imperial College Healthcare' },
+    { value: 'kings', label: "King's College Hospital" },
+    { value: 'other', label: 'Other' },
+  ]
+
+  const persistHospitalSelection = () => {
+    if (selectedHospital) {
+      localStorage.setItem('selected_hospital', selectedHospital)
+    }
+    if (hospitalCode.trim()) {
+      localStorage.setItem('hospital_code', hospitalCode.trim())
+    }
+  }
 
   const handleGoogleSuccess = (response: CredentialResponse) => {
     if (response.credential) {
+      persistHospitalSelection()
       onGoogleLogin(response.credential)
     }
   }
@@ -84,6 +106,7 @@ function LoginPageWithGoogle({
   const handleGuestSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (guestName.trim()) {
+      persistHospitalSelection()
       onGuestLogin(guestName.trim())
     }
   }
@@ -141,6 +164,98 @@ function LoginPageWithGoogle({
                 fontSize: 13,
                 color: '#9ca3af',
               }}>Sign in to continue</span>
+            </div>
+
+            {/* Hospital selector */}
+            <div style={{ marginBottom: 16, textAlign: 'left' }}>
+              <label style={{
+                display: 'block',
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#374151',
+                marginBottom: 6,
+              }}>
+                <Building2 size={14} style={{ display: 'inline', verticalAlign: '-2px', marginRight: 6 }} />
+                Select your hospital
+              </label>
+              <div style={{ position: 'relative' }}>
+                <select
+                  value={selectedHospital}
+                  onChange={(e) => setSelectedHospital(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px 36px 12px 14px',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: 12,
+                    fontSize: 14,
+                    color: selectedHospital ? '#111827' : '#9ca3af',
+                    background: '#f9fafb',
+                    outline: 'none',
+                    appearance: 'none',
+                    cursor: 'pointer',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <option value="" disabled>Choose hospital…</option>
+                  {HOSPITALS.map((h) => (
+                    <option key={h.value} value={h.value}>{h.label}</option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={16}
+                  style={{
+                    position: 'absolute',
+                    right: 12,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: '#9ca3af',
+                    pointerEvents: 'none',
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Hospital access code (optional) */}
+            <div style={{ marginBottom: 20, textAlign: 'left' }}>
+              <label style={{
+                display: 'block',
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#374151',
+                marginBottom: 6,
+              }}>
+                <KeyRound size={14} style={{ display: 'inline', verticalAlign: '-2px', marginRight: 6 }} />
+                Hospital access code
+                <span style={{ fontWeight: 400, color: '#9ca3af', marginLeft: 4 }}>(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={hospitalCode}
+                onChange={(e) => setHospitalCode(e.target.value.toUpperCase())}
+                placeholder="e.g. BARTS-2026-A1B2"
+                maxLength={30}
+                style={{
+                  width: '100%',
+                  padding: '12px 14px',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: 12,
+                  fontSize: 14,
+                  background: '#f9fafb',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  letterSpacing: '0.5px',
+                  fontFamily: 'monospace',
+                }}
+              />
+              <p style={{
+                fontSize: 11,
+                color: '#9ca3af',
+                marginTop: 4,
+                marginBottom: 0,
+                lineHeight: 1.4,
+              }}>
+                If your hospital provided an access code, enter it above for full access.
+              </p>
             </div>
 
             {/* Google Sign-In */}

@@ -1,25 +1,30 @@
-import { ReactNode, useEffect } from 'react'
+import { ReactNode } from 'react'
 import { ChevronLeft, Heart } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { BottomNav } from './components'
 import { CookieConsent } from '../components/gdpr/CookieConsent'
 
-const HOSPITAL_STORAGE_KEY = 'wireframe_hospital_logo'
-
 const HOSPITAL_LOGOS: Record<string, string> = {
+  barts: '/barts_logo.png',
   apollo: '/apollo-logo.svg',
-  bart: '/barts_logo.png',
 }
 
-const HOSPITAL_LABELS: Record<string, string> = {
-  apollo: '',
-  bart: '',
-}
+/**
+ * Resolves the active hospital id from (in priority order):
+ *   1. ?hospital= URL param   (for demo / QA overrides)
+ *   2. localStorage selected_hospital   (set at login)
+ * Returns undefined when no hospital is selected.
+ */
+function resolveHospitalId(searchParams: URLSearchParams): string | undefined {
+  const fromUrl = searchParams.get('hospital')
+  if (fromUrl && HOSPITAL_LOGOS[fromUrl]) return fromUrl
 
-/** Returns hospital id: apollo if ?hospital=apollo, otherwise Barts by default. */
-function getHospitalId(searchParams: URLSearchParams): string {
-  const hospital = searchParams.get('hospital')
-  return hospital && HOSPITAL_LOGOS[hospital] ? hospital : 'bart'
+  try {
+    const fromLogin = localStorage.getItem('selected_hospital')
+    if (fromLogin && HOSPITAL_LOGOS[fromLogin]) return fromLogin
+  } catch { /* ignore */ }
+
+  return undefined
 }
 
 interface WireframeLayoutProps {
@@ -32,15 +37,7 @@ interface WireframeLayoutProps {
 export function WireframeLayout({ children, title, showBack, hideNav }: WireframeLayoutProps) {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const hospitalId = getHospitalId(searchParams)
-
-  useEffect(() => {
-    try {
-      sessionStorage.setItem(HOSPITAL_STORAGE_KEY, hospitalId)
-    } catch {
-      // ignore
-    }
-  }, [searchParams, hospitalId])
+  const hospitalId = resolveHospitalId(searchParams)
 
   return (
     <div className="wireframe-phone-frame">
@@ -49,20 +46,22 @@ export function WireframeLayout({ children, title, showBack, hideNav }: Wirefram
         <div className="prototype-badge">Prototype</div>
         
         <header className="wf-header">
-        {/* Left: back button or hospital (Barts) logo */}
+        {/* Left: back button or hospital logo (if selected) */}
         {showBack ? (
           <button className="wf-header-back" onClick={() => navigate(-1)}>
             <ChevronLeft size={20} />
             Back
           </button>
-        ) : (
+        ) : hospitalId ? (
           <div className="wf-header-left">
             <img
               src={HOSPITAL_LOGOS[hospitalId]}
-              alt={HOSPITAL_LABELS[hospitalId] || 'Hospital'}
-              style={{ maxHeight: 36, objectFit: 'contain', width: 'auto' }}
+              alt="Hospital"
+              style={{ maxHeight: 44, objectFit: 'contain', width: 'auto' }}
             />
           </div>
+        ) : (
+          <div className="wf-header-left" />
         )}
 
         {/* Center: page title when showing back */}
@@ -78,7 +77,7 @@ export function WireframeLayout({ children, title, showBack, hideNav }: Wirefram
         ) : (
           <div className="wf-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div className="wf-logo-icon">
-              <Heart size={18} fill="currentColor" />
+              <Heart size={20} fill="currentColor" />
               <span className="wf-sparkle">✦</span>
             </div>
             <span className="wf-logo-name">Tara</span>

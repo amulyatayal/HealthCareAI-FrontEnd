@@ -4,7 +4,7 @@
   --wf-max-width: 430px;
   --wf-phone-width: 430px;
   --wf-nav-height: 70px;
-  --wf-header-height: 56px;
+  --wf-header-height: 68px;
   --wf-rose-50: #fff1f2;
   --wf-rose-100: #ffe4e6;
   --wf-rose-200: #fecdd3;
@@ -81,14 +81,15 @@
 .wf-header {
   position: sticky;
   top: 0;
-  height: var(--wf-header-height);
+  min-height: var(--wf-header-height);
   background: white;
   border-bottom: 1px solid var(--wf-gray-200);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 8px 16px;
   z-index: 100;
+  box-sizing: border-box;
 }
 
 .wf-header-title {
@@ -111,8 +112,8 @@
 
 .wf-logo-icon {
   position: relative;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--wf-rose-400), var(--wf-rose-500));
   display: flex;
@@ -138,7 +139,7 @@
 
 .wf-logo-name {
   font-family: 'Poppins', -apple-system, sans-serif;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   background: linear-gradient(135deg, var(--wf-rose-500), var(--wf-rose-600));
   -webkit-background-clip: text;
