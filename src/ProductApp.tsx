@@ -213,6 +213,15 @@ function LoginPageWithGoogle({
                   }}
                 />
               </div>
+              <p style={{
+                fontSize: 11,
+                color: '#9ca3af',
+                marginTop: 4,
+                marginBottom: 0,
+                lineHeight: 1.4,
+              }}>
+                Selecting a hospital does not automatically share your data.
+              </p>
             </div>
 
             {/* Hospital access code (optional) */}
@@ -254,12 +263,12 @@ function LoginPageWithGoogle({
                 marginBottom: 0,
                 lineHeight: 1.4,
               }}>
-                If your hospital provided an access code, enter it above for full access.
+                Enter a code if provided by your hospital.
               </p>
             </div>
 
             {/* Google Sign-In */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={() => console.error('Google Login Failed')}
@@ -270,6 +279,9 @@ function LoginPageWithGoogle({
                 shape="rectangular"
               />
             </div>
+            <p style={{ fontSize: 11, color: '#9ca3af', margin: '0 0 12px', lineHeight: 1.4 }}>
+              We only use your name and email to create your account.
+            </p>
 
             {/* Divider */}
             <div style={{
@@ -363,7 +375,7 @@ function LoginPageWithGoogle({
           </div>
 
           <p style={{ fontSize: 13, color: '#9ca3af', marginTop: 24, textAlign: 'center', maxWidth: 360 }}>
-            <strong>Remember:</strong> This AI provides information only and is not a substitute for professional medical advice.
+            Tara provides personalised lifestyle guidance and educational resources. It does not provide diagnosis, treatment, or clinical medical advice.
           </p>
         </div>
       </PhoneFrame>
