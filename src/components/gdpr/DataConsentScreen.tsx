@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Shield, Heart, MessageCircle, Activity, FileText, Users, ChevronDown, ChevronUp, Globe } from 'lucide-react'
+import { Shield, Heart, Activity, FileText, Users, ChevronDown, ChevronUp, Globe } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const DATA_CONSENT_KEY = 'gdpr_data_consent_v1'
@@ -171,11 +171,17 @@ export function DataConsentScreen({ onConsent }: Props) {
     setChoices((prev) => ({ ...prev, [key]: !prev[key] }))
   }
 
-  const buildFinalChoices = (overrides?: Partial<typeof choices>): DataConsentChoices => ({
-    coreService: true,
-    clinicalSharing: true,
-    ...(overrides ?? choices),
-  })
+  const buildFinalChoices = (overrides?: Partial<typeof choices>): DataConsentChoices => {
+    const merged = overrides ?? choices
+    return {
+      coreService: true,
+      clinicalSharing: true,
+      healthData: merged.healthData ?? false,
+      aiModelProviders: merged.aiModelProviders ?? false,
+      documentStorage: merged.documentStorage ?? false,
+      community: merged.community ?? false,
+    }
+  }
 
   const acceptAll = () => {
     const all = buildFinalChoices({

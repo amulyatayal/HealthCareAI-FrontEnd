@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { FileText, Calendar, Settings, Bell, Shield, LogOut, ChevronRight, User, Compass, Share2, Download, Trash2, ToggleLeft, Check, Clock } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
 import { useBasePath } from '../hooks/useBasePath'
@@ -10,7 +10,6 @@ import { getStoredDataConsent, saveDataConsent, clearDataConsent, type DataConse
 export function ProfilePage() {
   const base = useBasePath()
   const { user, logout } = useAuth()
-  const navigate = useNavigate()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [exporting, setExporting] = useState(false)
