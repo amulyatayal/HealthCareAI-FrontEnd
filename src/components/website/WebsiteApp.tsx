@@ -5,6 +5,8 @@ import { AboutPage } from './AboutPage'
 import { ServicesPage } from './ServicesPage'
 import { FoundersPage } from './FoundersPage'
 import { ContactPage } from './ContactPage'
+import { PrivacyPolicy } from '../legal/PrivacyPolicy'
+import { TermsOfService } from '../legal/TermsOfService'
 
 export function WebsiteApp() {
   return (
@@ -15,6 +17,8 @@ export function WebsiteApp() {
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/founders" element={<FoundersPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
       </Routes>
     </WebsiteLayout>
   )

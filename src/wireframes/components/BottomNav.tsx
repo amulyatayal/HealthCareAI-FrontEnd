@@ -1,11 +1,14 @@
 import { Home, Users, Heart, User, MessageCircle, Stethoscope } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
+import { useBasePath } from '../hooks/useBasePath'
 
 export function BottomNav() {
+  const base = useBasePath()
+
   return (
     <nav className="wf-bottom-nav">
       <NavLink
-        to="/demo"
+        to={`${base}/`}
         end
         className={({ isActive }) => `wf-nav-item ${isActive ? 'active' : ''}`}
       >
@@ -14,7 +17,7 @@ export function BottomNav() {
       </NavLink>
       
       <NavLink
-        to="/demo/chat"
+        to={`${base}/chat`}
         className={({ isActive }) => `wf-nav-item wf-nav-chat ${isActive ? 'active' : ''}`}
       >
         <MessageCircle />
@@ -22,7 +25,7 @@ export function BottomNav() {
       </NavLink>
       
       <NavLink
-        to="/demo/community"
+        to={`${base}/community`}
         className={({ isActive }) => `wf-nav-item ${isActive ? 'active' : ''}`}
       >
         <Users />
@@ -30,7 +33,7 @@ export function BottomNav() {
       </NavLink>
       
       <NavLink
-        to="/demo/health"
+        to={`${base}/health`}
         className={({ isActive }) => `wf-nav-item ${isActive ? 'active' : ''}`}
       >
         <Heart />
@@ -38,7 +41,7 @@ export function BottomNav() {
       </NavLink>
       
       <NavLink
-        to="/demo/team"
+        to={`${base}/team`}
         className={({ isActive }) => `wf-nav-item ${isActive ? 'active' : ''}`}
       >
         <Stethoscope />
@@ -46,7 +49,7 @@ export function BottomNav() {
       </NavLink>
       
       <NavLink
-        to="/demo/profile"
+        to={`${base}/profile`}
         className={({ isActive }) => `wf-nav-item ${isActive ? 'active' : ''}`}
       >
         <User />

@@ -2,14 +2,16 @@ import { Smile, Sparkles, Activity, Timer, ChevronRight, TrendingUp, Heart, Flam
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
+import { useBasePath } from '../hooks/useBasePath'
 
 export function HealthHub() {
+  const base = useBasePath()
   const features = [
     {
       icon: Smile,
       title: 'Basic Mood Diary',
       subtitle: 'Quick 0-10 mood tracking',
-      to: '/demo/health/mood',
+      to: `${base}/health/mood`,
       iconColor: 'amber',
       priority: 'P0'
     },
@@ -17,7 +19,7 @@ export function HealthHub() {
       icon: Sparkles,
       title: 'Advanced Mood Diary',
       subtitle: 'Detailed emotions and patterns',
-      to: '/demo/health/mood-advanced',
+      to: `${base}/health/mood-advanced`,
       iconColor: 'purple',
       priority: 'P1'
     },
@@ -25,7 +27,7 @@ export function HealthHub() {
       icon: Activity,
       title: 'Symptom Tracker',
       subtitle: 'Log and monitor symptoms',
-      to: '/demo/health/symptoms',
+      to: `${base}/health/symptoms`,
       iconColor: 'blue',
       priority: 'P1'
     },
@@ -33,7 +35,7 @@ export function HealthHub() {
       icon: Timer,
       title: 'Physical Tests and Wearable Integration',
       subtitle: '1 Mile, Sit-to-Stand, Balance, device sync',
-      to: '/demo/health/tests',
+      to: `${base}/health/tests`,
       iconColor: 'green',
       priority: 'P1'
     },
@@ -130,7 +132,7 @@ export function HealthHub() {
           })}
         </div>
         <Link 
-          to="/demo/health/mood" 
+          to={`${base}/health/mood`} 
           className="wf-btn wf-btn-primary wf-btn-full"
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
         >

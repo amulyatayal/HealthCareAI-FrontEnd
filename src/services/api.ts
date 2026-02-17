@@ -25,6 +25,14 @@ class ApiError extends Error {
   }
 }
 
+export interface ApiErrorWithConsent extends ApiError {
+  consentType?: string;
+}
+
+export function isConsentError(err: unknown): err is ApiErrorWithConsent {
+  return err instanceof ApiError && err.status === 403 && !!(err as ApiErrorWithConsent).consentType;
+}
+
 // Get auth token from localStorage
 function getAuthToken(): string | null {
   return localStorage.getItem('auth_token');
@@ -61,33 +69,31 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    // If unauthorized, signal session expiration
+    const error = await response.json().catch(() => ({ message: 'An error occurred' }));
+
+    // 401 — unauthorized / session expired
     if (response.status === 401) {
-      // Check if the token was JUST set (within last 5 seconds)
-      // This prevents clearing tokens during OAuth login race condition
       const tokenSetTime = localStorage.getItem('auth_token_set_time');
       const now = Date.now();
       const isRecentlySet = tokenSetTime && (now - parseInt(tokenSetTime)) < 5000;
 
       if (!isRecentlySet) {
-        // Clear the bad token immediately to prevent infinite 401 loops
         localStorage.removeItem('auth_token');
         localStorage.removeItem('auth_token_set_time');
-
-        // Dispatch event for modal (if listener exists in App.tsx)
         window.dispatchEvent(new CustomEvent('auth:session-expired'));
-
-        // Force reload to reset app state and redirect to login
-        // Skip reload if already on login page to prevent reload loop
         if (!window.location.pathname.includes('/login')) {
-          setTimeout(() => {
-            window.location.reload();
-          }, 100);
+          setTimeout(() => { window.location.reload(); }, 100);
         }
       }
-      // If recently set, just throw error without clearing (let the login flow complete)
     }
-    const error = await response.json().catch(() => ({ message: 'An error occurred' }));
+
+    // 403 — consent required or guest blocked
+    if (response.status === 403 && error.consent_type) {
+      const apiErr = new ApiError(response.status, error.message || 'Consent required');
+      (apiErr as ApiErrorWithConsent).consentType = error.consent_type;
+      throw apiErr;
+    }
+
     throw new ApiError(response.status, error.detail || error.message || 'An error occurred');
   }
 
@@ -264,6 +270,406 @@ export async function selectDetailedStage(stageId: string): Promise<{ message: s
 // Get current user's stage with context
 export async function getMyStage(): Promise<{ stage_id: string | null; stage_name: string; breadcrumb: string[]; description?: string; ai_context?: string }> {
   return fetchJson(`${API_BASE_V2}/profile/my-stage`);
+}
+
+// ================================
+// Dashboard API (v2)
+// ================================
+
+export interface DashboardSummary {
+  wellness_score: number;
+  streak_days: number;
+  avg_mood: number;
+  trend_direction: 'up' | 'down' | 'stable';
+  trend_percentage: number;
+  next_appointment: {
+    id: string;
+    title: string;
+    clinician_name: string;
+    specialty: string;
+    date: string;
+    time: string;
+    location: string;
+    reminder_set: boolean;
+  } | null;
+  daily_quote: { text: string; author: string } | null;
+}
+
+export async function getDashboardSummary(): Promise<DashboardSummary> {
+  return fetchJson<DashboardSummary>(`${API_BASE_V2}/dashboard/summary`);
+}
+
+// ================================
+// Mood Tracking API (v2)
+// ================================
+
+export interface MoodEntry {
+  id: string;
+  mood_score: number;
+  note: string | null;
+  emotions: string[] | null;
+  triggers: string[] | null;
+  quick_check: {
+    sleep_quality?: string;
+    physical_discomfort?: string;
+    energy_level?: string;
+  } | null;
+  timestamp: string;
+}
+
+export interface MoodLogRequest {
+  mood_score: number;
+  note?: string;
+  emotions?: string[];
+  triggers?: string[];
+  quick_check?: {
+    sleep_quality?: string;
+    physical_discomfort?: string;
+    energy_level?: string;
+  };
+  timestamp?: string;
+}
+
+export interface MoodHistoryResponse {
+  entries: MoodEntry[];
+  total_count: number;
+  avg_mood: number;
+  trend_direction: 'up' | 'down' | 'stable';
+  trend_percentage: number;
+}
+
+export async function logMood(data: MoodLogRequest): Promise<{ id: string; message: string }> {
+  return fetchJson(`${API_BASE_V2}/mood`, { method: 'POST', body: JSON.stringify(data) });
+}
+
+export async function getMoodHistory(limit: number = 30): Promise<MoodHistoryResponse> {
+  return fetchJson<MoodHistoryResponse>(`${API_BASE_V2}/mood?limit=${limit}`);
+}
+
+// ================================
+// Symptom Tracking API (v2)
+// ================================
+
+export interface SymptomEntry {
+  id: string;
+  symptom_name: string;
+  severity: number;
+  notes: string | null;
+  timestamp: string;
+}
+
+export interface SymptomLogRequest {
+  symptom_name: string;
+  severity: number;
+  notes?: string;
+  timestamp?: string;
+}
+
+export async function logSymptom(data: SymptomLogRequest): Promise<{ id: string; message: string }> {
+  return fetchJson(`${API_BASE_V2}/symptoms`, { method: 'POST', body: JSON.stringify(data) });
+}
+
+export async function getSymptomHistory(limit: number = 30): Promise<{ entries: SymptomEntry[]; total_count: number }> {
+  return fetchJson(`${API_BASE_V2}/symptoms?limit=${limit}`);
+}
+
+export async function getSymptomTrends(): Promise<{ trends: { symptom_name: string; direction: string; change_percentage: string }[] }> {
+  return fetchJson(`${API_BASE_V2}/symptoms/trends`);
+}
+
+// ================================
+// Appointments API (v2)
+// ================================
+
+export interface Appointment {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  reminder: string | null;
+  status: 'upcoming' | 'completed' | 'cancelled';
+}
+
+export interface CreateAppointmentRequest {
+  title: string;
+  date: string;
+  time: string;
+  location?: string;
+  reminder?: string;
+}
+
+export async function getAppointments(status?: string): Promise<{ appointments: Appointment[]; total_count: number }> {
+  const params = status ? `?status=${status}` : '';
+  return fetchJson(`${API_BASE_V2}/appointments${params}`);
+}
+
+export async function createAppointment(data: CreateAppointmentRequest): Promise<{ id: string; message: string }> {
+  return fetchJson(`${API_BASE_V2}/appointments`, { method: 'POST', body: JSON.stringify(data) });
+}
+
+export async function deleteAppointment(id: string): Promise<{ message: string }> {
+  return fetchJson(`${API_BASE_V2}/appointments/${id}`, { method: 'DELETE' });
+}
+
+// ================================
+// Documents API (v2)
+// ================================
+
+export interface DocumentMeta {
+  id: string;
+  name: string;
+  type: string;
+  date: string;
+  size: string;
+  size_bytes: number;
+}
+
+export async function getDocuments(): Promise<{ documents: DocumentMeta[]; total_count: number; total_size_bytes: number; storage_limit_bytes: number }> {
+  return fetchJson(`${API_BASE_V2}/documents`);
+}
+
+export async function deleteDocument(id: string): Promise<{ message: string }> {
+  return fetchJson(`${API_BASE_V2}/documents/${id}`, { method: 'DELETE' });
+}
+
+// ================================
+// Clinical Team API (v2)
+// ================================
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  specialty: string | null;
+  avatar_url: string | null;
+  contact_email: string | null;
+}
+
+export async function getClinicalTeam(): Promise<{ team_members: TeamMember[] }> {
+  return fetchJson(`${API_BASE_V2}/clinical-team`);
+}
+
+// ================================
+// Share Data API (v2) — QR Code Flow
+// ================================
+
+export interface ShareGenerateRequest {
+  data_types: {
+    mood: boolean;
+    pathway: boolean;
+    symptoms: boolean;
+    documents_summary: boolean;
+  };
+  date_range?: { from: string; to: string };
+}
+
+export interface ShareGenerateResponse {
+  share_id: string;
+  qr_code_base64: string;
+  token: string;
+  expires_at: string;
+  data_types: ShareGenerateRequest['data_types'];
+}
+
+export interface ShareViewResponse {
+  patient_ref_id: string;
+  data_summary: Record<string, unknown>;
+  expires_at: string;
+  created_at: string;
+}
+
+export interface ShareHistoryEntry {
+  share_id: string;
+  data_types: ShareGenerateRequest['data_types'];
+  created_at: string;
+  expires_at: string;
+  status: 'active' | 'expired' | 'revoked';
+  revoked_at?: string;
+}
+
+export async function generateShare(data: ShareGenerateRequest): Promise<ShareGenerateResponse> {
+  return fetchJson(`${API_BASE_V2}/share/generate`, { method: 'POST', body: JSON.stringify(data) });
+}
+
+export async function getShareView(token: string): Promise<ShareViewResponse> {
+  return fetchJson(`${API_BASE_V2}/share/${token}`);
+}
+
+export async function revokeShare(shareId: string): Promise<{ message: string }> {
+  return fetchJson(`${API_BASE_V2}/share/${shareId}`, { method: 'DELETE' });
+}
+
+export async function getShareHistory(): Promise<{ shares: ShareHistoryEntry[] }> {
+  return fetchJson(`${API_BASE_V2}/share/history`);
+}
+
+// Legacy — kept for backwards compatibility
+export interface ShareDataRequest {
+  data_types: {
+    mood: boolean;
+    pathway: boolean;
+    symptoms: boolean;
+    documents_summary: boolean;
+  };
+  clinician_id?: string;
+  message?: string;
+}
+
+export async function shareDataWithClinician(data: ShareDataRequest): Promise<{ message: string; share_id: string; shared_at: string }> {
+  return fetchJson(`${API_BASE_V2}/share-to-clinician`, { method: 'POST', body: JSON.stringify(data) });
+}
+
+// ================================
+// Clinical Team API (v2) — CRUD
+// ================================
+
+export interface AddTeamMemberRequest {
+  name: string;
+  role: string;
+  specialty?: string;
+  contact_email?: string;
+}
+
+export async function addClinicalTeamMember(data: AddTeamMemberRequest): Promise<TeamMember & { message: string }> {
+  return fetchJson(`${API_BASE_V2}/clinical-team`, { method: 'POST', body: JSON.stringify(data) });
+}
+
+export async function removeClinicalTeamMember(id: string): Promise<{ message: string }> {
+  return fetchJson(`${API_BASE_V2}/clinical-team/${id}`, { method: 'DELETE' });
+}
+
+// ================================
+// GDPR / Data Rights API (v2)
+// ================================
+
+export interface CookieConsentChoices {
+  necessary: true;
+  functional: boolean;
+  analytics: boolean;
+}
+
+export async function recordCookieConsent(choices: CookieConsentChoices, source: string): Promise<{ consent_id: string }> {
+  return fetchJson(`${API_BASE_V2}/consent/cookies`, {
+    method: 'POST',
+    body: JSON.stringify({ consent_version: 'v1', choices, timestamp: new Date().toISOString(), source }),
+  });
+}
+
+export interface DataConsentPayload {
+  core_service: true;
+  health_data: boolean;
+  ai_model_providers: boolean;
+  document_storage: boolean;
+  community: boolean;
+  clinical_sharing: true;
+}
+
+export async function recordDataConsent(choices: DataConsentPayload, source: string): Promise<{ consent_id: string }> {
+  return fetchJson(`${API_BASE_V2}/consent/data`, {
+    method: 'POST',
+    body: JSON.stringify({ consent_version: 'v1', choices, timestamp: new Date().toISOString(), source }),
+  });
+}
+
+export async function withdrawConsent(consentType: string): Promise<{ message: string; consent_type: string; withdrawn_at: string }> {
+  return fetchJson(`${API_BASE_V2}/consent/${consentType}`, { method: 'DELETE' });
+}
+
+export async function getConsentStatus(): Promise<{
+  cookie_consent: { choices: CookieConsentChoices; last_updated: string | null } | null;
+  data_consent: { choices: DataConsentPayload; last_updated: string | null } | null;
+}> {
+  return fetchJson(`${API_BASE_V2}/consent`);
+}
+
+// Legacy alias
+export interface ConsentChoices {
+  necessary: true;
+  functional: boolean;
+  analytics: boolean;
+  marketing?: boolean;
+  health_data_processing?: boolean;
+}
+
+export async function recordConsent(choices: ConsentChoices, source: string): Promise<{ consent_id: string }> {
+  return recordCookieConsent({ necessary: true, functional: choices.functional, analytics: choices.analytics }, source);
+}
+
+// ================================
+// Activity Log API (v2)
+// ================================
+
+export interface ActivityLogEntry {
+  id: string;
+  type: 'consent_granted' | 'consent_withdrawn' | 'data_shared' | 'data_exported' | 'account_created' | 'document_uploaded' | 'document_deleted' | string;
+  description: string;
+  timestamp: string;
+  metadata?: Record<string, unknown>;
+}
+
+export async function getActivityLog(limit: number = 50): Promise<{ activities: ActivityLogEntry[] }> {
+  return fetchJson(`${API_BASE_V2}/me/activity-log?limit=${limit}`);
+}
+
+// ================================
+// Document Upload API (v2)
+// ================================
+
+export interface UploadDocumentResponse {
+  id: string;
+  name: string;
+  type: string;
+  size: string;
+  uploaded_at: string;
+  message: string;
+}
+
+export async function uploadDocument(file: File, name?: string): Promise<UploadDocumentResponse> {
+  const token = getAuthToken();
+  const userId = getUserId();
+  const formData = new FormData();
+  formData.append('file', file);
+  if (name) formData.append('name', name);
+
+  const response = await fetch(`${API_BASE_V2}/documents/upload`, {
+    method: 'POST',
+    headers: {
+      ...(token && !token.startsWith('guest:') && { 'Authorization': `Bearer ${token}` }),
+      ...(userId && { 'X-User-ID': userId }),
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Upload failed' }));
+    if (response.status === 413) throw new ApiError(413, error.detail || 'File too large (max 10 MB)');
+    if (response.status === 422) throw new ApiError(422, error.detail || 'Invalid file type');
+    if (response.status === 409) throw new ApiError(409, error.detail || 'Storage limit reached');
+    throw new ApiError(response.status, error.detail || error.message || 'Upload failed');
+  }
+  return response.json();
+}
+
+// ================================
+// Data Export & Account (v2)
+// ================================
+
+export async function exportMyData(): Promise<Blob> {
+  const token = getAuthToken();
+  const userId = getUserId();
+  const response = await fetch(`${API_BASE_V2}/me/export`, {
+    headers: {
+      ...(token && !token.startsWith('guest:') && { 'Authorization': `Bearer ${token}` }),
+      ...(userId && { 'X-User-ID': userId }),
+    },
+  });
+  if (!response.ok) throw new ApiError(response.status, 'Export failed');
+  return response.blob();
+}
+
+export async function deleteMyAccount(confirmation: string): Promise<{ message: string }> {
+  return fetchJson(`${API_BASE_V2}/me`, { method: 'DELETE', body: JSON.stringify({ confirmation }) });
 }
 
 export { ApiError };

@@ -1,4 +1,5 @@
 export { BottomNav } from './BottomNav'
+export { PhoneFrame } from './PhoneFrame'
 export { WireframeCard } from './WireframeCard'
 export { MoodSlider } from './MoodSlider'
 export { WireframeWelcome } from './WireframeWelcome'

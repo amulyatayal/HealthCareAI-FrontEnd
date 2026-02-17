@@ -2,14 +2,16 @@ import { MessageCircle, Users, Calendar, Heart, ShoppingBag, ChevronRight, Spark
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
+import { useBasePath } from '../hooks/useBasePath'
 
 export function CommunityHub() {
+  const base = useBasePath()
   const features = [
     {
       icon: MessageCircle,
       title: 'Community Chats',
       subtitle: 'Connect with others on similar journeys',
-      to: '/demo/community/chat',
+      to: `${base}/community/chat`,
       badge: '12 new',
       iconColor: 'purple',
       priority: 'P0'
@@ -18,7 +20,7 @@ export function CommunityHub() {
       icon: Users,
       title: 'Buddy System',
       subtitle: 'Find a support buddy near you',
-      to: '/demo/community/buddy',
+      to: `${base}/community/buddy`,
       badge: '3 requests',
       iconColor: 'rose',
       priority: 'P1'
@@ -27,7 +29,7 @@ export function CommunityHub() {
       icon: Calendar,
       title: 'Events',
       subtitle: 'Community events and meetups',
-      to: '/demo/community/events',
+      to: `${base}/community/events`,
       badge: '2 upcoming',
       iconColor: 'amber',
       priority: 'P1'
@@ -36,7 +38,7 @@ export function CommunityHub() {
       icon: Heart,
       title: 'Charities & Resources',
       subtitle: 'Support organizations and helpful links',
-      to: '/demo/community/charities',
+      to: `${base}/community/charities`,
       iconColor: 'green',
       priority: 'P1'
     },
@@ -44,7 +46,7 @@ export function CommunityHub() {
       icon: ShoppingBag,
       title: 'Marketplace',
       subtitle: 'Buy, sell, or donate items',
-      to: '/demo/community/marketplace',
+      to: `${base}/community/marketplace`,
       badge: '5 new',
       iconColor: 'blue',
       priority: 'P1'

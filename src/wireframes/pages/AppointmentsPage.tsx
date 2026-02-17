@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Bell, Clock, MapPin, Calendar, Check, BellRing } from 'lucide-react'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
@@ -45,8 +45,67 @@ const appointments = [
 export function AppointmentsPage() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming')
   const [showAdd, setShowAdd] = useState(false)
+  const [appointmentList, setAppointmentList] = useState(appointments)
+  const [newTitle, setNewTitle] = useState('')
+  const [newDate, setNewDate] = useState('')
+  const [newTime, setNewTime] = useState('')
+  const [newLocation, setNewLocation] = useState('')
+  const [newReminder, setNewReminder] = useState('1 day before')
+  const [saving, setSaving] = useState(false)
 
-  const filteredAppointments = appointments.filter(
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      try {
+        const { getAppointments } = await import('../../services/api')
+        const data = await getAppointments()
+        if (!cancelled && data.appointments.length > 0) {
+          setAppointmentList(data.appointments.map((a, i) => ({
+            id: i + 100,
+            title: a.title,
+            date: new Date(a.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            time: a.time,
+            location: a.location,
+            reminder: a.reminder,
+            status: a.status,
+          })))
+        }
+      } catch {
+        // API not available
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [])
+
+  const handleCreateAppointment = async () => {
+    if (!newTitle || !newDate || !newTime) return
+    setSaving(true)
+    try {
+      const { createAppointment } = await import('../../services/api')
+      await createAppointment({ title: newTitle, date: newDate, time: newTime, location: newLocation, reminder: newReminder })
+    } catch {
+      // API not available
+    }
+    const newApt = {
+      id: Date.now(),
+      title: newTitle,
+      date: new Date(newDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      time: newTime,
+      location: newLocation,
+      reminder: newReminder,
+      status: 'upcoming' as const,
+    }
+    setAppointmentList((prev) => [newApt, ...prev])
+    setShowAdd(false)
+    setNewTitle('')
+    setNewDate('')
+    setNewTime('')
+    setNewLocation('')
+    setSaving(false)
+  }
+
+  const filteredAppointments = appointmentList.filter(
     apt => activeTab === 'upcoming' ? apt.status === 'upcoming' : apt.status === 'completed'
   )
 
@@ -74,25 +133,25 @@ export function AppointmentsPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div>
               <label className="wf-label">Title</label>
-              <input className="wf-input" placeholder="e.g., Doctor's appointment" />
+              <input className="wf-input" placeholder="e.g., Doctor's appointment" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
             </div>
             <div className="wf-grid-2">
               <div>
                 <label className="wf-label">Date</label>
-                <input className="wf-input" type="date" />
+                <input className="wf-input" type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} />
               </div>
               <div>
                 <label className="wf-label">Time</label>
-                <input className="wf-input" type="time" />
+                <input className="wf-input" type="time" value={newTime} onChange={(e) => setNewTime(e.target.value)} />
               </div>
             </div>
             <div>
               <label className="wf-label">Location</label>
-              <input className="wf-input" placeholder="Hospital/Clinic name" />
+              <input className="wf-input" placeholder="Hospital/Clinic name" value={newLocation} onChange={(e) => setNewLocation(e.target.value)} />
             </div>
             <div>
               <label className="wf-label">Reminder</label>
-              <select className="wf-input">
+              <select className="wf-input" value={newReminder} onChange={(e) => setNewReminder(e.target.value)}>
                 <option>1 hour before</option>
                 <option>2 hours before</option>
                 <option>1 day before</option>
@@ -103,8 +162,8 @@ export function AppointmentsPage() {
               <button className="wf-btn wf-btn-secondary" style={{ flex: 1 }} onClick={() => setShowAdd(false)}>
                 Cancel
               </button>
-              <button className="wf-btn wf-btn-primary" style={{ flex: 1 }}>
-                Save
+              <button className="wf-btn wf-btn-primary" style={{ flex: 1 }} disabled={!newTitle || !newDate || !newTime || saving} onClick={handleCreateAppointment}>
+                {saving ? 'Saving...' : 'Save'}
               </button>
             </div>
           </div>

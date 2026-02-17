@@ -4,6 +4,7 @@ import { ChevronRight } from 'lucide-react'
 import stageHierarchyData from '../data/stage_hierarchy.json'
 import { WireframeLayout } from '../WireframeLayout'
 import type { StageHierarchyData as StageHierarchyType, StageRecord } from '../data/stageHierarchyTypes'
+import { useBasePath } from '../hooks/useBasePath'
 
 const hierarchy = stageHierarchyData as StageHierarchyType
 
@@ -26,6 +27,7 @@ function getRootStages(): StageRecord[] {
 }
 
 export function StageSelectorPage() {
+  const base = useBasePath()
   const navigate = useNavigate()
   const [path, setPath] = useState<string[]>([])
   const [done, setDone] = useState(false)
@@ -55,12 +57,12 @@ export function StageSelectorPage() {
 
   const handleSave = () => {
     // In a real app: persist path (e.g. API call), then navigate
-    navigate('/demo/profile')
+    navigate(`${base}/profile`)
   }
 
   const handleDontKnowYet = () => {
     // Leave without saving; go back to profile
-    navigate('/demo/profile')
+    navigate(`${base}/profile`)
   }
 
   if (done) {

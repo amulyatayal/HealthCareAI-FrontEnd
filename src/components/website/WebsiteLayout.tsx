@@ -119,6 +119,11 @@ export function WebsiteLayout({ children }: WebsiteLayoutProps) {
             <Link to={getLinkPath('/founders')}>Founders</Link>
             <Link to={getLinkPath('/contact')}>Contact</Link>
           </div>
+          <div className="footer-section">
+            <h4>Legal</h4>
+            <Link to={getLinkPath('/privacy')}>Privacy Policy</Link>
+            <Link to={getLinkPath('/terms')}>Terms of Service</Link>
+          </div>
         </div>
         <div className="footer-bottom">
           <p>&copy; {new Date().getFullYear()} anvega.ai. All rights reserved.</p>

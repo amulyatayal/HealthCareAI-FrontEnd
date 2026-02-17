@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Check, TrendingUp } from 'lucide-react'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard, MoodSlider } from '../components'
@@ -8,21 +8,46 @@ export function BasicMoodPage() {
   const [saved, setSaved] = useState(false)
   const [note, setNote] = useState('')
 
-  const handleSave = () => {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-  }
-
-  // Sample history data
-  const history = [
-    { date: 'Today', value: null },
+  const [history, setHistory] = useState([
+    { date: 'Today', value: null as number | null },
     { date: 'Yesterday', value: 8 },
     { date: 'Jan 18', value: 7 },
     { date: 'Jan 17', value: 6 },
     { date: 'Jan 16', value: 8 },
     { date: 'Jan 15', value: 9 },
     { date: 'Jan 14', value: 7 },
-  ]
+  ])
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      try {
+        const { getMoodHistory } = await import('../../services/api')
+        const data = await getMoodHistory(7)
+        if (!cancelled && data.entries.length > 0) {
+          setHistory(data.entries.map((e) => ({
+            date: new Date(e.timestamp).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' }),
+            value: e.mood_score,
+          })))
+        }
+      } catch {
+        // API not available yet – keep mock data
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [saved])
+
+  const handleSave = async () => {
+    try {
+      const { logMood } = await import('../../services/api')
+      await logMood({ mood_score: mood, note: note || undefined })
+    } catch {
+      // API not available yet – still show saved state
+    }
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
 
   return (
     <WireframeLayout title="Mood Diary" showBack>

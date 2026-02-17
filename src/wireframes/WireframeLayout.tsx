@@ -2,6 +2,7 @@ import { ReactNode, useEffect } from 'react'
 import { ChevronLeft, Heart } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { BottomNav } from './components'
+import { CookieConsent } from '../components/gdpr/CookieConsent'
 
 const HOSPITAL_STORAGE_KEY = 'wireframe_hospital_logo'
 
@@ -44,6 +45,7 @@ export function WireframeLayout({ children, title, showBack, hideNav }: Wirefram
   return (
     <div className="wireframe-phone-frame">
       <div className="wireframe-container">
+        <CookieConsent />
         <div className="prototype-badge">Prototype</div>
         
         <header className="wf-header">

@@ -30,6 +30,24 @@ export function SymptomsPage() {
   const [showLog, setShowLog] = useState(false)
   const [selectedSymptom, setSelectedSymptom] = useState<string | null>(null)
   const [severity, setSeverity] = useState(5)
+  const [symptomNote, setSymptomNote] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const handleSaveSymptom = async () => {
+    if (!selectedSymptom) return
+    setSaving(true)
+    try {
+      const { logSymptom } = await import('../../services/api')
+      await logSymptom({ symptom_name: selectedSymptom, severity, notes: symptomNote || undefined })
+    } catch {
+      // API not available yet
+    }
+    setSaving(false)
+    setShowLog(false)
+    setSelectedSymptom(null)
+    setSeverity(5)
+    setSymptomNote('')
+  }
 
   const getSeverityColor = (value: number) => {
     if (value <= 3) return '#16a34a'
@@ -97,17 +115,19 @@ export function SymptomsPage() {
                   className="wf-input wf-textarea"
                   placeholder="When did it start? What helps?"
                   rows={2}
+                  value={symptomNote}
+                  onChange={(e) => setSymptomNote(e.target.value)}
                 />
               </div>
             </>
           )}
 
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button className="wf-btn wf-btn-secondary" style={{ flex: 1 }} onClick={() => setShowLog(false)}>
+            <button className="wf-btn wf-btn-secondary" style={{ flex: 1 }} onClick={() => { setShowLog(false); setSelectedSymptom(null); setSymptomNote('') }}>
               Cancel
             </button>
-            <button className="wf-btn wf-btn-primary" style={{ flex: 1 }} disabled={!selectedSymptom}>
-              Save
+            <button className="wf-btn wf-btn-primary" style={{ flex: 1 }} disabled={!selectedSymptom || saving} onClick={handleSaveSymptom}>
+              {saving ? 'Saving...' : 'Save'}
             </button>
           </div>
         </WireframeCard>

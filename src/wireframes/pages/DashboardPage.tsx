@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Calendar, MessageCircle, Heart, TrendingUp, Bell, ChevronRight, ChevronDown, Flame, Sparkles, FileText, UtensilsCrossed, Brain, Video, ExternalLink } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
+import { useBasePath } from '../hooks/useBasePath'
 import { youtubeToEmbedUrl } from '../utils/youtubeEmbed'
+import { useAuth } from '../../contexts/AuthContext'
 
 const RESOURCE_CATEGORIES = [
   {
@@ -51,8 +53,58 @@ const RESOURCE_CATEGORIES = [
   },
 ] as const
 
+// Default mock data for offline / pre-backend usage
+const MOCK_DASHBOARD: {
+  wellness_score: number;
+  streak_days: number;
+  avg_mood: number;
+  trend_direction: 'up' | 'down' | 'stable';
+  trend_percentage: number;
+  next_appointment: { id: string; title: string; clinician_name: string; specialty: string; date: string; time: string; location: string; reminder_set: boolean } | null;
+  daily_quote: { text: string; author: string } | null;
+} = {
+  wellness_score: 78,
+  streak_days: 7,
+  avg_mood: 8.2,
+  trend_direction: 'up',
+  trend_percentage: 15,
+  next_appointment: {
+    id: '1',
+    title: 'Dr. Thompson - Oncology',
+    clinician_name: 'Dr. Thompson',
+    specialty: 'Oncology',
+    date: new Date(Date.now() + 86400000).toISOString(),
+    time: '10:30 AM',
+    location: 'City Hospital, Room 302',
+    reminder_set: true,
+  },
+  daily_quote: {
+    text: 'Every day may not be good, but there is something good in every day.',
+    author: 'Alice Morse Earle',
+  },
+}
+
 export function DashboardPage() {
+  const base = useBasePath()
+  const { user } = useAuth()
+  const firstName = user?.name?.split(' ')[0] || 'there'
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
+  const [dashboard, setDashboard] = useState(MOCK_DASHBOARD)
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      try {
+        const { getDashboardSummary } = await import('../../services/api')
+        const data = await getDashboardSummary()
+        if (!cancelled) setDashboard(data)
+      } catch {
+        // API not available yet – keep mock data
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [])
 
   return (
     <WireframeLayout>
@@ -66,22 +118,24 @@ export function DashboardPage() {
             <div className="circle circle-3" />
           </div>
           
-          <p style={{ fontSize: '14px', color: 'var(--wf-gray-500)' }}>Good morning,</p>
+          <p style={{ fontSize: '14px', color: 'var(--wf-gray-500)' }}>
+            {new Date().getHours() < 12 ? 'Good morning,' : new Date().getHours() < 17 ? 'Good afternoon,' : 'Good evening,'}
+          </p>
           <h2 style={{ fontSize: '26px', fontWeight: '700', color: 'var(--wf-gray-800)', margin: '4px 0 8px' }}>
-            Sarah 👋
+            {firstName} 👋
           </h2>
           
           {/* Streak Badge */}
           <div className="wf-streak-badge" style={{ marginBottom: '16px' }}>
             <span className="streak-fire">🔥</span>
-            7 day streak!
+            {dashboard.streak_days} day streak!
           </div>
           
           <p style={{ fontSize: '14px', color: 'var(--wf-gray-500)', marginBottom: '16px' }}>
             How are you feeling today?
           </p>
           
-          <Link to="/demo/health/mood" className="wf-btn wf-btn-primary">
+          <Link to={`${base}/health/mood`} className="wf-btn wf-btn-primary">
             <Heart size={18} />
             Log Your Mood
           </Link>
@@ -91,9 +145,9 @@ export function DashboardPage() {
       {/* Wellness Score & Stats */}
       <div className="wf-grid-2">
         <WireframeCard style={{ textAlign: 'center', padding: '20px 12px' }}>
-          <div className="wf-score-ring" style={{ '--score': 78 } as React.CSSProperties}>
+          <div className="wf-score-ring" style={{ '--score': dashboard.wellness_score } as React.CSSProperties}>
             <div className="ring-inner">
-              <span className="score-value">78</span>
+              <span className="score-value">{dashboard.wellness_score}</span>
               <span className="score-label">Score</span>
             </div>
           </div>
@@ -115,7 +169,7 @@ export function DashboardPage() {
               😊
             </div>
             <div>
-              <div style={{ fontSize: '20px', fontWeight: '700', color: 'var(--wf-gray-800)' }}>8.2</div>
+              <div style={{ fontSize: '20px', fontWeight: '700', color: 'var(--wf-gray-800)' }}>{dashboard.avg_mood.toFixed(1)}</div>
               <div style={{ fontSize: '12px', color: 'var(--wf-gray-500)' }}>Avg Mood</div>
             </div>
           </WireframeCard>
@@ -133,7 +187,7 @@ export function DashboardPage() {
               <TrendingUp size={22} style={{ color: '#16a34a' }} />
             </div>
             <div>
-              <div style={{ fontSize: '20px', fontWeight: '700', color: '#16a34a' }}>+15%</div>
+              <div style={{ fontSize: '20px', fontWeight: '700', color: '#16a34a' }}>{dashboard.trend_direction === 'down' ? '' : '+'}{dashboard.trend_percentage}%</div>
               <div style={{ fontSize: '12px', color: 'var(--wf-gray-500)' }}>This week</div>
             </div>
           </WireframeCard>
@@ -141,19 +195,21 @@ export function DashboardPage() {
       </div>
 
       {/* Daily Inspiration */}
-      <WireframeCard className="wf-quote-card">
-        <div className="quote-icon">💜</div>
-        <p className="quote-text">
-          "Every day may not be good, but there is something good in every day."
-        </p>
-        <p className="quote-author">— Alice Morse Earle</p>
-      </WireframeCard>
+      {dashboard.daily_quote && (
+        <WireframeCard className="wf-quote-card">
+          <div className="quote-icon">💜</div>
+          <p className="quote-text">
+            "{dashboard.daily_quote.text}"
+          </p>
+          <p className="quote-author">— {dashboard.daily_quote.author}</p>
+        </WireframeCard>
+      )}
 
       {/* Upcoming Appointments */}
       <WireframeCard 
         title="Upcoming" 
         action={
-          <Link to="/demo/profile/appointments" style={{ color: 'var(--wf-rose-500)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <Link to={`${base}/profile/appointments`} style={{ color: 'var(--wf-rose-500)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '4px' }}>
             View All <ChevronRight size={16} />
           </Link>
         }
@@ -235,7 +291,7 @@ export function DashboardPage() {
                       return (
                         <Link
                           key={link.url}
-                          to={`/demo/watch?url=${encodeURIComponent(embedUrl)}`}
+                          to={`${base}/watch?url=${encodeURIComponent(embedUrl)}`}
                           style={linkStyle}
                         >
                           <Video size={16} style={{ color: 'var(--wf-gray-400)', flexShrink: 0 }} />
@@ -289,7 +345,7 @@ export function DashboardPage() {
         <span className="wf-section-title">Quick Actions</span>
       </div>
       <div className="wf-grid-2" style={{ marginBottom: '16px' }}>
-        <Link to="/demo/chat" style={{ textDecoration: 'none' }}>
+        <Link to={`${base}/chat`} style={{ textDecoration: 'none' }}>
           <div className="wf-feature-card">
             <div className="feature-icon rose">
               <Sparkles size={24} />
@@ -299,7 +355,7 @@ export function DashboardPage() {
           </div>
         </Link>
         
-        <Link to="/demo/community/chat" style={{ textDecoration: 'none' }}>
+        <Link to={`${base}/community/chat`} style={{ textDecoration: 'none' }}>
           <div className="wf-feature-card">
             <div className="feature-icon purple">
               <MessageCircle size={24} />
@@ -309,7 +365,7 @@ export function DashboardPage() {
           </div>
         </Link>
         
-        <Link to="/demo/health/symptoms" style={{ textDecoration: 'none' }}>
+        <Link to={`${base}/health/symptoms`} style={{ textDecoration: 'none' }}>
           <div className="wf-feature-card">
             <div className="feature-icon blue">
               <TrendingUp size={24} />
@@ -319,7 +375,7 @@ export function DashboardPage() {
           </div>
         </Link>
         
-        <Link to="/demo/community/events" style={{ textDecoration: 'none' }}>
+        <Link to={`${base}/community/events`} style={{ textDecoration: 'none' }}>
           <div className="wf-feature-card">
             <div className="feature-icon amber">
               <Calendar size={24} />
@@ -332,7 +388,7 @@ export function DashboardPage() {
 
       {/* Community Activity */}
       <WireframeCard title="Community Activity" className="wf-card-accent">
-        <Link to="/demo/community/chat" className="wf-list-item" style={{ textDecoration: 'none' }}>
+        <Link to={`${base}/community/chat`} className="wf-list-item" style={{ textDecoration: 'none' }}>
           <div className="wf-avatar-enhanced">
             <div className="avatar-inner">
               <MessageCircle size={20} />
@@ -349,7 +405,7 @@ export function DashboardPage() {
           </div>
         </Link>
         
-        <Link to="/demo/community/events" className="wf-list-item" style={{ textDecoration: 'none' }}>
+        <Link to={`${base}/community/events`} className="wf-list-item" style={{ textDecoration: 'none' }}>
           <div className="wf-list-avatar" style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)' }}>
             <Flame size={20} style={{ color: '#d97706' }} />
           </div>

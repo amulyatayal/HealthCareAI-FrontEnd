@@ -3,6 +3,7 @@ import { Send, Users, Plus } from 'lucide-react'
 import { useParams, Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
+import { useBasePath } from '../hooks/useBasePath'
 
 const chatRooms = [
   { id: 'breast-cancer', name: 'Breast Cancer Support', members: 234, unread: 12 },
@@ -21,6 +22,7 @@ const sampleMessages = [
 ]
 
 export function CommunityChatPage() {
+  const base = useBasePath()
   const { roomId } = useParams()
   const [message, setMessage] = useState('')
   
@@ -35,7 +37,7 @@ export function CommunityChatPage() {
         {chatRooms.map((room) => (
           <Link 
             key={room.id} 
-            to={`/demo/community/chat/${room.id}`}
+            to={`${base}/community/chat/${room.id}`}
             style={{ textDecoration: 'none' }}
           >
             <WireframeCard>

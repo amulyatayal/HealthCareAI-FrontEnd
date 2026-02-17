@@ -96,7 +96,10 @@ export function LoginPage() {
           )}
 
           <p className="login-footer">
-            By signing in, you agree to our Terms of Service and Privacy Policy
+            By signing in, you agree to our{' '}
+            <a href="/terms" style={{ color: 'inherit', textDecoration: 'underline' }}>Terms of Service</a>{' '}
+            and{' '}
+            <a href="/privacy" style={{ color: 'inherit', textDecoration: 'underline' }}>Privacy Policy</a>
           </p>
         </div>
 

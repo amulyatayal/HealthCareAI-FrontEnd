@@ -22,39 +22,42 @@ import { StageSelectorPage } from './pages/StageSelectorPage'
 import { ShareDataPage } from './pages/ShareDataPage'
 import { ClinicalTeamPage } from './pages/ClinicalTeamPage'
 import { WatchVideoPage } from './pages/WatchVideoPage'
+import { GuestGate } from './components/GuestGate'
 
 export function WireframeApp() {
   return (
     <div className="wireframe-viewport">
       <Routes>
-      {/* Main tabs */}
+      {/* Main tabs — open to all users */}
       <Route path="/" element={<DashboardPage />} />
       <Route path="/chat" element={<ChatPage />} />
       <Route path="/community" element={<CommunityHub />} />
       <Route path="/health" element={<HealthHub />} />
       <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/team" element={<ClinicalTeamPage />} />
       <Route path="/watch" element={<WatchVideoPage />} />
+
+      {/* Guest-gated: health features */}
+      <Route path="/health/mood" element={<GuestGate featureName="mood tracking"><BasicMoodPage /></GuestGate>} />
+      <Route path="/health/mood-advanced" element={<GuestGate featureName="mood tracking"><AdvancedMoodPage /></GuestGate>} />
+      <Route path="/health/symptoms" element={<GuestGate featureName="symptom tracking"><SymptomsPage /></GuestGate>} />
+      <Route path="/health/tests" element={<GuestGate featureName="physical tests"><TestsPage /></GuestGate>} />
+
+      {/* Guest-gated: profile features */}
+      <Route path="/profile/documents" element={<GuestGate featureName="document storage"><DocumentsPage /></GuestGate>} />
+      <Route path="/profile/appointments" element={<GuestGate featureName="appointments"><AppointmentsPage /></GuestGate>} />
+      <Route path="/profile/stage" element={<StageSelectorPage />} />
+      <Route path="/profile/share" element={<GuestGate featureName="data sharing"><ShareDataPage /></GuestGate>} />
+
+      {/* Guest-gated: clinical team */}
+      <Route path="/team" element={<GuestGate featureName="clinical team"><ClinicalTeamPage /></GuestGate>} />
       
-      {/* Community features */}
+      {/* Community features — open to all */}
       <Route path="/community/chat" element={<CommunityChatPage />} />
       <Route path="/community/chat/:roomId" element={<CommunityChatPage />} />
       <Route path="/community/buddy" element={<BuddyPage />} />
       <Route path="/community/events" element={<EventsPage />} />
       <Route path="/community/charities" element={<CharitiesPage />} />
       <Route path="/community/marketplace" element={<MarketplacePage />} />
-      
-      {/* Health features */}
-      <Route path="/health/mood" element={<BasicMoodPage />} />
-      <Route path="/health/mood-advanced" element={<AdvancedMoodPage />} />
-      <Route path="/health/symptoms" element={<SymptomsPage />} />
-      <Route path="/health/tests" element={<TestsPage />} />
-      
-      {/* Profile features */}
-      <Route path="/profile/documents" element={<DocumentsPage />} />
-      <Route path="/profile/appointments" element={<AppointmentsPage />} />
-      <Route path="/profile/stage" element={<StageSelectorPage />} />
-      <Route path="/profile/share" element={<ShareDataPage />} />
       </Routes>
     </div>
   )
