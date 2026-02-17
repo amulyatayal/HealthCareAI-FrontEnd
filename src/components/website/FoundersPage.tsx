@@ -1,51 +1,54 @@
 import { Linkedin, Briefcase, GraduationCap, Award, User } from 'lucide-react'
 import { useState } from 'react'
 
+interface TeamMemberImage {
+  src: string
+  alt: string
+  errored: boolean
+}
+
+function useImageFallback(path: string, alt: string): TeamMemberImage & { onError: () => void } {
+  const [errored, setErrored] = useState(false)
+  return { src: path, alt, errored, onError: () => setErrored(true) }
+}
+
+function AvatarImage({ image }: { image: TeamMemberImage & { onError: () => void } }) {
+  if (image.errored) return <User size={40} />
+  return <img src={image.src} alt={image.alt} onError={image.onError} />
+}
+
 export function FoundersPage() {
-  const [amulyaImageError, setAmulyaImageError] = useState(false)
-  const [shwetaImageError, setShwetaImageError] = useState(false)
-  
-  // Try local images first (from public/founders/ folder)
-  // If not found, will fallback to User icon
-  // To add images: Download from LinkedIn and save to public/founders/
-  const amulyaImageSrc = amulyaImageError 
-    ? null 
-    : '/founders/amulya-tayal.jpg'
-  
-  const shwetaImageSrc = shwetaImageError 
-    ? null 
-    : '/founders/shweta-aggarwal.jpg'
+  const amulya = useImageFallback('/founders/amulya-tayal.jpg', 'Amulya Tayal')
+  const shweta = useImageFallback('/founders/shweta-aggarwal.jpg', 'Ms. Shweta Aggarwal')
+  const sekhar = useImageFallback('/founders/sekhar-marla.jpg', 'Mr. Sekhar Marla')
+  const joyeta = useImageFallback('/founders/joyeta-ghosh.jpg', 'Dr. Joyeta Ghosh')
+  const sandeep = useImageFallback('/founders/sandeep-gupta.jpg', 'Sandeep Gupta')
+
   return (
     <div className="founders-page">
       <section className="page-hero">
         <div className="container">
-          <h1>Our Founders</h1>
+          <h1>Our Team</h1>
           <p className="hero-description">
             Combining deep technical expertise with clinical insight
           </p>
         </div>
       </section>
 
+      {/* ─── Founders ─── */}
       <section className="founders-content">
         <div className="container">
+          <h2 className="section-heading">Founders</h2>
           <div className="founders-grid">
             {/* Amulya Tayal */}
             <div className="founder-card">
               <div className="founder-header">
                 <div className="founder-avatar">
-                  {amulyaImageSrc ? (
-                    <img 
-                      src={amulyaImageSrc}
-                      alt="Amulya Tayal"
-                      onError={() => setAmulyaImageError(true)}
-                    />
-                  ) : (
-                    <User size={40} />
-                  )}
+                  <AvatarImage image={amulya} />
                 </div>
                 <div className="founder-title">
                   <h2>Amulya Tayal</h2>
-                  <p className="founder-role">Founder & Chief Technology Officer</p>
+                  <p className="founder-role">Founder &amp; Chief Technology Officer</p>
                 </div>
               </div>
               <div className="founder-content">
@@ -67,7 +70,7 @@ export function FoundersPage() {
                     <Award size={20} />
                     <div>
                       <strong>Expertise</strong>
-                      <p>AI & Data Platforms, Global Scale Systems, Engineering Leadership</p>
+                      <p>AI &amp; Data Platforms, Global Scale Systems, Engineering Leadership</p>
                     </div>
                   </div>
                   <div className="highlight-item">
@@ -96,19 +99,11 @@ export function FoundersPage() {
             <div className="founder-card">
               <div className="founder-header">
                 <div className="founder-avatar">
-                  {shwetaImageSrc ? (
-                    <img 
-                      src={shwetaImageSrc}
-                      alt="Ms. Shweta Aggarwal"
-                      onError={() => setShwetaImageError(true)}
-                    />
-                  ) : (
-                    <User size={40} />
-                  )}
+                  <AvatarImage image={shweta} />
                 </div>
                 <div className="founder-title">
                   <h2>Ms. Shweta Aggarwal</h2>
-                  <p className="founder-role">Founder & Chief Executive Officer</p>
+                  <p className="founder-role">Founder &amp; Chief Executive Officer</p>
                 </div>
               </div>
               <div className="founder-content">
@@ -163,7 +158,188 @@ export function FoundersPage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
 
+      {/* ─── Clinical & Advisory Team ─── */}
+      <section className="founders-content" style={{ paddingTop: 0 }}>
+        <div className="container">
+          <h2 className="section-heading">Clinical &amp; Advisory Team</h2>
+          <div className="founders-grid founders-grid-three">
+
+            {/* Mr. Sekhar Marla */}
+            <div className="founder-card">
+              <div className="founder-header">
+                <div className="founder-avatar">
+                  <AvatarImage image={sekhar} />
+                </div>
+                <div className="founder-title">
+                  <h2>Mr. Sekhar Marla</h2>
+                  <p className="founder-role">Clinical Advisor — Oncoplastic Breast Surgery</p>
+                </div>
+              </div>
+              <div className="founder-content">
+                <p className="founder-bio">
+                  Mr. Sekhar Marla is a Consultant Oncoplastic Breast Surgeon at University
+                  Hospital of North Midlands (NHS) with over 15 years of clinical experience.
+                  He brings deep surgical expertise and a commitment to advancing breast
+                  cancer care through innovation and education.
+                </p>
+                <div className="founder-highlights">
+                  <div className="highlight-item">
+                    <Briefcase size={20} />
+                    <div>
+                      <strong>Experience</strong>
+                      <p>Consultant Oncoplastic Breast Surgeon, University Hospital of North Midlands (NHS)</p>
+                    </div>
+                  </div>
+                  <div className="highlight-item">
+                    <GraduationCap size={20} />
+                    <div>
+                      <strong>Credentials</strong>
+                      <p>
+                        FRCS (General &amp; Breast Surgery)<br />
+                        MSc Medical Sciences, University of Glasgow<br />
+                        MBBS &amp; MS General Surgery, Maulana Azad Medical College
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="founder-links">
+                  <a
+                    href="https://www.linkedin.com/in/sekhar-marla-2615a790/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="founder-link"
+                  >
+                    <Linkedin size={20} />
+                    LinkedIn Profile
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Dr. Joyeta Ghosh */}
+            <div className="founder-card">
+              <div className="founder-header">
+                <div className="founder-avatar">
+                  <AvatarImage image={joyeta} />
+                </div>
+                <div className="founder-title">
+                  <h2>Dr. Joyeta Ghosh</h2>
+                  <p className="founder-role">Advisor — Public Health Nutrition &amp; AI</p>
+                </div>
+              </div>
+              <div className="founder-content">
+                <p className="founder-bio">
+                  Dr. Joyeta Ghosh is a public health nutrition scientist and data-driven 
+                  researcher with expertise spanning AI, epidemiology, and clinical nutrition.
+                  A former Space Health &amp; Nutrition Data Scientist at NASA, she brings a 
+                  unique interdisciplinary perspective to healthcare AI.
+                </p>
+                <div className="founder-highlights">
+                  <div className="highlight-item">
+                    <Briefcase size={20} />
+                    <div>
+                      <strong>Experience</strong>
+                      <p>
+                        Assistant Professor, Amity University<br />
+                        Former Space Health &amp; Nutrition Data Scientist, NASA
+                      </p>
+                    </div>
+                  </div>
+                  <div className="highlight-item">
+                    <GraduationCap size={20} />
+                    <div>
+                      <strong>Credentials</strong>
+                      <p>
+                        MSc Data Science, Liverpool John Moores University<br />
+                        Executive PG in Data Science, IIIT Bangalore<br />
+                        PG in Public Health Nutrition, PHFI
+                      </p>
+                    </div>
+                  </div>
+                  <div className="highlight-item">
+                    <Award size={20} />
+                    <div>
+                      <strong>Expertise</strong>
+                      <p>Public Health Nutrition, Data Science, AI in Healthcare, Clinical Research</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="founder-links">
+                  <a
+                    href="https://www.linkedin.com/in/dr-joyeta-ghosh-476ab0a9/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="founder-link"
+                  >
+                    <Linkedin size={20} />
+                    LinkedIn Profile
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Sandeep Gupta */}
+            <div className="founder-card">
+              <div className="founder-header">
+                <div className="founder-avatar">
+                  <AvatarImage image={sandeep} />
+                </div>
+                <div className="founder-title">
+                  <h2>Sandeep Gupta</h2>
+                  <p className="founder-role">Advisor — AI, Cybersecurity &amp; Privacy</p>
+                </div>
+              </div>
+              <div className="founder-content">
+                <p className="founder-bio">
+                  Sandeep Gupta is a researcher and software architect with 20+ years of 
+                  experience in AI/ML, biometrics, cybersecurity, and IoT. He has contributed 
+                  to multiple EU H2020 research projects and held senior roles at Samsung and 
+                  Accenture, bringing deep expertise in privacy-preserving AI systems.
+                </p>
+                <div className="founder-highlights">
+                  <div className="highlight-item">
+                    <Briefcase size={20} />
+                    <div>
+                      <strong>Experience</strong>
+                      <p>
+                        Researcher — EU H2020 Projects (CyberSec4Europe, E-Corridor, Collabs)<br />
+                        Former Samsung Certified Architect<br />
+                        Former Accenture Certified Technical Architect (top 1%)
+                      </p>
+                    </div>
+                  </div>
+                  <div className="highlight-item">
+                    <Award size={20} />
+                    <div>
+                      <strong>Expertise</strong>
+                      <p>AI/ML, Behavioral Biometrics, Cybersecurity, Edge Computing, Privacy Engineering</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="founder-links">
+                  <a
+                    href="https://www.linkedin.com/in/sandeepgupta26/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="founder-link"
+                  >
+                    <Linkedin size={20} />
+                    LinkedIn Profile
+                  </a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Why Healthcare AI ─── */}
+      <section className="founders-content" style={{ paddingTop: 0 }}>
+        <div className="container">
           <div className="founders-story">
             <h2>Why Healthcare AI? Why Now?</h2>
             <div className="why-section">
@@ -194,6 +370,11 @@ export function FoundersPage() {
                 <strong>Deep AI/Engineering Experience:</strong> Amulya's 20+ years building 
                 large-scale AI systems at companies like Amazon means we can deliver enterprise-grade 
                 solutions that actually scale.
+              </p>
+              <p>
+                <strong>Multidisciplinary Advisory Team:</strong> From oncoplastic surgery and 
+                public health nutrition to cybersecurity and privacy engineering, our advisors 
+                ensure every dimension of patient care and data safety is covered.
               </p>
               <p>
                 <strong>Vision for Responsible AI:</strong> We're building AI that's not just 

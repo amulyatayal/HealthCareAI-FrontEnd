@@ -15,7 +15,8 @@ export function WebsiteApp() {
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/services" element={<ServicesPage />} />
-        <Route path="/founders" element={<FoundersPage />} />
+        <Route path="/team" element={<FoundersPage />} />
+        <Route path="/founders" element={<FoundersPage />} /> {/* backward compat */}
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />

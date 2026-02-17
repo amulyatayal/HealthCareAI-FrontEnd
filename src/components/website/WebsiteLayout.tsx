@@ -69,11 +69,11 @@ export function WebsiteLayout({ children }: WebsiteLayoutProps) {
               </li>
               <li>
                 <Link
-                  to={getLinkPath('/founders')}
-                  className={isActive('/founders') ? 'active' : ''}
+                  to={getLinkPath('/team')}
+                  className={isActive('/team') ? 'active' : ''}
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Founders
+                  Team
                 </Link>
               </li>
               <li>
@@ -116,7 +116,7 @@ export function WebsiteLayout({ children }: WebsiteLayoutProps) {
             <h4>Quick Links</h4>
             <Link to={getLinkPath('/about')}>About</Link>
             <Link to={getLinkPath('/services')}>Services</Link>
-            <Link to={getLinkPath('/founders')}>Founders</Link>
+            <Link to={getLinkPath('/team')}>Team</Link>
             <Link to={getLinkPath('/contact')}>Contact</Link>
           </div>
           <div className="footer-section">
