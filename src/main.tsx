@@ -52,7 +52,7 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { error: Error
   }
 }
 
-// Set favicon based on domain so mytara shows heart, anvega shows anvega icon
+// Set favicon and page title based on domain
 function FaviconSwitcher() {
   const location = useLocation()
   const domain = detectDomain()
@@ -62,6 +62,9 @@ function FaviconSwitcher() {
       link.href = domain === 'anvega' ? FAVICON_ANVEGA : FAVICON_TARA
       link.type = domain === 'anvega' ? 'image/png' : 'image/svg+xml'
     }
+    document.title = domain === 'anvega'
+      ? 'anvega.ai — AI Solutions for Healthcare'
+      : 'Tara — Your AI Health Companion'
   }, [domain, location.search])
   return null
 }
