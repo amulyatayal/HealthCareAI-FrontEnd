@@ -19,10 +19,11 @@ function AvatarImage({ image }: { image: TeamMemberImage & { onError: () => void
 
 export function FoundersPage() {
   const amulya = useImageFallback('/founders/amulya-tayal.jpg', 'Amulya Tayal')
-  const shweta = useImageFallback('/founders/shweta-aggarwal.jpg', 'Ms. Shweta Aggarwal')
-  const sekhar = useImageFallback('/founders/sekhar-marla.jpg', 'Mr. Sekhar Marla')
+  const shweta = useImageFallback('/founders/shweta-aggarwal.jpg', 'Dr. Shweta Aggarwal')
+  const sekhar = useImageFallback('/founders/sekhar-marla.jpg', 'Dr. Sekhar Marla')
   const joyeta = useImageFallback('/founders/joyeta-ghosh.jpg', 'Dr. Joyeta Ghosh')
-  const sandeep = useImageFallback('/founders/sandeep-gupta.jpg', 'Sandeep Gupta')
+  const sandeep = useImageFallback('/founders/sandeep-gupta.jpg', 'Dr. Sandeep Gupta')
+  const sanjay = useImageFallback('/founders/sanjay-kinra.jpg', 'Prof. Sanjay Kinra')
 
   return (
     <div className="founders-page">
@@ -102,13 +103,13 @@ export function FoundersPage() {
                   <AvatarImage image={shweta} />
                 </div>
                 <div className="founder-title">
-                  <h2>Ms. Shweta Aggarwal</h2>
+                  <h2>Dr. Shweta Aggarwal</h2>
                   <p className="founder-role">Founder &amp; Chief Executive Officer</p>
                 </div>
               </div>
               <div className="founder-content">
                 <p className="founder-bio">
-                  Ms. Shweta Aggarwal is a Board Certified Plastic Surgeon with 
+                  Dr. Shweta Aggarwal is a Board Certified Plastic Surgeon with 
                   extensive clinical experience and a passion for healthcare innovation. 
                   As an NHS Clinical Entrepreneur and Honorary Senior Lecturer at Queen 
                   Mary University of London, she bridges the gap between clinical 
@@ -165,22 +166,88 @@ export function FoundersPage() {
       <section className="founders-content" style={{ paddingTop: 0 }}>
         <div className="container">
           <h2 className="section-heading">Clinical &amp; Advisory Team</h2>
-          <div className="founders-grid founders-grid-three">
+          <div className="founders-grid">
 
-            {/* Mr. Sekhar Marla */}
+            {/* Prof. Sanjay Kinra — first */}
+            <div className="founder-card">
+              <div className="founder-header">
+                <div className="founder-avatar">
+                  <AvatarImage image={sanjay} />
+                </div>
+                <div className="founder-title">
+                  <h2>Prof. Sanjay Kinra</h2>
+                  <p className="founder-role">Advisor — AI in Global Health &amp; Clinical Epidemiology</p>
+                </div>
+              </div>
+              <div className="founder-content">
+                <p className="founder-bio">
+                  Prof. Sanjay Kinra is Professor of Clinical Epidemiology at the London School
+                  of Hygiene &amp; Tropical Medicine (LSHTM) with over 27 years of experience.
+                  He heads a group on AI in Global Health and Health Care, developing novel methods
+                  for geographical and cultural alignment of AI for primary and preventive healthcare.
+                  He is also an Honorary Consultant in Public Health Medicine at the Department of
+                  Health and Social Care, and a former Visiting Scholar at Microsoft Research.
+                </p>
+                <div className="founder-highlights">
+                  <div className="highlight-item">
+                    <Briefcase size={20} />
+                    <div>
+                      <strong>Experience</strong>
+                      <p>
+                        Professor of Clinical Epidemiology, LSHTM<br />
+                        Honorary Consultant, Dept. of Health &amp; Social Care<br />
+                        Former Visiting Scholar, Microsoft Research<br />
+                        Former Committee Member, NICE
+                      </p>
+                    </div>
+                  </div>
+                  <div className="highlight-item">
+                    <GraduationCap size={20} />
+                    <div>
+                      <strong>Credentials</strong>
+                      <p>
+                        PhD Epidemiology, University of Bristol<br />
+                        MD Paediatrics, Maulana Azad Medical College<br />
+                        MSc Epidemiology, LSHTM
+                      </p>
+                    </div>
+                  </div>
+                  <div className="highlight-item">
+                    <Award size={20} />
+                    <div>
+                      <strong>Expertise</strong>
+                      <p>AI in Global Health, Clinical Epidemiology, Public Health, Chronic Disease Prevention</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="founder-links">
+                  <a
+                    href="https://www.linkedin.com/in/sanjaykinra/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="founder-link"
+                  >
+                    <Linkedin size={20} />
+                    LinkedIn Profile
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Dr. Sekhar Marla */}
             <div className="founder-card">
               <div className="founder-header">
                 <div className="founder-avatar">
                   <AvatarImage image={sekhar} />
                 </div>
                 <div className="founder-title">
-                  <h2>Mr. Sekhar Marla</h2>
+                  <h2>Dr. Sekhar Marla</h2>
                   <p className="founder-role">Clinical Advisor — Oncoplastic Breast Surgery</p>
                 </div>
               </div>
               <div className="founder-content">
                 <p className="founder-bio">
-                  Mr. Sekhar Marla is a Consultant Oncoplastic Breast Surgeon at University
+                  Dr. Sekhar Marla is a Consultant Oncoplastic Breast Surgeon at University
                   Hospital of North Midlands (NHS) with over 15 years of clinical experience.
                   He brings deep surgical expertise and a commitment to advancing breast
                   cancer care through innovation and education.
@@ -227,7 +294,7 @@ export function FoundersPage() {
                 </div>
                 <div className="founder-title">
                   <h2>Dr. Joyeta Ghosh</h2>
-                  <p className="founder-role">Advisor — Public Health Nutrition &amp; AI</p>
+                  <p className="founder-role">Assistant Professor — Public Health Nutrition &amp; AI</p>
                 </div>
               </div>
               <div className="founder-content">
@@ -281,20 +348,20 @@ export function FoundersPage() {
               </div>
             </div>
 
-            {/* Sandeep Gupta */}
+            {/* Dr. Sandeep Gupta */}
             <div className="founder-card">
               <div className="founder-header">
                 <div className="founder-avatar">
                   <AvatarImage image={sandeep} />
                 </div>
                 <div className="founder-title">
-                  <h2>Sandeep Gupta</h2>
+                  <h2>Dr. Sandeep Gupta</h2>
                   <p className="founder-role">Advisor — AI, Cybersecurity &amp; Privacy</p>
                 </div>
               </div>
               <div className="founder-content">
                 <p className="founder-bio">
-                  Sandeep Gupta is a researcher and software architect with 20+ years of 
+                  Dr. Sandeep Gupta is a researcher and software architect with 20+ years of 
                   experience in AI/ML, biometrics, cybersecurity, and IoT. He has contributed 
                   to multiple EU H2020 research projects and held senior roles at Samsung and 
                   Accenture, bringing deep expertise in privacy-preserving AI systems.
@@ -363,7 +430,7 @@ export function FoundersPage() {
             <div className="why-section">
               <h3>Why Us?</h3>
               <p>
-                <strong>Clinical Credibility:</strong> Ms. Shweta brings real-world clinical 
+                <strong>Clinical Credibility:</strong> Dr. Shweta brings real-world clinical 
                 experience and understands patient needs from the front lines of care.
               </p>
               <p>
