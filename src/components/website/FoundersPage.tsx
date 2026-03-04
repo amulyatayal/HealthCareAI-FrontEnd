@@ -41,6 +41,72 @@ export function FoundersPage() {
         <div className="container">
           <h2 className="section-heading">Founders</h2>
           <div className="founders-grid">
+            {/* Dr. Shweta Aggarwal */}
+            <div className="founder-card">
+              <div className="founder-header">
+                <div className="founder-avatar">
+                  <AvatarImage image={shweta} />
+                </div>
+                <div className="founder-title">
+                  <h2>Dr. Shweta Aggarwal</h2>
+                  <p className="founder-role">Founder</p>
+                </div>
+              </div>
+              <div className="founder-content">
+                <p className="founder-bio">
+                  Dr. Shweta Aggarwal is a Board-Certified Plastic Surgeon with over 25 years
+                  of clinical experience spanning two continents. As an NHS Clinical Entrepreneur
+                  and alumna of the LBS Entrepreneurs Edge programme, she combines deep surgical
+                  expertise with innovation-driven entrepreneurship. A patent-pending inventor,
+                  Dr. Aggarwal holds the position of Honorary Senior Lecturer at Queen Mary
+                  University of London. Her work is focused on translating evidence-based medicine
+                  into transformative solutions for cancer patients and survivors.
+                </p>
+                <div className="founder-highlights">
+                  <div className="highlight-item">
+                    <Briefcase size={20} />
+                    <div>
+                      <strong>Experience</strong>
+                      <p>
+                        Consultant Plastic Surgeon, Barts Health NHS Trust<br />
+                        Honorary Senior Lecturer, Queen Mary University of London<br />
+                        NHS Clinical Entrepreneur Programme<br />
+                        LBS Entrepreneurs Edge Programme
+                      </p>
+                    </div>
+                  </div>
+                  <div className="highlight-item">
+                    <Award size={20} />
+                    <div>
+                      <strong>Specialization</strong>
+                      <p>
+                        Plastic Surgery, Oncoplastic Breast Surgery,<br />
+                        Healthcare Innovation, Clinical Entrepreneurship
+                      </p>
+                    </div>
+                  </div>
+                  <div className="highlight-item">
+                    <GraduationCap size={20} />
+                    <div>
+                      <strong>Credentials</strong>
+                      <p>FRCS (Plast), Board-Certified Plastic Surgeon</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="founder-links">
+                  <a
+                    href="https://www.linkedin.com/in/shweta-aggarwal-b7198123/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="founder-link"
+                  >
+                    <Linkedin size={20} />
+                    LinkedIn Profile
+                  </a>
+                </div>
+              </div>
+            </div>
+
             {/* Amulya Tayal */}
             <div className="founder-card">
               <div className="founder-header">
@@ -49,7 +115,7 @@ export function FoundersPage() {
                 </div>
                 <div className="founder-title">
                   <h2>Amulya Tayal</h2>
-                  <p className="founder-role">Founder &amp; Chief Technology Officer</p>
+                  <p className="founder-role">Founder</p>
                 </div>
               </div>
               <div className="founder-content">
@@ -85,69 +151,6 @@ export function FoundersPage() {
                 <div className="founder-links">
                   <a
                     href="https://www.linkedin.com/in/amulya-tayal-931976a/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="founder-link"
-                  >
-                    <Linkedin size={20} />
-                    LinkedIn Profile
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Ms. Shweta Aggarwal */}
-            <div className="founder-card">
-              <div className="founder-header">
-                <div className="founder-avatar">
-                  <AvatarImage image={shweta} />
-                </div>
-                <div className="founder-title">
-                  <h2>Dr. Shweta Aggarwal</h2>
-                  <p className="founder-role">Founder &amp; Chief Executive Officer</p>
-                </div>
-              </div>
-              <div className="founder-content">
-                <p className="founder-bio">
-                  Dr. Shweta Aggarwal is a Board Certified Plastic Surgeon with 
-                  extensive clinical experience and a passion for healthcare innovation. 
-                  As an NHS Clinical Entrepreneur and Honorary Senior Lecturer at Queen 
-                  Mary University of London, she bridges the gap between clinical 
-                  practice and technology innovation.
-                </p>
-                <div className="founder-highlights">
-                  <div className="highlight-item">
-                    <Briefcase size={20} />
-                    <div>
-                      <strong>Experience</strong>
-                      <p>
-                        Consultant Plastic Surgeon, Barts Health NHS Trust<br />
-                        Honorary Senior Lecturer, Queen Mary University of London<br />
-                        NHS Clinical Entrepreneur Programme
-                      </p>
-                    </div>
-                  </div>
-                  <div className="highlight-item">
-                    <Award size={20} />
-                    <div>
-                      <strong>Specialization</strong>
-                      <p>
-                        Plastic Surgery, Oncoplastic Breast Surgery,<br />
-                        Healthcare Innovation, Clinical Entrepreneurship
-                      </p>
-                    </div>
-                  </div>
-                  <div className="highlight-item">
-                    <GraduationCap size={20} />
-                    <div>
-                      <strong>Credentials</strong>
-                      <p>FRCS (Plast), Board Certified Plastic Surgeon</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="founder-links">
-                  <a
-                    href="https://www.linkedin.com/in/shweta-aggarwal-b7198123/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="founder-link"
