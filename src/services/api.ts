@@ -672,5 +672,21 @@ export async function deleteMyAccount(confirmation: string): Promise<{ message: 
   return fetchJson(`${API_BASE_V2}/me`, { method: 'DELETE', body: JSON.stringify({ confirmation }) });
 }
 
+// ================================
+// Patient-facing Resources API (v2)
+// ================================
+
+export interface PatientResource {
+  title: string;
+  description: string;
+  url: string;
+  type: 'pdf' | 'video' | 'link';
+  intents: string[];
+}
+
+export async function getResourcesForStage(stageId: string): Promise<{ resources: PatientResource[] }> {
+  return fetchJson(`${API_BASE_V2}/resources?stage_id=${encodeURIComponent(stageId)}`);
+}
+
 export { ApiError };
 

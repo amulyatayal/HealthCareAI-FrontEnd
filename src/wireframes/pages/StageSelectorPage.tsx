@@ -56,7 +56,12 @@ export function StageSelectorPage() {
   }
 
   const handleSave = () => {
-    // In a real app: persist path (e.g. API call), then navigate
+    // Persist to localStorage so dashboard can show stage-matched resources.
+    // When the backend is ready, this will be an API call instead.
+    if (path.length > 0) {
+      localStorage.setItem('patient_stage_path', JSON.stringify(path))
+      window.dispatchEvent(new StorageEvent('storage', { key: 'patient_stage_path' }))
+    }
     navigate(`${base}/profile`)
   }
 

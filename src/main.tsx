@@ -9,6 +9,7 @@ import { PrivacyPolicy } from './components/legal/PrivacyPolicy'
 import { TermsOfService } from './components/legal/TermsOfService'
 
 import { LogoutRoute } from './components/LogoutRoute'
+import { AdminApp } from './admin/AdminApp'
 import { AuthProvider } from './contexts/AuthContext'
 import { detectDomain } from './utils/domainDetector'
 import { useEffect } from 'react'
@@ -73,6 +74,15 @@ function FaviconSwitcher() {
 function AppRouter() {
   const location = useLocation()
   const domain = detectDomain()
+
+  // Admin portal — accessible on any domain at /admin
+  if (location.pathname.startsWith('/admin')) {
+    return (
+      <Routes>
+        <Route path="/admin/*" element={<AdminApp />} />
+      </Routes>
+    )
+  }
 
   // Always prioritize /demo routes - show WireframeApp regardless of domain
   if (location.pathname.startsWith('/demo')) {

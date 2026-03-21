@@ -6,8 +6,26 @@ import { WireframeCard } from '../components'
 import { useBasePath } from '../hooks/useBasePath'
 import { youtubeToEmbedUrl } from '../utils/youtubeEmbed'
 import { useAuth } from '../../contexts/AuthContext'
+import type { PatientResource } from '../../services/api'
 
-const RESOURCE_CATEGORIES = [
+interface ResourceCategory {
+  id: string
+  title: string
+  iconBg: string
+  iconColor: string
+  Icon: typeof Video | typeof FileText | typeof Brain | typeof UtensilsCrossed | typeof ExternalLink
+  links: { label: string; url: string; type: 'video' | 'pdf' | 'link' }[]
+}
+
+const ICON_ROTATION: { Icon: typeof Video | typeof FileText | typeof Brain | typeof UtensilsCrossed | typeof ExternalLink; bg: string; color: string }[] = [
+  { Icon: Video, bg: 'linear-gradient(135deg, #dbeafe, #eff6ff)', color: '#2563eb' },
+  { Icon: FileText, bg: 'linear-gradient(135deg, #fef3c7, #fffbeb)', color: '#d97706' },
+  { Icon: Brain, bg: 'linear-gradient(135deg, #f3e8ff, #faf5ff)', color: '#9333ea' },
+  { Icon: UtensilsCrossed, bg: 'linear-gradient(135deg, #dcfce7, #f0fdf4)', color: '#16a34a' },
+  { Icon: ExternalLink, bg: 'linear-gradient(135deg, #fce7f3, #fdf2f8)', color: '#db2777' },
+]
+
+const FALLBACK_CATEGORIES: ResourceCategory[] = [
   {
     id: 'procedure',
     title: 'Information about procedure',
@@ -51,7 +69,39 @@ const RESOURCE_CATEGORIES = [
       { label: 'Diet (PDF leaflet)', url: 'https://sthk.merseywestlancs.nhs.uk/media/.leaflets/606ec25be26520.16511553.pdf', type: 'pdf' as const },
     ],
   },
-] as const
+]
+
+function patientResourcesToCategories(resources: PatientResource[]): ResourceCategory[] {
+  const grouped = new Map<string, PatientResource[]>()
+  for (const r of resources) {
+    const key = r.description || 'Resources'
+    if (!grouped.has(key)) grouped.set(key, [])
+    grouped.get(key)!.push(r)
+  }
+  const categories: ResourceCategory[] = []
+  let i = 0
+  for (const [desc, items] of grouped) {
+    const style = ICON_ROTATION[i % ICON_ROTATION.length]
+    categories.push({
+      id: `dynamic-${i}`,
+      title: desc,
+      iconBg: style.bg,
+      iconColor: style.color,
+      Icon: style.Icon,
+      links: items.map((r) => ({ label: r.title, url: r.url, type: r.type })),
+    })
+    i++
+  }
+  return categories
+}
+
+function getPatientStageIds(): string[] {
+  try {
+    const raw = localStorage.getItem('patient_stage_path')
+    if (raw) return JSON.parse(raw) as string[]
+  } catch { /* ignore */ }
+  return []
+}
 
 // Default mock data for offline / pre-backend usage
 const MOCK_DASHBOARD: {
@@ -90,6 +140,27 @@ export function DashboardPage() {
   const firstName = user?.name?.split(' ')[0] || 'there'
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
   const [dashboard, setDashboard] = useState(MOCK_DASHBOARD)
+  const [resourceCategories, setResourceCategories] = useState<ResourceCategory[]>(FALLBACK_CATEGORIES)
+  const [patientStageIds, setPatientStageIds] = useState<string[]>(getPatientStageIds)
+  const hasStageSelected = patientStageIds.length > 0
+
+  // Re-read the stage from localStorage whenever the component mounts or the user navigates back
+  useEffect(() => {
+    setPatientStageIds(getPatientStageIds())
+  }, [])
+
+  // Also re-check on window focus (user may have changed stage in another tab or returned from stage selector)
+  useEffect(() => {
+    function handleFocus() {
+      setPatientStageIds(getPatientStageIds())
+    }
+    window.addEventListener('focus', handleFocus)
+    window.addEventListener('storage', handleFocus)
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      window.removeEventListener('storage', handleFocus)
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -105,6 +176,114 @@ export function DashboardPage() {
     load()
     return () => { cancelled = true }
   }, [])
+
+  const stageKey = patientStageIds.join(',')
+  useEffect(() => {
+    if (!hasStageSelected) {
+      setResourceCategories(FALLBACK_CATEGORIES)
+      return
+    }
+    let cancelled = false
+    const leafStageId = patientStageIds[patientStageIds.length - 1]
+
+    // Demo resource data -- used when no backend and no admin-saved resources in localStorage.
+    // This mirrors the data a clinician would enter via the admin portal.
+    const DEMO_ADMIN_RESOURCES = [
+      {
+        pathway_stage_ids: ['2', '2.1', '2.1.1', '2.1.1.1', '2.1.1.2', '2.1.1.2.1', '2.1.1.2.2', '2.1.2', '2.1.2.1', '2.1.2.2', '2.1.2.2.1', '2.1.2.2.2'],
+        description: 'Information about your surgery',
+        intents: ['surgery_procedures', 'post_surgery_recovery'],
+        resources: [
+          { title: 'Information on the procedure (video)', url: 'https://youtu.be/zeMr6XaoTEM?si=KUcwJsQ7WsNBY_cr', type: 'video' as const },
+          { title: 'Barts chest wall perforator flap PIF (PDF)', url: 'https://drive.google.com/file/d/1TcJlT72dojrOCe8Z3OIxsfTSga4-tYF_/view?usp=drive_link', type: 'pdf' as const },
+        ],
+      },
+      {
+        pathway_stage_ids: ['2', '2.1', '2.1.1', '2.1.1.1', '2.1.1.2', '2.1.2', '2.1.2.1', '2.1.2.2', '5', '5.1', '5.2', '6', '7', '8'],
+        description: 'Exercises after surgery',
+        intents: ['exercise', 'post_surgery_recovery'],
+        resources: [
+          { title: 'Exercises after breast cancer surgery (PDF)', url: 'https://breastcancernow.org/media-assets/dmbpk1rz/bcc6-excercises-after-breast-cancer-surgery-web-pdf.pdf', type: 'pdf' as const },
+          { title: 'Exercise (short video)', url: 'https://www.youtube.com/shorts/haDyGVRpQzo', type: 'video' as const },
+        ],
+      },
+      {
+        pathway_stage_ids: ['0', '1', '1.1', '1.2', '1.3', '2', '3', '4', '5', '5.1', '5.2', '6', '7', '8', '9', '10'],
+        description: 'Mental health & wellbeing',
+        intents: ['emotional_support'],
+        resources: [
+          { title: 'Mental health (video)', url: 'https://www.youtube.com/watch?v=AKCmdHN9JX8', type: 'video' as const },
+          { title: 'Body image (Macmillan)', url: 'https://cdn.macmillan.org.uk/dfsmedia/1a6f23537f7f4519bb0cf14c45b2a629/791-source/body-image-mac14192', type: 'link' as const },
+        ],
+      },
+      {
+        pathway_stage_ids: ['2', '2.1', '2.1.1', '2.1.2', '3', '5', '5.1', '5.2', '6', '7', '8', '9', '10'],
+        description: 'Diet & nutrition',
+        intents: ['nutrition'],
+        resources: [
+          { title: 'Diet (PDF leaflet)', url: 'https://sthk.merseywestlancs.nhs.uk/media/.leaflets/606ec25be26520.16511553.pdf', type: 'pdf' as const },
+        ],
+      },
+    ]
+
+    function matchResources(adminItems: typeof DEMO_ADMIN_RESOURCES): PatientResource[] {
+      const matched: PatientResource[] = []
+      for (const item of adminItems) {
+        if (patientStageIds.some((id) => item.pathway_stage_ids.includes(id))) {
+          for (const r of item.resources) {
+            matched.push({
+              title: r.title,
+              description: item.description,
+              url: r.url,
+              type: r.type,
+              intents: item.intents,
+            })
+          }
+        }
+      }
+      return matched
+    }
+
+    async function loadResources() {
+      // Try backend first
+      try {
+        const { getResourcesForStage } = await import('../../services/api')
+        const data = await getResourcesForStage(leafStageId)
+        if (!cancelled && data.resources.length > 0) {
+          setResourceCategories(patientResourcesToCategories(data.resources))
+          return
+        }
+      } catch { /* backend not available */ }
+
+      if (cancelled) return
+
+      // Fall back to locally-stored admin resources (saved from admin portal)
+      try {
+        const adminDataRaw = localStorage.getItem('admin_pathway_resources')
+        if (adminDataRaw) {
+          const adminItems = JSON.parse(adminDataRaw)
+          const matched = matchResources(adminItems)
+          if (matched.length > 0) {
+            setResourceCategories(patientResourcesToCategories(matched))
+            return
+          }
+        }
+      } catch { /* ignore */ }
+
+      if (cancelled) return
+
+      // Fall back to built-in demo data (stage-aware matching)
+      const matched = matchResources(DEMO_ADMIN_RESOURCES)
+      if (matched.length > 0) {
+        setResourceCategories(patientResourcesToCategories(matched))
+      } else {
+        setResourceCategories(FALLBACK_CATEGORIES)
+      }
+    }
+
+    loadResources()
+    return () => { cancelled = true }
+  }, [stageKey])
 
   return (
     <WireframeLayout>
@@ -245,12 +424,19 @@ export function DashboardPage() {
       {/* Associated leaflets and material */}
       <div className="wf-section-header">
         <span className="wf-section-title">Resources for your pathway</span>
+        {!hasStageSelected && (
+          <Link to={`${base}/profile/stage`} style={{ fontSize: 12, color: 'var(--wf-rose-500)', textDecoration: 'none' }}>
+            Set your pathway
+          </Link>
+        )}
       </div>
       <p style={{ fontSize: '13px', color: 'var(--wf-gray-600)', marginBottom: '12px' }}>
-        Videos play in the app; PDFs and links open in a new tab.
+        {hasStageSelected
+          ? 'Videos play in the app; PDFs and links open in a new tab.'
+          : 'Set your treatment pathway to see personalised resources from your clinical team.'}
       </p>
       <WireframeCard>
-        {RESOURCE_CATEGORIES.map((cat) => {
+        {resourceCategories.map((cat) => {
           const isExpanded = expandedCategory === cat.id
           return (
             <div key={cat.id} style={{ borderBottom: '1px solid var(--wf-gray-100)' }}>
