@@ -1,37 +1,21 @@
-import { Video, FileText, Brain, UtensilsCrossed, ExternalLink } from 'lucide-react'
+import { Video, Brain, UtensilsCrossed, Dumbbell, Shirt, ClipboardCheck } from 'lucide-react'
 import type { PatientResource } from '../../../services/api'
-import type { ResourceCategory } from '../types'
+import type { ResourceCategory, ResourceLink } from '../types'
 
-export const ICON_ROTATION: { Icon: typeof Video | typeof FileText | typeof Brain | typeof UtensilsCrossed | typeof ExternalLink; bg: string; color: string }[] = [
-  { Icon: Video, bg: 'linear-gradient(135deg, #dbeafe, #eff6ff)', color: '#2563eb' },
-  { Icon: FileText, bg: 'linear-gradient(135deg, #fef3c7, #fffbeb)', color: '#d97706' },
-  { Icon: Brain, bg: 'linear-gradient(135deg, #f3e8ff, #faf5ff)', color: '#9333ea' },
-  { Icon: UtensilsCrossed, bg: 'linear-gradient(135deg, #dcfce7, #f0fdf4)', color: '#16a34a' },
-  { Icon: ExternalLink, bg: 'linear-gradient(135deg, #fce7f3, #fdf2f8)', color: '#db2777' },
-]
-
-export const FALLBACK_CATEGORIES: ResourceCategory[] = [
+const CATEGORY_DEFINITIONS: Omit<ResourceCategory, 'links'>[] = [
   {
     id: 'procedure',
     title: 'Information about procedure',
     iconBg: 'linear-gradient(135deg, #dbeafe, #eff6ff)',
     iconColor: '#2563eb',
     Icon: Video,
-    links: [
-      { label: 'Information on the procedure (video)', url: 'https://youtu.be/zeMr6XaoTEM?si=KUcwJsQ7WsNBY_cr', type: 'video' },
-      { label: 'Barts chest wall perforator flap PIF (PDF)', url: 'https://drive.google.com/file/d/1TcJlT72dojrOCe8Z3OIxsfTSga4-tYF_/view?usp=drive_link', type: 'pdf' },
-    ],
   },
   {
     id: 'exercises',
     title: 'Exercises',
     iconBg: 'linear-gradient(135deg, #fef3c7, #fffbeb)',
     iconColor: '#d97706',
-    Icon: FileText,
-    links: [
-      { label: 'Exercises after breast cancer surgery (PDF)', url: 'https://breastcancernow.org/media-assets/dmbpk1rz/bcc6-excercises-after-breast-cancer-surgery-web-pdf.pdf', type: 'pdf' },
-      { label: 'Exercise (short video)', url: 'https://www.youtube.com/shorts/haDyGVRpQzo', type: 'video' },
-    ],
+    Icon: Dumbbell,
   },
   {
     id: 'mental-health',
@@ -39,10 +23,6 @@ export const FALLBACK_CATEGORIES: ResourceCategory[] = [
     iconBg: 'linear-gradient(135deg, #f3e8ff, #faf5ff)',
     iconColor: '#9333ea',
     Icon: Brain,
-    links: [
-      { label: 'Mental health (video)', url: 'https://www.youtube.com/watch?v=AKCmdHN9JX8', type: 'video' },
-      { label: 'Body image (Macmillan)', url: 'https://cdn.macmillan.org.uk/dfsmedia/1a6f23537f7f4519bb0cf14c45b2a629/791-source/body-image-mac14192', type: 'link' },
-    ],
   },
   {
     id: 'diet',
@@ -50,6 +30,68 @@ export const FALLBACK_CATEGORIES: ResourceCategory[] = [
     iconBg: 'linear-gradient(135deg, #dcfce7, #f0fdf4)',
     iconColor: '#16a34a',
     Icon: UtensilsCrossed,
+  },
+  {
+    id: 'follow-up-care',
+    title: 'Follow-up care',
+    iconBg: 'linear-gradient(135deg, #e0f2fe, #f0f9ff)',
+    iconColor: '#0891b2',
+    Icon: ClipboardCheck,
+  },
+  {
+    id: 'lifestyle',
+    title: 'Lifestyle',
+    iconBg: 'linear-gradient(135deg, #fce7f3, #fdf2f8)',
+    iconColor: '#db2777',
+    Icon: Shirt,
+  },
+]
+
+const INTENT_TO_CATEGORY: Record<string, string> = {
+  symptoms: 'procedure',
+  surgery_procedures: 'procedure',
+  drains_wound_care: 'procedure',
+  cancer_treatment: 'procedure',
+  medication_info: 'procedure',
+  side_effects: 'procedure',
+  pre_surgery_prehab: 'procedure',
+  post_surgery_recovery: 'procedure',
+  diagnosis_testing: 'procedure',
+  safety_red_flags: 'procedure',
+  statistics: 'procedure',
+  admin_logistics: 'procedure',
+  unknown: 'procedure',
+  exercise: 'exercises',
+  emotional_support: 'mental-health',
+  nutrition: 'diet',
+  follow_up_care: 'follow-up-care',
+  clothing: 'lifestyle',
+}
+
+export const FALLBACK_CATEGORIES: ResourceCategory[] = [
+  {
+    ...CATEGORY_DEFINITIONS[0],
+    links: [
+      { label: 'Information on the procedure (video)', url: 'https://youtu.be/zeMr6XaoTEM?si=KUcwJsQ7WsNBY_cr', type: 'video' },
+      { label: 'Barts chest wall perforator flap PIF (PDF)', url: 'https://drive.google.com/file/d/1TcJlT72dojrOCe8Z3OIxsfTSga4-tYF_/view?usp=drive_link', type: 'pdf' },
+    ],
+  },
+  {
+    ...CATEGORY_DEFINITIONS[1],
+    links: [
+      { label: 'Exercises after breast cancer surgery (PDF)', url: 'https://breastcancernow.org/media-assets/dmbpk1rz/bcc6-excercises-after-breast-cancer-surgery-web-pdf.pdf', type: 'pdf' },
+      { label: 'Exercise (short video)', url: 'https://www.youtube.com/shorts/haDyGVRpQzo', type: 'video' },
+    ],
+  },
+  {
+    ...CATEGORY_DEFINITIONS[2],
+    links: [
+      { label: 'Mental health (video)', url: 'https://www.youtube.com/watch?v=AKCmdHN9JX8', type: 'video' },
+      { label: 'Body image (Macmillan)', url: 'https://cdn.macmillan.org.uk/dfsmedia/1a6f23537f7f4519bb0cf14c45b2a629/791-source/body-image-mac14192', type: 'link' },
+    ],
+  },
+  {
+    ...CATEGORY_DEFINITIONS[3],
     links: [
       { label: 'Diet (PDF leaflet)', url: 'https://sthk.merseywestlancs.nhs.uk/media/.leaflets/606ec25be26520.16511553.pdf', type: 'pdf' },
     ],
@@ -113,26 +155,24 @@ export const MOCK_DASHBOARD = {
   },
 }
 
+function resolveCategoryId(intents: string[]): string {
+  for (const intent of intents) {
+    const catId = INTENT_TO_CATEGORY[intent]
+    if (catId) return catId
+  }
+  return 'procedure'
+}
+
 export function patientResourcesToCategories(resources: PatientResource[]): ResourceCategory[] {
-  const grouped = new Map<string, PatientResource[]>()
+  const buckets = new Map<string, ResourceLink[]>()
+
   for (const r of resources) {
-    const key = r.description || 'Resources'
-    if (!grouped.has(key)) grouped.set(key, [])
-    grouped.get(key)!.push(r)
+    const catId = resolveCategoryId(r.intents)
+    if (!buckets.has(catId)) buckets.set(catId, [])
+    buckets.get(catId)!.push({ label: r.title, url: r.url, type: r.type })
   }
-  const categories: ResourceCategory[] = []
-  let i = 0
-  for (const [desc, items] of grouped) {
-    const style = ICON_ROTATION[i % ICON_ROTATION.length]
-    categories.push({
-      id: `dynamic-${i}`,
-      title: desc,
-      iconBg: style.bg,
-      iconColor: style.color,
-      Icon: style.Icon,
-      links: items.map((r) => ({ label: r.title, url: r.url, type: r.type })),
-    })
-    i++
-  }
-  return categories
+
+  return CATEGORY_DEFINITIONS
+    .filter((def) => buckets.has(def.id))
+    .map((def) => ({ ...def, links: buckets.get(def.id)! }))
 }
