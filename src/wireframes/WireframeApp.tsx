@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import './wireframes.css'
 
 // Pages
-import { DashboardPage } from './pages/DashboardPage'
+import { DashboardPage } from '../features/dashboard'
 import { ChatPage } from './pages/ChatPage'
 import { CommunityChatPage } from './pages/CommunityChatPage'
 import { BasicMoodPage } from './pages/BasicMoodPage'

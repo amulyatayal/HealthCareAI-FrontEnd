@@ -1,4 +1,4 @@
-export { DashboardPage } from './DashboardPage'
+export { DashboardPage } from '../../features/dashboard'
 export { ChatPage } from './ChatPage'
 export { CommunityHub } from './CommunityHub'
 export { HealthHub } from './HealthHub'
