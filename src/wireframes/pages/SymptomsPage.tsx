@@ -4,15 +4,26 @@ import { logSymptom, getSymptomHistory, getSymptomTrends } from '../../services/
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
 
+const SYMPTOM_ICONS: Record<string, string> = {
+  'Fatigue': '😴',
+  'Nausea': '🤢',
+  'Pain': '😣',
+  'Appetite Loss': '🍽️',
+  'Insomnia': '🌙',
+  'Anxiety': '😰',
+  'Brain Fog': '🌫️',
+  'Joint Pain': '🦴',
+}
+
 const commonSymptoms = [
-  { id: 1, name: 'Fatigue', icon: '😴', tracked: true },
-  { id: 2, name: 'Nausea', icon: '🤢', tracked: true },
-  { id: 3, name: 'Pain', icon: '😣', tracked: true },
-  { id: 4, name: 'Appetite Loss', icon: '🍽️', tracked: false },
-  { id: 5, name: 'Insomnia', icon: '🌙', tracked: true },
-  { id: 6, name: 'Anxiety', icon: '😰', tracked: false },
-  { id: 7, name: 'Brain Fog', icon: '🌫️', tracked: false },
-  { id: 8, name: 'Joint Pain', icon: '🦴', tracked: true },
+  { id: 1, name: 'Fatigue', icon: '😴' },
+  { id: 2, name: 'Nausea', icon: '🤢' },
+  { id: 3, name: 'Pain', icon: '😣' },
+  { id: 4, name: 'Appetite Loss', icon: '🍽️' },
+  { id: 5, name: 'Insomnia', icon: '🌙' },
+  { id: 6, name: 'Anxiety', icon: '😰' },
+  { id: 7, name: 'Brain Fog', icon: '🌫️' },
+  { id: 8, name: 'Joint Pain', icon: '🦴' },
 ]
 
 const MOCK_RECENT_LOGS = [
@@ -192,7 +203,10 @@ export function SymptomsPage() {
               borderBottom: '1px solid var(--wf-gray-100)'
             }}
           >
-            <span style={{ fontSize: '15px', color: 'var(--wf-gray-700)' }}>{trend.name}</span>
+            <span style={{ fontSize: '15px', color: 'var(--wf-gray-700)' }}>
+              {SYMPTOM_ICONS[trend.name] && <span style={{ marginRight: '6px' }}>{SYMPTOM_ICONS[trend.name]}</span>}
+              {trend.name}
+            </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               {trend.direction === 'down' && <TrendingDown size={18} style={{ color: '#16a34a' }} />}
               {trend.direction === 'up' && <TrendingUp size={18} style={{ color: '#dc2626' }} />}
@@ -232,7 +246,10 @@ export function SymptomsPage() {
                     borderRadius: symptom.notes ? '8px 8px 0 0' : '8px',
                   }}
                 >
-                  <span style={{ fontSize: '14px', flex: 1 }}>{symptom.name}</span>
+                  <span style={{ fontSize: '14px', flex: 1 }}>
+                    {SYMPTOM_ICONS[symptom.name] && <span style={{ marginRight: '6px' }}>{SYMPTOM_ICONS[symptom.name]}</span>}
+                    {symptom.name}
+                  </span>
                   <span 
                     style={{ 
                       fontSize: '14px',
@@ -261,24 +278,6 @@ export function SymptomsPage() {
           </div>
         </WireframeCard>
       ))}
-
-      {/* Symptoms being tracked */}
-      <WireframeCard title="Tracked Symptoms">
-        <p style={{ fontSize: '13px', color: 'var(--wf-gray-500)', marginBottom: '12px' }}>
-          Tap to add or remove from quick log
-        </p>
-        <div className="wf-bubbles">
-          {commonSymptoms.map((symptom) => (
-            <button
-              key={symptom.id}
-              className={`wf-bubble ${symptom.tracked ? 'selected' : ''}`}
-            >
-              <span style={{ marginRight: '4px' }}>{symptom.icon}</span>
-              {symptom.name}
-            </button>
-          ))}
-        </div>
-      </WireframeCard>
 
       {/* Alert threshold info */}
       <div 
