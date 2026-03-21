@@ -163,14 +163,19 @@
 /* Main content area */
 .wf-main {
   padding: 16px;
-  padding-bottom: 24px;
+  padding-bottom: calc(var(--wf-nav-height) + 24px);
   min-height: calc(100vh - var(--wf-header-height) - var(--wf-nav-height));
 }
 
-/* Bottom Navigation - sticky at bottom of phone frame */
+/* Bottom Navigation - fixed on mobile, flex-pinned on desktop */
 .wf-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   width: 100%;
   max-width: var(--wf-max-width);
+  margin: 0 auto;
   height: var(--wf-nav-height);
   background: white;
   border-top: 1px solid var(--wf-gray-200);
@@ -1278,7 +1283,12 @@
   }
 
   .wf-bottom-nav {
+    position: static;
     border-radius: 0 0 24px 24px;
+  }
+
+  .wf-main {
+    padding-bottom: 24px;
   }
 }
 
