@@ -15,7 +15,9 @@ export function useDashboardData() {
         if (!cancelled) {
           console.info('[Dashboard] Backend returned summary', data)
           setDashboard({
-            wellness_score: data.wellness_score ?? MOCK_DASHBOARD.wellness_score,
+            wellness_score: data.wellness_score != null
+              ? (data.wellness_score <= 10 ? data.wellness_score * 10 : data.wellness_score)
+              : MOCK_DASHBOARD.wellness_score,
             streak_days: data.streak_days ?? MOCK_DASHBOARD.streak_days,
             avg_mood: data.avg_mood ?? MOCK_DASHBOARD.avg_mood,
             trend_direction: data.trend_direction ?? MOCK_DASHBOARD.trend_direction,
