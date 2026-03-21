@@ -169,8 +169,6 @@
 
 /* Bottom Navigation - sticky at bottom of phone frame */
 .wf-bottom-nav {
-  position: sticky;
-  bottom: 0;
   width: 100%;
   max-width: var(--wf-max-width);
   height: var(--wf-nav-height);
