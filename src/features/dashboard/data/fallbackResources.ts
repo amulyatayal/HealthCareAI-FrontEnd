@@ -103,12 +103,9 @@ export const MOCK_DASHBOARD = {
   next_appointment: {
     id: '1',
     title: 'Dr. Thompson - Oncology',
-    clinician_name: 'Dr. Thompson',
-    specialty: 'Oncology',
     date: new Date(Date.now() + 86400000).toISOString(),
     time: '10:30 AM',
     location: 'City Hospital, Room 302',
-    reminder_set: true,
   },
   daily_quote: {
     text: 'Every day may not be good, but there is something good in every day.',

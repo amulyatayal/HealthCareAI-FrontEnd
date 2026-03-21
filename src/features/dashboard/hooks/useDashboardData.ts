@@ -14,7 +14,15 @@ export function useDashboardData() {
         const data = await getDashboardSummary()
         if (!cancelled) {
           console.info('[Dashboard] Backend returned summary', data)
-          setDashboard(data)
+          setDashboard({
+            wellness_score: data.wellness_score ?? MOCK_DASHBOARD.wellness_score,
+            streak_days: data.streak_days ?? MOCK_DASHBOARD.streak_days,
+            avg_mood: data.avg_mood ?? MOCK_DASHBOARD.avg_mood,
+            trend_direction: data.trend_direction ?? MOCK_DASHBOARD.trend_direction,
+            trend_percentage: data.trend_percentage ?? MOCK_DASHBOARD.trend_percentage,
+            next_appointment: data.next_appointment ?? MOCK_DASHBOARD.next_appointment,
+            daily_quote: data.daily_quote ?? MOCK_DASHBOARD.daily_quote,
+          })
         }
       } catch (err) {
         console.info('[Dashboard] Backend unavailable, using mock data', err)

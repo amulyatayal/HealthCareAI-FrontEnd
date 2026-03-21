@@ -11,9 +11,9 @@ export function WellnessStats({ dashboard }: Props) {
   return (
     <div className="wf-grid-2">
       <WireframeCard style={{ textAlign: 'center', padding: '20px 12px' }}>
-        <div className="wf-score-ring" style={{ '--score': dashboard.wellness_score } as React.CSSProperties}>
+        <div className="wf-score-ring" style={{ '--score': dashboard.wellness_score ?? 0 } as React.CSSProperties}>
           <div className="ring-inner">
-            <span className="score-value">{dashboard.wellness_score}</span>
+            <span className="score-value">{dashboard.wellness_score ?? 0}</span>
             <span className="score-label">Score</span>
           </div>
         </div>
@@ -35,7 +35,7 @@ export function WellnessStats({ dashboard }: Props) {
             😊
           </div>
           <div>
-            <div style={{ fontSize: '20px', fontWeight: '700', color: 'var(--wf-gray-800)' }}>{dashboard.avg_mood.toFixed(1)}</div>
+            <div style={{ fontSize: '20px', fontWeight: '700', color: 'var(--wf-gray-800)' }}>{(dashboard.avg_mood ?? 0).toFixed(1)}</div>
             <div style={{ fontSize: '12px', color: 'var(--wf-gray-500)' }}>Avg Mood</div>
           </div>
         </WireframeCard>
@@ -54,7 +54,7 @@ export function WellnessStats({ dashboard }: Props) {
           </div>
           <div>
             <div style={{ fontSize: '20px', fontWeight: '700', color: '#16a34a' }}>
-              {dashboard.trend_direction === 'down' ? '' : '+'}{dashboard.trend_percentage}%
+              {dashboard.trend_direction === 'down' ? '' : '+'}{dashboard.trend_percentage ?? 0}%
             </div>
             <div style={{ fontSize: '12px', color: 'var(--wf-gray-500)' }}>This week</div>
           </div>

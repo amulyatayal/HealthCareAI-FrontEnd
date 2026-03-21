@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Check, TrendingUp } from 'lucide-react'
+import { logMood, getMoodHistory } from '../../services/api'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard, MoodSlider } from '../components'
 
@@ -9,25 +10,25 @@ export function BasicMoodPage() {
   const [note, setNote] = useState('')
 
   const [history, setHistory] = useState([
-    { date: 'Today', value: null as number | null },
-    { date: 'Yesterday', value: 8 },
-    { date: 'Jan 18', value: 7 },
-    { date: 'Jan 17', value: 6 },
-    { date: 'Jan 16', value: 8 },
-    { date: 'Jan 15', value: 9 },
-    { date: 'Jan 14', value: 7 },
+    { date: 'Today', value: null as number | null, note: null as string | null },
+    { date: 'Yesterday', value: 8, note: 'Feeling positive after a good walk' },
+    { date: 'Jan 18', value: 7, note: null as string | null },
+    { date: 'Jan 17', value: 6, note: 'A bit tired from treatment' },
+    { date: 'Jan 16', value: 8, note: null as string | null },
+    { date: 'Jan 15', value: 9, note: 'Great day with family' },
+    { date: 'Jan 14', value: 7, note: null as string | null },
   ])
 
   useEffect(() => {
     let cancelled = false
     async function load() {
       try {
-        const { getMoodHistory } = await import('../../services/api')
         const data = await getMoodHistory(7)
         if (!cancelled && data.entries.length > 0) {
           setHistory(data.entries.map((e) => ({
             date: new Date(e.timestamp).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' }),
             value: e.mood_score,
+            note: e.note,
           })))
         }
       } catch {
@@ -40,7 +41,6 @@ export function BasicMoodPage() {
 
   const handleSave = async () => {
     try {
-      const { logMood } = await import('../../services/api')
       await logMood({ mood_score: mood, note: note || undefined })
     } catch {
       // API not available yet – still show saved state
@@ -120,39 +120,43 @@ export function BasicMoodPage() {
           <div 
             key={entry.date}
             style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between',
               padding: '10px 0',
               borderBottom: i < history.length - 1 ? '1px solid var(--wf-gray-100)' : 'none'
             }}
           >
-            <span style={{ fontSize: '14px', color: 'var(--wf-gray-600)' }}>
-              {entry.date}
-            </span>
-            {entry.value ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div 
-                  style={{ 
-                    width: `${entry.value * 10}px`, 
-                    height: '8px', 
-                    borderRadius: '4px',
-                    background: `linear-gradient(90deg, var(--wf-rose-300), var(--wf-rose-${Math.min(500, 300 + entry.value * 20)}))`
-                  }} 
-                />
-                <span style={{ 
-                  fontSize: '16px', 
-                  fontWeight: '600', 
-                  color: 'var(--wf-rose-500)',
-                  width: '24px'
-                }}>
-                  {entry.value}
-                </span>
-              </div>
-            ) : (
-              <span style={{ fontSize: '14px', color: 'var(--wf-gray-400)' }}>
-                Not logged yet
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '14px', color: 'var(--wf-gray-600)' }}>
+                {entry.date}
               </span>
+              {entry.value ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div 
+                    style={{ 
+                      width: `${entry.value * 10}px`, 
+                      height: '8px', 
+                      borderRadius: '4px',
+                      background: `linear-gradient(90deg, var(--wf-rose-300), var(--wf-rose-${Math.min(500, 300 + entry.value * 20)}))`
+                    }} 
+                  />
+                  <span style={{ 
+                    fontSize: '16px', 
+                    fontWeight: '600', 
+                    color: 'var(--wf-rose-500)',
+                    width: '24px'
+                  }}>
+                    {entry.value}
+                  </span>
+                </div>
+              ) : (
+                <span style={{ fontSize: '14px', color: 'var(--wf-gray-400)' }}>
+                  Not logged yet
+                </span>
+              )}
+            </div>
+            {entry.note && (
+              <div style={{ fontSize: '13px', color: 'var(--wf-gray-500)', fontStyle: 'italic', marginTop: '4px', paddingLeft: '2px' }}>
+                📝 {entry.note}
+              </div>
             )}
           </div>
         ))}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Plus, Bell, Clock, MapPin, Calendar, Check, BellRing } from 'lucide-react'
+import { getAppointments, createAppointment } from '../../services/api'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
 
@@ -10,8 +11,8 @@ const appointments = [
     date: 'Jan 21, 2024',
     time: '10:30 AM',
     location: 'City Hospital, Room 302',
-    reminder: '1 day before',
-    status: 'upcoming'
+    reminder: true,
+    status: 'upcoming' as const,
   },
   {
     id: 2,
@@ -19,8 +20,8 @@ const appointments = [
     date: 'Jan 25, 2024',
     time: '9:00 AM',
     location: 'Lab Corp',
-    reminder: '2 hours before',
-    status: 'upcoming'
+    reminder: true,
+    status: 'upcoming' as const,
   },
   {
     id: 3,
@@ -28,8 +29,8 @@ const appointments = [
     date: 'Jan 28, 2024',
     time: '2:00 PM',
     location: 'Cancer Treatment Center',
-    reminder: '1 day before',
-    status: 'upcoming'
+    reminder: true,
+    status: 'upcoming' as const,
   },
   {
     id: 4,
@@ -37,27 +38,34 @@ const appointments = [
     date: 'Jan 15, 2024',
     time: '11:00 AM',
     location: 'Medical Center',
-    reminder: null,
-    status: 'completed'
+    reminder: false,
+    status: 'past' as const,
   },
 ]
 
 export function AppointmentsPage() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming')
   const [showAdd, setShowAdd] = useState(false)
-  const [appointmentList, setAppointmentList] = useState(appointments)
+  const [appointmentList, setAppointmentList] = useState<{
+    id: number;
+    title: string;
+    date: string;
+    time: string;
+    location: string;
+    reminder: boolean;
+    status: 'upcoming' | 'past' | 'cancelled';
+  }[]>(appointments)
   const [newTitle, setNewTitle] = useState('')
   const [newDate, setNewDate] = useState('')
   const [newTime, setNewTime] = useState('')
   const [newLocation, setNewLocation] = useState('')
-  const [newReminder, setNewReminder] = useState('1 day before')
+  const [newReminder, setNewReminder] = useState(true)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     let cancelled = false
     async function load() {
       try {
-        const { getAppointments } = await import('../../services/api')
         const data = await getAppointments()
         if (!cancelled && data.appointments.length > 0) {
           setAppointmentList(data.appointments.map((a, i) => ({
@@ -82,7 +90,6 @@ export function AppointmentsPage() {
     if (!newTitle || !newDate || !newTime) return
     setSaving(true)
     try {
-      const { createAppointment } = await import('../../services/api')
       await createAppointment({ title: newTitle, date: newDate, time: newTime, location: newLocation, reminder: newReminder })
     } catch {
       // API not available
@@ -106,7 +113,7 @@ export function AppointmentsPage() {
   }
 
   const filteredAppointments = appointmentList.filter(
-    apt => activeTab === 'upcoming' ? apt.status === 'upcoming' : apt.status === 'completed'
+    apt => activeTab === 'upcoming' ? apt.status === 'upcoming' : apt.status === 'past'
   )
 
   return (
@@ -150,13 +157,10 @@ export function AppointmentsPage() {
               <input className="wf-input" placeholder="Hospital/Clinic name" value={newLocation} onChange={(e) => setNewLocation(e.target.value)} />
             </div>
             <div>
-              <label className="wf-label">Reminder</label>
-              <select className="wf-input" value={newReminder} onChange={(e) => setNewReminder(e.target.value)}>
-                <option>1 hour before</option>
-                <option>2 hours before</option>
-                <option>1 day before</option>
-                <option>2 days before</option>
-              </select>
+              <label className="wf-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input type="checkbox" checked={newReminder} onChange={(e) => setNewReminder(e.target.checked)} />
+                Set reminder
+              </label>
             </div>
             <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
               <button className="wf-btn wf-btn-secondary" style={{ flex: 1 }} onClick={() => setShowAdd(false)}>
@@ -202,7 +206,7 @@ export function AppointmentsPage() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--wf-gray-600)' }}>
             <BellRing size={16} />
-            <span style={{ fontSize: '13px' }}>Reminder set: {filteredAppointments[0].reminder}</span>
+            <span style={{ fontSize: '13px' }}>{filteredAppointments[0].reminder ? 'Reminder set' : 'No reminder'}</span>
           </div>
         </WireframeCard>
       )}
@@ -222,14 +226,14 @@ export function AppointmentsPage() {
                 width: '48px', 
                 textAlign: 'center',
                 padding: '6px',
-                background: apt.status === 'completed' ? 'var(--wf-gray-100)' : 'var(--wf-rose-50)',
+                background: apt.status === 'past' ? 'var(--wf-gray-100)' : 'var(--wf-rose-50)',
                 borderRadius: '10px'
               }}
             >
               <div style={{ 
                 fontSize: '18px', 
                 fontWeight: '700', 
-                color: apt.status === 'completed' ? 'var(--wf-gray-500)' : 'var(--wf-rose-500)' 
+                color: apt.status === 'past' ? 'var(--wf-gray-500)' : 'var(--wf-rose-500)' 
               }}>
                 {apt.date.split(' ')[1].replace(',', '')}
               </div>
@@ -243,7 +247,7 @@ export function AppointmentsPage() {
                 <h3 style={{ fontSize: '15px', fontWeight: '500', color: 'var(--wf-gray-800)' }}>
                   {apt.title}
                 </h3>
-                {apt.status === 'completed' && (
+                {apt.status === 'past' && (
                   <Check size={16} style={{ color: '#16a34a' }} />
                 )}
               </div>
@@ -267,7 +271,7 @@ export function AppointmentsPage() {
                   color: 'var(--wf-rose-500)'
                 }}>
                   <Bell size={12} />
-                  {apt.reminder}
+                  Reminder set
                 </div>
               )}
             </div>

@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, TrendingUp, TrendingDown, Minus, AlertCircle } from 'lucide-react'
+import { logSymptom, getSymptomHistory, getSymptomTrends } from '../../services/api'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
 
@@ -14,13 +15,13 @@ const commonSymptoms = [
   { id: 8, name: 'Joint Pain', icon: '🦴', tracked: true },
 ]
 
-const recentLogs = [
-  { date: 'Today', symptoms: [{ name: 'Fatigue', severity: 6 }, { name: 'Nausea', severity: 3 }] },
-  { date: 'Yesterday', symptoms: [{ name: 'Fatigue', severity: 7 }, { name: 'Pain', severity: 4 }] },
-  { date: 'Jan 18', symptoms: [{ name: 'Fatigue', severity: 5 }, { name: 'Insomnia', severity: 6 }] },
+const MOCK_RECENT_LOGS = [
+  { date: 'Today', symptoms: [{ name: 'Fatigue', severity: 6, notes: 'Felt drained after morning walk' }, { name: 'Nausea', severity: 3, notes: null as string | null }] },
+  { date: 'Yesterday', symptoms: [{ name: 'Fatigue', severity: 7, notes: 'Could barely get out of bed' }, { name: 'Pain', severity: 4, notes: null as string | null }] },
+  { date: 'Jan 18', symptoms: [{ name: 'Fatigue', severity: 5, notes: null as string | null }, { name: 'Insomnia', severity: 6, notes: 'Woke up multiple times' }] },
 ]
 
-const trends = [
+const MOCK_TRENDS = [
   { name: 'Fatigue', direction: 'down', change: '-12%' },
   { name: 'Nausea', direction: 'stable', change: '0%' },
   { name: 'Pain', direction: 'up', change: '+8%' },
@@ -32,12 +33,47 @@ export function SymptomsPage() {
   const [severity, setSeverity] = useState(5)
   const [symptomNote, setSymptomNote] = useState('')
   const [saving, setSaving] = useState(false)
+  const [recentLogs, setRecentLogs] = useState(MOCK_RECENT_LOGS)
+  const [trends, setTrends] = useState(MOCK_TRENDS)
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+    async function loadHistory() {
+      try {
+        const data = await getSymptomHistory(30)
+        if (cancelled || data.entries.length === 0) return
+        const grouped = new Map<string, { name: string; severity: number; notes: string | null }[]>()
+        for (const e of data.entries) {
+          const dateStr = new Date(e.timestamp).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })
+          if (!grouped.has(dateStr)) grouped.set(dateStr, [])
+          grouped.get(dateStr)!.push({ name: e.symptom_name, severity: e.severity, notes: e.notes })
+        }
+        const logs = Array.from(grouped, ([date, symptoms]) => ({ date, symptoms })).slice(0, 5)
+        if (!cancelled) setRecentLogs(logs)
+      } catch { /* keep mock data */ }
+    }
+    async function loadTrends() {
+      try {
+        const data = await getSymptomTrends()
+        if (cancelled || data.trends.length === 0) return
+        const mapped = data.trends.map((t) => ({
+          name: t.symptom_name,
+          direction: t.direction,
+          change: `${t.change_percentage >= 0 ? '+' : ''}${t.change_percentage}%`,
+        }))
+        if (!cancelled) setTrends(mapped)
+      } catch { /* keep mock data */ }
+    }
+    loadHistory()
+    loadTrends()
+    return () => { cancelled = true }
+  }, [refreshKey])
 
   const handleSaveSymptom = async () => {
     if (!selectedSymptom) return
     setSaving(true)
     try {
-      const { logSymptom } = await import('../../services/api')
       await logSymptom({ symptom_name: selectedSymptom, severity, notes: symptomNote || undefined })
     } catch {
       // API not available yet
@@ -47,6 +83,7 @@ export function SymptomsPage() {
     setSelectedSymptom(null)
     setSeverity(5)
     setSymptomNote('')
+    setRefreshKey((k) => k + 1)
   }
 
   const getSeverityColor = (value: number) => {
@@ -182,29 +219,43 @@ export function SymptomsPage() {
           <div style={{ fontSize: '13px', color: 'var(--wf-gray-500)', marginBottom: '8px' }}>
             {log.date}
           </div>
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {log.symptoms.map((symptom) => (
-              <div 
-                key={symptom.name}
-                style={{ 
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '8px 12px',
-                  background: 'var(--wf-gray-100)',
-                  borderRadius: '8px'
-                }}
-              >
-                <span style={{ fontSize: '14px' }}>{symptom.name}</span>
-                <span 
+              <div key={symptom.name}>
+                <div 
                   style={{ 
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: getSeverityColor(symptom.severity)
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 12px',
+                    background: 'var(--wf-gray-100)',
+                    borderRadius: symptom.notes ? '8px 8px 0 0' : '8px',
                   }}
                 >
-                  {symptom.severity}/10
-                </span>
+                  <span style={{ fontSize: '14px', flex: 1 }}>{symptom.name}</span>
+                  <span 
+                    style={{ 
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: getSeverityColor(symptom.severity)
+                    }}
+                  >
+                    {symptom.severity}/10
+                  </span>
+                </div>
+                {symptom.notes && (
+                  <div style={{
+                    padding: '6px 12px 8px',
+                    background: 'var(--wf-gray-50)',
+                    borderRadius: '0 0 8px 8px',
+                    borderTop: '1px dashed var(--wf-gray-200)',
+                    fontSize: '13px',
+                    color: 'var(--wf-gray-500)',
+                    fontStyle: 'italic',
+                  }}>
+                    📝 {symptom.notes}
+                  </div>
+                )}
               </div>
             ))}
           </div>

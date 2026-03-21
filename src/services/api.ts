@@ -285,12 +285,9 @@ export interface DashboardSummary {
   next_appointment: {
     id: string;
     title: string;
-    clinician_name: string;
-    specialty: string;
     date: string;
     time: string;
     location: string;
-    reminder_set: boolean;
   } | null;
   daily_quote: { text: string; author: string } | null;
 }
@@ -304,15 +301,15 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
 // ================================
 
 export interface MoodEntry {
-  id: string;
+  entry_id: string;
   mood_score: number;
   note: string | null;
   emotions: string[] | null;
   triggers: string[] | null;
   quick_check: {
-    sleep_quality?: string;
-    physical_discomfort?: string;
-    energy_level?: string;
+    sleep_quality?: number;
+    physical_discomfort?: number;
+    energy_level?: number;
   } | null;
   timestamp: string;
 }
@@ -323,9 +320,9 @@ export interface MoodLogRequest {
   emotions?: string[];
   triggers?: string[];
   quick_check?: {
-    sleep_quality?: string;
-    physical_discomfort?: string;
-    energy_level?: string;
+    sleep_quality?: number;
+    physical_discomfort?: number;
+    energy_level?: number;
   };
   timestamp?: string;
 }
@@ -351,7 +348,7 @@ export async function getMoodHistory(limit: number = 30): Promise<MoodHistoryRes
 // ================================
 
 export interface SymptomEntry {
-  id: string;
+  entry_id: string;
   symptom_name: string;
   severity: number;
   notes: string | null;
@@ -373,7 +370,7 @@ export async function getSymptomHistory(limit: number = 30): Promise<{ entries: 
   return fetchJson(`${API_BASE_V2}/symptoms?limit=${limit}`);
 }
 
-export async function getSymptomTrends(): Promise<{ trends: { symptom_name: string; direction: string; change_percentage: string }[] }> {
+export async function getSymptomTrends(): Promise<{ trends: { symptom_name: string; direction: string; change_percentage: number }[] }> {
   return fetchJson(`${API_BASE_V2}/symptoms/trends`);
 }
 
@@ -387,8 +384,8 @@ export interface Appointment {
   date: string;
   time: string;
   location: string;
-  reminder: string | null;
-  status: 'upcoming' | 'completed' | 'cancelled';
+  reminder: boolean;
+  status: 'upcoming' | 'past' | 'cancelled';
 }
 
 export interface CreateAppointmentRequest {
@@ -396,7 +393,7 @@ export interface CreateAppointmentRequest {
   date: string;
   time: string;
   location?: string;
-  reminder?: string;
+  reminder?: boolean;
 }
 
 export async function getAppointments(status?: string): Promise<{ appointments: Appointment[]; total_count: number }> {

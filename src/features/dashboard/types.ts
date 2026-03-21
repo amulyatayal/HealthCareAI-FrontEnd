@@ -24,12 +24,9 @@ export interface DashboardSummary {
   next_appointment: {
     id: string
     title: string
-    clinician_name: string
-    specialty: string
     date: string
     time: string
     location: string
-    reminder_set: boolean
   } | null
   daily_quote: { text: string; author: string } | null
 }
