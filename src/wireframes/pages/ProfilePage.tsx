@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FileText, Calendar, Settings, Bell, Shield, LogOut, ChevronRight, User, Compass, Share2, Download, Trash2, ToggleLeft, Check, Clock } from 'lucide-react'
+import { FileText, Calendar, Settings, Bell, Shield, LogOut, ChevronRight, User, Compass, Share2, Download, Trash2, ToggleLeft, Check, Clock, Search, MessageCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
@@ -30,6 +30,11 @@ export function ProfilePage() {
   const [showActivityLog, setShowActivityLog] = useState(false)
   const [activityLog, setActivityLog] = useState<{ id: string; type: string; description: string; timestamp: string }[]>([])
   const [loadingActivity, setLoadingActivity] = useState(false)
+  const [navMode, setNavMode] = useState<'ai' | 'search'>(() => {
+    try {
+      return localStorage.getItem('nav_mode') === 'search' ? 'search' : 'ai'
+    } catch { return 'ai' }
+  })
 
   const handleExportData = async () => {
     setExporting(true)
@@ -180,6 +185,52 @@ export function ProfilePage() {
           </div>
         </Link>
       ))}
+
+      {/* Navigation Mode Toggle */}
+      <div className="wf-section-header">
+        <span className="wf-section-title">Navigation Mode</span>
+      </div>
+
+      <WireframeCard>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--wf-gray-800)', marginBottom: 4 }}>
+              {navMode === 'ai' ? 'Ask Tara (AI)' : 'Search Resources'}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--wf-gray-500)', lineHeight: 1.4 }}>
+              {navMode === 'ai'
+                ? 'AI-powered assistant answers your questions'
+                : 'Keyword search across resources from your care team'}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const next = navMode === 'ai' ? 'search' : 'ai'
+              setNavMode(next)
+              localStorage.setItem('nav_mode', next)
+              window.dispatchEvent(new Event('nav_mode_changed'))
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '8px 14px',
+              border: '1px solid var(--wf-gray-200)',
+              borderRadius: 20,
+              background: 'var(--wf-gray-50)',
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: 500,
+              color: 'var(--wf-gray-700)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {navMode === 'ai' ? <Search size={14} /> : <MessageCircle size={14} />}
+            Switch to {navMode === 'ai' ? 'Search' : 'Ask Tara'}
+          </button>
+        </div>
+      </WireframeCard>
 
       {/* Privacy & Data Rights (GDPR) */}
       <div className="wf-section-header">

@@ -685,5 +685,9 @@ export async function getResourcesForStage(stageId: string): Promise<{ resources
   return fetchJson(`${API_BASE_V2}/resources?stage_id=${encodeURIComponent(stageId)}`);
 }
 
+export async function searchAllResources(query: string): Promise<{ resources: PatientResource[] }> {
+  return fetchJson(`${API_BASE_V2}/resources/search?q=${encodeURIComponent(query)}`);
+}
+
 export { ApiError };
 
