@@ -1161,6 +1161,16 @@
   background: var(--warm-gray-300) !important;
 }
 
+.admin-field-required {
+  border-color: #f87171 !important;
+  box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.15) !important;
+}
+
+.admin-field-required.admin-grid-dropdown-trigger {
+  border-color: #f87171;
+  box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.15);
+}
+
 @keyframes admin-card-in {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }

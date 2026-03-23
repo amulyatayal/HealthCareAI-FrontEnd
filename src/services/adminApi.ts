@@ -20,11 +20,12 @@ function getAdminToken(): string | null {
 
 async function fetchAdminJson<T>(url: string, options?: RequestInit): Promise<T> {
   const token = getAdminToken();
+  const hasBody = options?.body != null;
 
   const response = await fetch(url, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      ...(hasBody && { 'Content-Type': 'application/json' }),
       ...(token && { Authorization: `Bearer ${token}` }),
       ...options?.headers,
     },
@@ -41,6 +42,8 @@ async function fetchAdminJson<T>(url: string, options?: RequestInit): Promise<T>
 
     throw new AdminApiError(response.status, error.detail || error.message || 'An error occurred');
   }
+
+  if (response.status === 204) return {} as T;
 
   return response.json();
 }

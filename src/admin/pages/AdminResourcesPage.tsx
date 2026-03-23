@@ -210,8 +210,20 @@ export function AdminResourcesPage() {
     setTimeout(() => newCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
   };
 
-  const removeRow = (localId: string) => {
+  const removeRow = async (localId: string) => {
+    const row = rows.find((r) => r.localId === localId);
+    if (!row) return;
+
     setRows((prev) => (prev.length > 1 ? prev.filter((r) => r.localId !== localId) : prev));
+
+    if (row.id) {
+      try {
+        const { deletePathwayResource } = await import('../../services/adminApi');
+        await deletePathwayResource(row.id);
+      } catch (err) {
+        console.error('Backend delete failed:', err);
+      }
+    }
   };
 
   const updateRow = useCallback((localId: string, updates: Partial<ResourceRow>) => {
@@ -236,7 +248,7 @@ export function AdminResourcesPage() {
   };
 
   const handleSaveAll = async () => {
-    const validRows = rows.filter((r) => r.pathway_stage_ids.length > 0 && r.title.trim() && r.url.trim());
+    const validRows = rows.filter((r) => r.title.trim() && r.url.trim() && r.description.trim() && r.intents.length > 0);
     if (validRows.length === 0) return;
 
     setSaving(true);
@@ -432,11 +444,13 @@ export function AdminResourcesPage() {
           {filteredRows.map((row, idx) => {
             const typeMeta = TYPE_META[row.type];
             const isLast = idx === filteredRows.length - 1;
-            const isValid = row.title.trim() && row.url.trim() && row.pathway_stage_ids.length > 0;
+            const isValid = row.title.trim() && row.url.trim() && row.description.trim() && row.intents.length > 0;
+            const hasContent = !!(row.title || row.url || row.description || row.intents.length > 0);
+            const showRequired = hasContent && !isValid;
             return (
               <div
                 key={row.localId}
-                className={`admin-res-card${row._dirty ? ' dirty' : ''}${!isValid && (row.title || row.url) ? ' incomplete' : ''}`}
+                className={`admin-res-card${row._dirty ? ' dirty' : ''}${showRequired ? ' incomplete' : ''}`}
                 data-type={row.type}
                 ref={isLast ? newCardRef : undefined}
               >
@@ -463,8 +477,8 @@ export function AdminResourcesPage() {
                     </div>
                     <input
                       type="text"
-                      className="admin-res-card-title-input"
-                      placeholder="Resource title"
+                      className={`admin-res-card-title-input${showRequired && !row.title.trim() ? ' admin-field-required' : ''}`}
+                      placeholder="Resource title (required)"
                       value={row.title}
                       onChange={(e) => updateRow(row.localId, { title: e.target.value })}
                     />
@@ -485,14 +499,16 @@ export function AdminResourcesPage() {
                   <div className="admin-res-card-row2">
                     <input
                       type="text"
-                      placeholder="Brief description…"
+                      className={showRequired && !row.description.trim() ? 'admin-field-required' : ''}
+                      placeholder="Description (required)"
                       value={row.description}
                       onChange={(e) => updateRow(row.localId, { description: e.target.value })}
                     />
                     <div className="admin-url-field">
                       <input
                         type="url"
-                        placeholder="Paste URL — type is auto-detected"
+                        className={showRequired && !row.url.trim() ? 'admin-field-required' : ''}
+                        placeholder="Paste URL (required) — type is auto-detected"
                         value={row.url}
                         onChange={(e) => handleUrlChange(row.localId, e.target.value)}
                       />
@@ -542,12 +558,12 @@ export function AdminResourcesPage() {
                     >
                       <button
                         type="button"
-                        className="admin-grid-dropdown-trigger"
+                        className={`admin-grid-dropdown-trigger${showRequired && row.intents.length === 0 ? ' admin-field-required' : ''}`}
                         onClick={() => toggleDropdown(row.localId, 'intents')}
                       >
                         <span className={row.intents.length === 0 ? 'placeholder' : ''}>
                           {row.intents.length === 0
-                            ? 'Intents (optional)…'
+                            ? 'Select intents (required)…'
                             : row.intents
                                 .slice(0, 2)
                                 .map((i) => INTENT_OPTIONS.find((o) => o.value === i)?.label || i)
@@ -587,7 +603,7 @@ export function AdminResourcesPage() {
               <button
                 type="button"
                 className="admin-btn admin-btn-primary"
-                disabled={saving || !rows.some((r) => r.pathway_stage_ids.length > 0 && r.title.trim() && r.url.trim())}
+                disabled={saving || !rows.some((r) => r.title.trim() && r.url.trim() && r.description.trim() && r.intents.length > 0)}
                 onClick={handleSaveAll}
               >
                 <Save size={16} /> {saving ? 'Saving…' : 'Save All'}
