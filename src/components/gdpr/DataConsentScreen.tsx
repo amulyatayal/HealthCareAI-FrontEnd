@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Shield, Heart, Activity, FileText, Users, ChevronDown, ChevronUp, Globe } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { getJurisdiction, getEthicsCommittee } from '../../utils/jurisdiction'
 
 const DATA_CONSENT_KEY = 'gdpr_data_consent_v1'
 
@@ -73,9 +74,12 @@ interface ConsentItem {
   badgeColor?: string
   summary: string
   consentStatement?: string
+  indiaConsentStatement?: string
   detail: string
+  indiaDetail?: string
   type: ConsentItemType
   legalBasis: string
+  indiaBasis: string
 }
 
 const CONSENT_ITEMS: ConsentItem[] = [
@@ -91,6 +95,7 @@ const CONSENT_ITEMS: ConsentItem[] = [
     detail: 'We store your name and email (from Google) or guest username to provide the service. Your chat messages are processed by our AI to generate responses. This processing is necessary to provide the Service and does not require consent.',
     type: 'informational',
     legalBasis: 'Performance of contract (Art. 6(1)(b))',
+    indiaBasis: 'Necessary for performance of contract (DPDPA Section 7(b))',
   },
   {
     key: 'healthData',
@@ -103,9 +108,12 @@ const CONSENT_ITEMS: ConsentItem[] = [
     badgeColor: '#dc2626',
     summary: 'Mood logs, symptom tracking, physical tests',
     consentStatement: 'By ticking this box, you explicitly consent to the processing of your health data under UK GDPR.',
+    indiaConsentStatement: 'By ticking this box, you provide free, specific, informed, and unambiguous consent to the processing of your health data under DPDPA.',
     detail: 'I explicitly consent to the processing of my health data (special category data) under Article 9(2)(a) UK GDPR. This includes mood scores, symptom entries, and physical test results stored to show trends and support my wellbeing journey.',
+    indiaDetail: 'I provide free, specific, informed, and unambiguous consent to the processing of my health data under DPDPA Section 6. This includes mood scores, symptom entries, and physical test results stored to show trends and support my wellbeing journey.',
     type: 'explicit',
     legalBasis: 'Performance of contract (Art. 6(1)(b)) + Explicit consent (Art. 9(2)(a))',
+    indiaBasis: 'Consent (DPDPA Section 6) — free, specific, informed, unambiguous',
   },
   {
     key: 'aiModelProviders',
@@ -118,6 +126,7 @@ const CONSENT_ITEMS: ConsentItem[] = [
     detail: 'Your messages may be processed by third-party AI providers acting as data processors on our behalf to generate responses. These providers are contractually prohibited from using your data for their own purposes, including model training. We do not intentionally send identifying information (name, email) — only conversation content. If disabled, AI chat functionality may be limited or unavailable.',
     type: 'optional',
     legalBasis: 'Consent (Art. 6(1)(a))',
+    indiaBasis: 'Consent (DPDPA Section 6)',
   },
   {
     key: 'documentStorage',
@@ -130,6 +139,7 @@ const CONSENT_ITEMS: ConsentItem[] = [
     detail: 'Documents you upload are encrypted at rest (AES-256) and in transit (TLS 1.2+). We do not read or analyse your documents. They are only accessible to you and anyone you explicitly share them with. Documents may contain sensitive personal data — you control what you upload and delete.',
     type: 'optional',
     legalBasis: 'Consent (Art. 6(1)(a))',
+    indiaBasis: 'Consent (DPDPA Section 6)',
   },
   {
     key: 'community',
@@ -142,6 +152,7 @@ const CONSENT_ITEMS: ConsentItem[] = [
     detail: 'Content you post in the community is visible to other users. You can post anonymously. Buddy matching shares limited profile info with your match. You can delete your content at any time.',
     type: 'optional',
     legalBasis: 'Consent (Art. 6(1)(a))',
+    indiaBasis: 'Consent (DPDPA Section 6)',
   },
   {
     key: 'clinicalSharing',
@@ -155,10 +166,15 @@ const CONSENT_ITEMS: ConsentItem[] = [
     detail: 'We will only share data with your clinician when you explicitly choose to share specific information via the "Share my Data" feature. Each sharing action requires your individual consent at the time — this is not a blanket authorisation.',
     type: 'informational',
     legalBasis: 'Explicit consent per event (Art. 9(2)(a))',
+    indiaBasis: 'Per-event consent (DPDPA Section 6)',
   },
 ]
 
 export function DataConsentScreen({ onConsent }: Props) {
+  const jurisdiction = getJurisdiction()
+  const ec = getEthicsCommittee()
+  const isIndia = jurisdiction === 'india'
+
   const [choices, setChoices] = useState<Omit<DataConsentChoices, 'coreService' | 'clinicalSharing'>>({
     healthData: false,
     aiModelProviders: false,
@@ -233,11 +249,18 @@ export function DataConsentScreen({ onConsent }: Props) {
         </div>
         <h1 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 6px' }}>Your Data, Your Choice</h1>
         <p style={{ fontSize: 13, opacity: 0.9, margin: 0, lineHeight: 1.5 }}>
-          Tara collects data to provide its features. Under UK GDPR, you have the right to decide
-          exactly what we process. You can change these choices at any time in Settings.
+          {isIndia
+            ? 'Under the Digital Personal Data Protection Act 2023 (DPDPA), you have the right to decide exactly what personal data we process. Your consent must be free, specific, informed, and unambiguous. You can change these choices at any time in Settings.'
+            : 'Tara collects data to provide its features. Under UK GDPR, you have the right to decide exactly what we process. You can change these choices at any time in Settings.'}
         </p>
+        {ec && (
+          <p style={{ fontSize: 11, opacity: 0.85, margin: '8px 0 0', lineHeight: 1.4 }}>
+            This application has been reviewed and approved by {ec.name} (Ref: {ec.approvalRef}).
+          </p>
+        )}
         <p style={{ fontSize: 11, opacity: 0.7, margin: '8px 0 0', lineHeight: 1.4 }}>
-          Consent applies to Privacy Policy version January 2026.
+          Consent applies to Privacy Policy version January 2026.{' '}
+          {isIndia && 'Regulated under DPDPA 2023 and DPDP Rules 2025.'}
         </p>
       </div>
 
@@ -306,9 +329,9 @@ export function DataConsentScreen({ onConsent }: Props) {
                     )}
                   </div>
                   <div style={{ fontSize: 12, color: '#6b7280', marginTop: 1 }}>{item.summary}</div>
-                  {item.consentStatement && isChecked && (
+                  {((isIndia ? item.indiaConsentStatement : item.consentStatement) ?? item.consentStatement) && isChecked && (
                     <div style={{ fontSize: 11, color: '#dc2626', marginTop: 3, fontWeight: 500, lineHeight: 1.4 }}>
-                      {item.consentStatement}
+                      {(isIndia ? item.indiaConsentStatement : item.consentStatement) ?? item.consentStatement}
                     </div>
                   )}
                 </div>
@@ -347,9 +370,9 @@ export function DataConsentScreen({ onConsent }: Props) {
                   color: '#4b5563',
                   lineHeight: 1.6,
                 }}>
-                  <p style={{ margin: '0 0 6px' }}>{item.detail}</p>
+                  <p style={{ margin: '0 0 6px' }}>{(isIndia ? item.indiaDetail : item.detail) ?? item.detail}</p>
                   <p style={{ margin: 0, fontSize: 11, color: '#9ca3af' }}>
-                    Legal basis: {item.legalBasis}
+                    Legal basis: {isIndia ? item.indiaBasis : item.legalBasis}
                   </p>
                 </div>
               )}

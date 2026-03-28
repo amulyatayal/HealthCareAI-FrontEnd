@@ -689,5 +689,38 @@ export async function searchAllResources(query: string): Promise<{ resources: Pa
   return fetchJson(`${API_BASE_V2}/resources/search?q=${encodeURIComponent(query)}`);
 }
 
+// --- DPDPA: Nominee Designation ---
+
+export interface NomineeData {
+  name: string;
+  relationship: string;
+  email: string;
+  phone: string;
+}
+
+export async function saveNominee(data: NomineeData): Promise<NomineeData> {
+  return fetchJson(`${API_BASE_V2}/me/nominee`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getNominee(): Promise<NomineeData | null> {
+  try {
+    return await fetchJson(`${API_BASE_V2}/me/nominee`);
+  } catch {
+    return null;
+  }
+}
+
+// --- DPDPA: Grievance Redressal ---
+
+export async function submitGrievance(subject: string, description: string): Promise<{ id: string; status: string }> {
+  return fetchJson(`${API_BASE_V2}/grievance`, {
+    method: 'POST',
+    body: JSON.stringify({ subject, description }),
+  });
+}
+
 export { ApiError };
 

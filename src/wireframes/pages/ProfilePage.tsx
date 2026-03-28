@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { FileText, Calendar, Settings, Bell, Shield, LogOut, ChevronRight, User, Compass, Share2, Download, Trash2, ToggleLeft, Check, Clock, Search, MessageCircle } from 'lucide-react'
+import { FileText, Calendar, Settings, Bell, Shield, LogOut, ChevronRight, User, Compass, Share2, Download, Trash2, ToggleLeft, Check, Clock, Search, MessageCircle, UserPlus, AlertTriangle, BookOpen, Database, Mail, Phone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
 import { useBasePath } from '../hooks/useBasePath'
 import { useAuth } from '../../contexts/AuthContext'
 import { getStoredDataConsent, saveDataConsent, clearDataConsent, type DataConsentChoices } from '../../components/gdpr/DataConsentScreen'
+import { getEthicsCommittee, isIndiaJurisdiction } from '../../utils/jurisdiction'
 
 export function ProfilePage() {
   const base = useBasePath()
@@ -35,6 +36,25 @@ export function ProfilePage() {
       return localStorage.getItem('nav_mode') === 'search' ? 'search' : 'ai'
     } catch { return 'ai' }
   })
+
+  const isIndia = isIndiaJurisdiction()
+  const ec = getEthicsCommittee()
+
+  const [showNominee, setShowNominee] = useState(false)
+  const [nominee, setNominee] = useState(() => {
+    try {
+      const stored = localStorage.getItem('dpdpa_nominee')
+      return stored ? JSON.parse(stored) : { name: '', relationship: '', email: '', phone: '' }
+    } catch { return { name: '', relationship: '', email: '', phone: '' } }
+  })
+  const [nomineeSaved, setNomineeSaved] = useState(false)
+
+  const [showGrievance, setShowGrievance] = useState(false)
+  const [grievance, setGrievance] = useState({ subject: '', description: '' })
+  const [grievanceSubmitted, setGrievanceSubmitted] = useState(false)
+
+  const [showEthicsCommittee, setShowEthicsCommittee] = useState(false)
+  const [showRetention, setShowRetention] = useState(false)
 
   const handleExportData = async () => {
     setExporting(true)
@@ -425,6 +445,265 @@ export function ProfilePage() {
             ))
           )}
         </WireframeCard>
+      )}
+
+      {/* Ethics Committee Disclosure — all jurisdictions */}
+      <button
+        type="button"
+        onClick={() => setShowEthicsCommittee(!showEthicsCommittee)}
+        className="wf-list-item"
+        style={{ background: 'white', borderRadius: '12px', marginBottom: '8px', width: '100%', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+      >
+        <div className="wf-icon-btn" style={{ background: '#ecfdf5', color: '#059669' }}>
+          <BookOpen size={20} />
+        </div>
+        <div className="wf-list-content">
+          <div className="wf-list-title">Ethics Committee Approval</div>
+          <div className="wf-list-subtitle">Institutional review and oversight details</div>
+        </div>
+        <ChevronRight size={18} style={{ color: 'var(--wf-gray-400)', transform: showEthicsCommittee ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+      </button>
+
+      {showEthicsCommittee && (
+        <WireframeCard>
+          {ec ? (
+            <div style={{ fontSize: 13, color: 'var(--wf-gray-700)', lineHeight: 1.7 }}>
+              <p style={{ fontWeight: 600, marginBottom: 8, color: 'var(--wf-gray-800)' }}>
+                This application has been reviewed and approved by:
+              </p>
+              <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: 14, marginBottom: 12 }}>
+                <p style={{ fontWeight: 600, marginBottom: 4 }}>{ec.name}</p>
+                <p>Approval Reference: <strong>{ec.approvalRef}</strong></p>
+                <p>Valid until: {new Date(ec.validUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+              </div>
+              <p style={{ fontWeight: 600, marginBottom: 6 }}>Contact the Ethics Committee:</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <a href={`mailto:${ec.contactEmail}`} style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#2563eb', textDecoration: 'none', fontSize: 13 }}>
+                  <Mail size={14} /> {ec.contactEmail}
+                </a>
+                {ec.contactPhone && (
+                  <a href={`tel:${ec.contactPhone}`} style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#2563eb', textDecoration: 'none', fontSize: 13 }}>
+                    <Phone size={14} /> {ec.contactPhone}
+                  </a>
+                )}
+              </div>
+              <p style={{ marginTop: 12, fontSize: 12, color: 'var(--wf-gray-500)', lineHeight: 1.5 }}>
+                If you have concerns about how this app handles your data, you may contact the Ethics Committee directly.
+                {isIndia && ' Under ICMR guidelines, all health data applications must have IEC oversight and approval.'}
+              </p>
+            </div>
+          ) : (
+            <p style={{ fontSize: 13, color: 'var(--wf-gray-500)', textAlign: 'center', padding: 12 }}>
+              Ethics committee details are available once a hospital is selected.
+            </p>
+          )}
+        </WireframeCard>
+      )}
+
+      {/* Data Retention Disclosure */}
+      <button
+        type="button"
+        onClick={() => setShowRetention(!showRetention)}
+        className="wf-list-item"
+        style={{ background: 'white', borderRadius: '12px', marginBottom: '8px', width: '100%', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+      >
+        <div className="wf-icon-btn" style={{ background: '#fef3c7', color: '#d97706' }}>
+          <Database size={20} />
+        </div>
+        <div className="wf-list-content">
+          <div className="wf-list-title">Data Retention</div>
+          <div className="wf-list-subtitle">How long we keep your data</div>
+        </div>
+        <ChevronRight size={18} style={{ color: 'var(--wf-gray-400)', transform: showRetention ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+      </button>
+
+      {showRetention && (
+        <WireframeCard>
+          <div style={{ fontSize: 13, color: 'var(--wf-gray-700)', lineHeight: 1.7 }}>
+            {isIndia && (
+              <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: 10, marginBottom: 12, fontSize: 12, color: '#92400e' }}>
+                Under DPDPA 2023, we are required to disclose the purpose and duration of data retention for all personal data we process.
+              </div>
+            )}
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr>
+                  <th style={{ textAlign: 'left', padding: '8px 6px', borderBottom: '2px solid #e5e7eb', fontSize: 12, color: '#6b7280' }}>Data Type</th>
+                  <th style={{ textAlign: 'left', padding: '8px 6px', borderBottom: '2px solid #e5e7eb', fontSize: 12, color: '#6b7280' }}>Retention Period</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ['Account data', 'Until you delete your account'],
+                  ['Health data', 'Until consent withdrawal or account deletion'],
+                  ['Chat history', 'Up to 12 months, or until deletion request'],
+                  ['Documents', 'Until you delete them or your account'],
+                  ['Forum content', 'Until deleted; anonymised on account deletion'],
+                  ['Consent records', 'Account duration + 3 years (audit)'],
+                ].map(([type, period]) => (
+                  <tr key={type}>
+                    <td style={{ padding: '8px 6px', borderBottom: '1px solid #f3f4f6', fontWeight: 500 }}>{type}</td>
+                    <td style={{ padding: '8px 6px', borderBottom: '1px solid #f3f4f6', color: 'var(--wf-gray-500)' }}>{period}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p style={{ fontSize: 12, color: 'var(--wf-gray-500)', marginTop: 10, lineHeight: 1.5 }}>
+              Upon account deletion, personal data is removed within 30 days. Encrypted backups are purged within 90 days.
+            </p>
+          </div>
+        </WireframeCard>
+      )}
+
+      {/* Nominee Designation — India only */}
+      {isIndia && (
+        <>
+          <button
+            type="button"
+            onClick={() => setShowNominee(!showNominee)}
+            className="wf-list-item"
+            style={{ background: 'white', borderRadius: '12px', marginBottom: '8px', width: '100%', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+          >
+            <div className="wf-icon-btn" style={{ background: '#dbeafe', color: '#2563eb' }}>
+              <UserPlus size={20} />
+            </div>
+            <div className="wf-list-content">
+              <div className="wf-list-title">Nominee Designation</div>
+              <div className="wf-list-subtitle">DPDPA Section 14(3) — nominate a data rights representative</div>
+            </div>
+            <ChevronRight size={18} style={{ color: 'var(--wf-gray-400)', transform: showNominee ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+          </button>
+
+          {showNominee && (
+            <WireframeCard>
+              <p style={{ fontSize: 13, color: 'var(--wf-gray-600)', marginBottom: 12, lineHeight: 1.5 }}>
+                Under DPDPA Section 14(3), you may nominate a person to exercise your data rights in case of death or incapacity.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <input
+                  type="text"
+                  className="wf-input"
+                  placeholder="Nominee name"
+                  value={nominee.name}
+                  onChange={(e) => setNominee((prev: typeof nominee) => ({ ...prev, name: e.target.value }))}
+                />
+                <input
+                  type="text"
+                  className="wf-input"
+                  placeholder="Relationship (e.g. spouse, parent, child)"
+                  value={nominee.relationship}
+                  onChange={(e) => setNominee((prev: typeof nominee) => ({ ...prev, relationship: e.target.value }))}
+                />
+                <input
+                  type="email"
+                  className="wf-input"
+                  placeholder="Nominee email"
+                  value={nominee.email}
+                  onChange={(e) => setNominee((prev: typeof nominee) => ({ ...prev, email: e.target.value }))}
+                />
+                <input
+                  type="tel"
+                  className="wf-input"
+                  placeholder="Nominee phone"
+                  value={nominee.phone}
+                  onChange={(e) => setNominee((prev: typeof nominee) => ({ ...prev, phone: e.target.value }))}
+                />
+              </div>
+              <button
+                className="wf-btn"
+                style={{ width: '100%', marginTop: 12, background: '#f43f5e', color: 'white', border: 'none', borderRadius: 10, padding: '12px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+                onClick={() => {
+                  localStorage.setItem('dpdpa_nominee', JSON.stringify(nominee))
+                  setNomineeSaved(true)
+                  setTimeout(() => setNomineeSaved(false), 2500)
+                }}
+              >
+                {nomineeSaved ? <><Check size={14} /> Saved</> : 'Save Nominee'}
+              </button>
+            </WireframeCard>
+          )}
+        </>
+      )}
+
+      {/* Grievance Redressal — India only */}
+      {isIndia && (
+        <>
+          <button
+            type="button"
+            onClick={() => setShowGrievance(!showGrievance)}
+            className="wf-list-item"
+            style={{ background: 'white', borderRadius: '12px', marginBottom: '8px', width: '100%', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+          >
+            <div className="wf-icon-btn" style={{ background: '#fef2f2', color: '#dc2626' }}>
+              <AlertTriangle size={20} />
+            </div>
+            <div className="wf-list-content">
+              <div className="wf-list-title">Grievance Redressal</div>
+              <div className="wf-list-subtitle">Submit a complaint under DPDPA</div>
+            </div>
+            <ChevronRight size={18} style={{ color: 'var(--wf-gray-400)', transform: showGrievance ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+          </button>
+
+          {showGrievance && (
+            <WireframeCard>
+              <div style={{ fontSize: 13, color: 'var(--wf-gray-700)', lineHeight: 1.7 }}>
+                <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: 12, marginBottom: 12 }}>
+                  <p style={{ fontWeight: 600, marginBottom: 4 }}>Grievance Officer</p>
+                  <p>Name: <strong>Anvega Compliance Team</strong></p>
+                  <p>Email: <a href="mailto:grievance@anvega.ai" style={{ color: '#2563eb' }}>grievance@anvega.ai</a></p>
+                </div>
+                <p style={{ fontSize: 12, color: 'var(--wf-gray-500)', marginBottom: 12 }}>
+                  We will acknowledge your grievance within 48 hours and resolve it within 30 days, as required under DPDPA.
+                </p>
+                {grievanceSubmitted ? (
+                  <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 8, padding: 14, textAlign: 'center' }}>
+                    <Check size={20} style={{ color: '#059669', marginBottom: 6 }} />
+                    <p style={{ fontWeight: 600, color: '#059669' }}>Grievance submitted successfully</p>
+                    <p style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>You will receive an acknowledgement within 48 hours.</p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <input
+                      type="text"
+                      className="wf-input"
+                      placeholder="Subject"
+                      value={grievance.subject}
+                      onChange={(e) => setGrievance((prev) => ({ ...prev, subject: e.target.value }))}
+                    />
+                    <textarea
+                      className="wf-input"
+                      placeholder="Describe your concern..."
+                      rows={4}
+                      value={grievance.description}
+                      onChange={(e) => setGrievance((prev) => ({ ...prev, description: e.target.value }))}
+                      style={{ resize: 'vertical' }}
+                    />
+                    <button
+                      className="wf-btn"
+                      style={{ width: '100%', background: '#f43f5e', color: 'white', border: 'none', borderRadius: 10, padding: '12px', fontSize: 14, fontWeight: 600, cursor: grievance.subject && grievance.description ? 'pointer' : 'not-allowed', opacity: grievance.subject && grievance.description ? 1 : 0.5 }}
+                      disabled={!grievance.subject || !grievance.description}
+                      onClick={async () => {
+                        try {
+                          const { submitGrievance } = await import('../../services/api')
+                          await submitGrievance(grievance.subject, grievance.description)
+                        } catch {
+                          // Fallback: mailto
+                          window.open(`mailto:grievance@anvega.ai?subject=${encodeURIComponent(grievance.subject)}&body=${encodeURIComponent(grievance.description)}`)
+                        }
+                        setGrievanceSubmitted(true)
+                      }}
+                    >
+                      Submit Grievance
+                    </button>
+                    <p style={{ fontSize: 11, color: 'var(--wf-gray-400)', textAlign: 'center' }}>
+                      You may also escalate to the <strong>Data Protection Board of India</strong> if unresolved.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </WireframeCard>
+          )}
+        </>
       )}
 
       {!showDeleteConfirm ? (
