@@ -56,14 +56,15 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const token = getAuthToken();
   const userId = getUserId();
 
+  const hospitalId = localStorage.getItem('selected_hospital');
+
   const response = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      // For Google auth, send the JWT token
-      // For guest auth, send a custom header with user ID
       ...(token && !token.startsWith('guest:') && { 'Authorization': `Bearer ${token}` }),
       ...(userId && { 'X-User-ID': userId }),
+      ...(hospitalId && { 'X-Hospital-Id': hospitalId }),
       ...options?.headers,
     },
   });
@@ -719,6 +720,18 @@ export async function submitGrievance(subject: string, description: string): Pro
   return fetchJson(`${API_BASE_V2}/grievance`, {
     method: 'POST',
     body: JSON.stringify({ subject, description }),
+  });
+}
+
+// --- Patient-Clinician Association ---
+
+export async function associatePatient(
+  hospitalId: string,
+  accessCode?: string
+): Promise<{ clinician_id?: string; clinician_name?: string; hospital_id?: string }> {
+  return fetchJson(`${API_BASE_V2}/me/associate`, {
+    method: 'POST',
+    body: JSON.stringify({ hospital_id: hospitalId, access_code: accessCode }),
   });
 }
 

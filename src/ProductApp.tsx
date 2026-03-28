@@ -96,10 +96,20 @@ function LoginPageWithGoogle({
     }
   }
 
+  const sendAssociation = () => {
+    if (!selectedHospital) return
+    import('./services/api').then(({ associatePatient }) => {
+      associatePatient(selectedHospital, hospitalCode.trim() || undefined).catch(() => {
+        // Non-blocking — backend may not be ready yet
+      })
+    })
+  }
+
   const handleGoogleSuccess = (response: CredentialResponse) => {
     if (response.credential) {
       persistHospitalSelection()
       onGoogleLogin(response.credential)
+      sendAssociation()
     }
   }
 
@@ -108,6 +118,7 @@ function LoginPageWithGoogle({
     if (guestName.trim()) {
       persistHospitalSelection()
       onGuestLogin(guestName.trim())
+      sendAssociation()
     }
   }
 
@@ -234,7 +245,7 @@ function LoginPageWithGoogle({
                 marginBottom: 6,
               }}>
                 <KeyRound size={14} style={{ display: 'inline', verticalAlign: '-2px', marginRight: 6 }} />
-                Hospital access code
+                Access code
                 <span style={{ fontWeight: 400, color: '#9ca3af', marginLeft: 4 }}>(optional)</span>
               </label>
               <input
