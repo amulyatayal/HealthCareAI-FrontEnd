@@ -132,7 +132,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null)
     setUser(null)
     localStorage.removeItem('auth_token')
-    localStorage.removeItem('patient_clinician_id')
   }
 
   return (

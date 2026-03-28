@@ -5,7 +5,6 @@ import type { ResourceCategory } from '../types'
 import {
   FALLBACK_CATEGORIES,
   DEMO_ADMIN_RESOURCES,
-  filterByPatientClinician,
   patientResourcesToCategories,
 } from '../data/fallbackResources'
 
@@ -90,7 +89,7 @@ export function usePathwayResources() {
       try {
         const adminDataRaw = localStorage.getItem('admin_pathway_resources')
         if (adminDataRaw) {
-          const adminItems = filterByPatientClinician(JSON.parse(adminDataRaw) as typeof DEMO_ADMIN_RESOURCES)
+          const adminItems = JSON.parse(adminDataRaw)
           const matched = matchResources(adminItems, patientStageIds)
           if (matched.length > 0) {
             console.info(`[PathwayResources] Using localStorage admin resources (${matched.length} matched)`)
@@ -102,7 +101,7 @@ export function usePathwayResources() {
 
       if (cancelled) return
 
-      const matched = matchResources(filterByPatientClinician(DEMO_ADMIN_RESOURCES), patientStageIds)
+      const matched = matchResources(DEMO_ADMIN_RESOURCES, patientStageIds)
       if (matched.length > 0) {
         console.info(`[PathwayResources] Using demo fallback resources (${matched.length} matched)`)
         setResourceCategories(patientResourcesToCategories(matched))

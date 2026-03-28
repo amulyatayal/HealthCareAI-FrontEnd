@@ -7,7 +7,7 @@ import { useBasePath } from '../hooks/useBasePath'
 import { youtubeToEmbedUrl } from '../utils/youtubeEmbed'
 import { searchAllResources } from '../../services/api'
 import type { PatientResource } from '../../services/api'
-import { DEMO_ADMIN_RESOURCES, filterByPatientClinician, patientResourcesToCategories } from '../../features/dashboard/data/fallbackResources'
+import { DEMO_ADMIN_RESOURCES, patientResourcesToCategories } from '../../features/dashboard/data/fallbackResources'
 import type { ResourceCategory } from '../../features/dashboard/types'
 
 function getAllLocalResources(): PatientResource[] {
@@ -16,12 +16,7 @@ function getAllLocalResources(): PatientResource[] {
   try {
     const adminRaw = localStorage.getItem('admin_pathway_resources')
     if (adminRaw) {
-      const adminItems = filterByPatientClinician(JSON.parse(adminRaw) as Array<{
-        clinician_id?: string
-        resources: { title: string; url: string; type: 'pdf' | 'video' | 'link' }[]
-        description: string
-        intents: string[]
-      }>)
+      const adminItems = JSON.parse(adminRaw)
       for (const item of adminItems) {
         for (const r of item.resources) {
           all.push({
@@ -37,7 +32,7 @@ function getAllLocalResources(): PatientResource[] {
   } catch { /* ignore */ }
 
   if (all.length === 0) {
-    for (const item of filterByPatientClinician(DEMO_ADMIN_RESOURCES)) {
+    for (const item of DEMO_ADMIN_RESOURCES) {
       for (const r of item.resources) {
         all.push({
           title: r.title,
