@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Search, Video, FileText, ExternalLink, X, BookOpen } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
 import { useBasePath } from '../hooks/useBasePath'
 import { youtubeToEmbedUrl } from '../utils/youtubeEmbed'
-import { searchAllResources } from '../../services/api'
+import { getAllResources } from '../../services/api'
 import type { PatientResource } from '../../services/api'
 import { DEMO_ADMIN_RESOURCES, patientResourcesToCategories } from '../../features/dashboard/data/fallbackResources'
 import type { ResourceCategory } from '../../features/dashboard/types'
@@ -63,39 +63,18 @@ export function SearchResourcesPage() {
   const base = useBasePath()
   const [query, setQuery] = useState('')
   const [categories, setCategories] = useState<ResourceCategory[]>([])
-  const [allLocal, setAllLocal] = useState<PatientResource[]>([])
-  const [loading, setLoading] = useState(false)
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+  const [allResources, setAllResources] = useState<PatientResource[]>([])
+  const [loading, setLoading] = useState(true)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    setAllLocal(getAllLocalResources())
-  }, [])
-
-  useEffect(() => {
-    if (!allLocal.length) return
-    if (!query.trim()) {
-      setCategories(patientResourcesToCategories(allLocal))
-      return
-    }
-
-    setLoading(true)
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-
-    debounceRef.current = setTimeout(() => {
-      searchBackendThenLocal(query.trim())
-    }, 300)
-
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-    }
-  }, [query, allLocal])
-
-  const searchBackendThenLocal = useCallback(
-    async (q: string) => {
+    let cancelled = false
+    async function loadResources() {
+      setLoading(true)
       try {
-        const data = await searchAllResources(q)
-        if (data.resources.length > 0) {
+        const data = await getAllResources()
+        if (!cancelled && data.resources.length > 0) {
+          setAllResources(data.resources)
           setCategories(patientResourcesToCategories(data.resources))
           setLoading(false)
           return
@@ -103,13 +82,22 @@ export function SearchResourcesPage() {
       } catch {
         /* backend unavailable, fall through */
       }
+      if (!cancelled) {
+        const local = getAllLocalResources()
+        setAllResources(local)
+        setCategories(patientResourcesToCategories(local))
+        setLoading(false)
+      }
+    }
+    loadResources()
+    return () => { cancelled = true }
+  }, [])
 
-      const matched = filterResources(allLocal, q)
-      setCategories(patientResourcesToCategories(matched))
-      setLoading(false)
-    },
-    [allLocal],
-  )
+  useEffect(() => {
+    if (!allResources.length) return
+    const matched = filterResources(allResources, query)
+    setCategories(patientResourcesToCategories(matched))
+  }, [query, allResources])
 
   const totalResults = categories.reduce((n, c) => n + c.links.length, 0)
 

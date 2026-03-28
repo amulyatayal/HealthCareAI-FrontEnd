@@ -682,6 +682,10 @@ export interface PatientResource {
   intents: string[];
 }
 
+export async function getAllResources(): Promise<{ resources: PatientResource[] }> {
+  return fetchJson(`${API_BASE_V2}/resources`);
+}
+
 export async function getResourcesForStage(stageId: string): Promise<{ resources: PatientResource[] }> {
   return fetchJson(`${API_BASE_V2}/resources?stage_id=${encodeURIComponent(stageId)}`);
 }
