@@ -21,7 +21,7 @@ import { ProfilePage } from './pages/ProfilePage'
 import { StageSelectorPage } from './pages/StageSelectorPage'
 import { ShareDataPage } from './pages/ShareDataPage'
 import { ClinicalTeamPage } from './pages/ClinicalTeamPage'
-import { WatchVideoPage } from './pages/WatchVideoPage'
+import { ViewResourcePage } from './pages/ViewResourcePage'
 import { SearchResourcesPage } from './pages/SearchResourcesPage'
 import { GuestGate } from './components/GuestGate'
 
@@ -35,7 +35,7 @@ export function WireframeApp() {
       <Route path="/community" element={<CommunityHub />} />
       <Route path="/health" element={<HealthHub />} />
       <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/watch" element={<WatchVideoPage />} />
+      <Route path="/view" element={<ViewResourcePage />} />
       <Route path="/search" element={<SearchResourcesPage />} />
 
       {/* Guest-gated: health features */}

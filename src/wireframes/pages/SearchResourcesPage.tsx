@@ -7,7 +7,7 @@ import { useBasePath } from '../hooks/useBasePath'
 import { youtubeToEmbedUrl } from '../utils/youtubeEmbed'
 import { searchAllResources } from '../../services/api'
 import type { PatientResource } from '../../services/api'
-import { DEMO_ADMIN_RESOURCES, patientResourcesToCategories } from '../../features/dashboard/data/fallbackResources'
+import { DEMO_ADMIN_RESOURCES, filterByPatientClinician, patientResourcesToCategories } from '../../features/dashboard/data/fallbackResources'
 import type { ResourceCategory } from '../../features/dashboard/types'
 
 function getAllLocalResources(): PatientResource[] {
@@ -16,7 +16,12 @@ function getAllLocalResources(): PatientResource[] {
   try {
     const adminRaw = localStorage.getItem('admin_pathway_resources')
     if (adminRaw) {
-      const adminItems = JSON.parse(adminRaw)
+      const adminItems = filterByPatientClinician(JSON.parse(adminRaw) as Array<{
+        clinician_id?: string
+        resources: { title: string; url: string; type: 'pdf' | 'video' | 'link' }[]
+        description: string
+        intents: string[]
+      }>)
       for (const item of adminItems) {
         for (const r of item.resources) {
           all.push({
@@ -32,7 +37,7 @@ function getAllLocalResources(): PatientResource[] {
   } catch { /* ignore */ }
 
   if (all.length === 0) {
-    for (const item of DEMO_ADMIN_RESOURCES) {
+    for (const item of filterByPatientClinician(DEMO_ADMIN_RESOURCES)) {
       for (const r of item.resources) {
         all.push({
           title: r.title,
@@ -178,34 +183,20 @@ export function SearchResourcesPage() {
               {cat.links.map((link) => {
                 const TypeIcon = link.type === 'video' ? Video : link.type === 'pdf' ? FileText : ExternalLink
                 const typeColor = link.type === 'video' ? '#2563eb' : link.type === 'pdf' ? '#d97706' : '#6b7280'
+                const viewUrl = link.type === 'video'
+                  ? `${base}/view?url=${encodeURIComponent(youtubeToEmbedUrl(link.url))}&type=video&title=${encodeURIComponent(link.label)}`
+                  : `${base}/view?url=${encodeURIComponent(link.url)}&type=${link.type}&title=${encodeURIComponent(link.label)}`
 
-                if (link.type === 'video') {
-                  const embedUrl = youtubeToEmbedUrl(link.url)
-                  return (
-                    <Link
-                      key={link.url}
-                      to={`${base}/watch?url=${encodeURIComponent(embedUrl)}`}
-                      className="wf-search-result-card"
-                    >
-                      <TypeIcon size={18} style={{ color: typeColor, flexShrink: 0 }} />
-                      <span className="wf-search-result-label">{link.label}</span>
-                      <span className="wf-search-result-badge" style={{ color: typeColor }}>{link.type}</span>
-                    </Link>
-                  )
-                }
                 return (
-                  <a
+                  <Link
                     key={link.url}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    to={viewUrl}
                     className="wf-search-result-card"
                   >
                     <TypeIcon size={18} style={{ color: typeColor, flexShrink: 0 }} />
                     <span className="wf-search-result-label">{link.label}</span>
                     <span className="wf-search-result-badge" style={{ color: typeColor }}>{link.type}</span>
-                    <ExternalLink size={14} style={{ color: 'var(--wf-gray-400)', flexShrink: 0 }} />
-                  </a>
+                  </Link>
                 )
               })}
             </WireframeCard>

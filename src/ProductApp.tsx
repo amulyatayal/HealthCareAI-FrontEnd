@@ -99,9 +99,15 @@ function LoginPageWithGoogle({
   const sendAssociation = () => {
     if (!selectedHospital) return
     import('./services/api').then(({ associatePatient }) => {
-      associatePatient(selectedHospital, hospitalCode.trim() || undefined).catch(() => {
-        // Non-blocking — backend may not be ready yet
-      })
+      associatePatient(selectedHospital, hospitalCode.trim() || undefined)
+        .then((res) => {
+          if (res.clinician_id) {
+            localStorage.setItem('patient_clinician_id', res.clinician_id)
+          }
+        })
+        .catch(() => {
+          // Non-blocking — backend may not be ready yet
+        })
     })
   }
 

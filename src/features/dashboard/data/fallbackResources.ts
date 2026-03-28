@@ -136,6 +136,18 @@ export const DEMO_ADMIN_RESOURCES = [
   },
 ]
 
+/**
+ * When a patient_clinician_id is stored (from /me/associate), only keep
+ * resources belonging to that clinician. No-op when no ID is stored.
+ */
+export function filterByPatientClinician<T>(items: T[]): T[] {
+  const id = localStorage.getItem('patient_clinician_id')?.trim()
+  if (!id) return items
+  return items.filter(
+    (item) => (item as Record<string, unknown>).clinician_id === id,
+  )
+}
+
 export const MOCK_DASHBOARD = {
   wellness_score: 78,
   streak_days: 7,
