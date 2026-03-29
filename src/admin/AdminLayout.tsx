@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 import { Link, useLocation, Navigate } from 'react-router-dom';
-import { LayoutDashboard, FolderOpen, Share2, KeyRound, LogOut, Heart } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, Share2, KeyRound, MessageSquare, Calendar, LogOut, Heart } from 'lucide-react';
 import { useAdminAuth } from './AdminAuthContext';
 
 interface Props {
@@ -10,8 +10,10 @@ interface Props {
 const NAV_ITEMS = [
   { path: '/admin', label: 'Dashboard', icon: LayoutDashboard, enabled: true },
   { path: '/admin/resources', label: 'Pathway Resources', icon: FolderOpen, enabled: true },
+  { path: '/admin/access-codes', label: 'Access Codes', icon: KeyRound, enabled: true },
+  { path: '/admin/community', label: 'Community', icon: MessageSquare, enabled: true },
+  { path: '/admin/events', label: 'Events', icon: Calendar, enabled: true },
   { path: '/admin/shared-data', label: 'Shared Patient Data', icon: Share2, enabled: false },
-  { path: '/admin/access-codes', label: 'Access Codes', icon: KeyRound, enabled: false },
 ];
 
 export function AdminLayout({ children }: Props) {

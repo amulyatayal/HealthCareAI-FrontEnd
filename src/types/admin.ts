@@ -90,3 +90,21 @@ export interface AdminLoginResponse {
   token: string;
   user: AdminUser;
 }
+
+// Access Codes
+export interface AccessCode {
+  access_code: string;
+  clinician_id: string;
+  clinician_name: string;
+  hospital_id: string;
+  created_at: string;
+  is_active: boolean;
+}
+
+export interface AccessCodeCreateRequest {
+  hospital_id: string;
+}
+
+export interface AccessCodeListResponse {
+  codes: AccessCode[];
+}

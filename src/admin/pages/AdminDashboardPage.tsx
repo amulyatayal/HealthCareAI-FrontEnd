@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FolderOpen, Share2, KeyRound } from 'lucide-react';
+import { FolderOpen, Share2, KeyRound, MessageSquare, Calendar } from 'lucide-react';
 
 const CARDS = [
   {
@@ -12,21 +12,39 @@ const CARDS = [
     enabled: true,
   },
   {
-    title: 'Shared Patient Data',
-    description: 'View data that patients have shared with your clinical team.',
-    icon: Share2,
-    iconBg: 'linear-gradient(135deg, var(--lavender-100), var(--lavender-50))',
-    iconColor: 'var(--lavender-300)',
-    path: '/admin/shared-data',
-    enabled: false,
-  },
-  {
     title: 'Access Codes',
     description: 'Manage access codes that can be shared with patients to connect them to your team.',
     icon: KeyRound,
     iconBg: 'linear-gradient(135deg, var(--rose-100), var(--rose-50))',
     iconColor: 'var(--rose-400)',
     path: '/admin/access-codes',
+    enabled: true,
+  },
+  {
+    title: 'Community Chats',
+    description: 'Moderate community chat rooms and engage with patients as a care team member.',
+    icon: MessageSquare,
+    iconBg: 'linear-gradient(135deg, #e8f5e9, #f1f8e9)',
+    iconColor: '#43a047',
+    path: '/admin/community',
+    enabled: true,
+  },
+  {
+    title: 'Events',
+    description: 'Create and manage wellness events, support groups, and educational sessions.',
+    icon: Calendar,
+    iconBg: 'linear-gradient(135deg, #fff3e0, #fff8e1)',
+    iconColor: '#ef6c00',
+    path: '/admin/events',
+    enabled: true,
+  },
+  {
+    title: 'Shared Patient Data',
+    description: 'View data that patients have shared with your clinical team.',
+    icon: Share2,
+    iconBg: 'linear-gradient(135deg, var(--lavender-100), var(--lavender-50))',
+    iconColor: 'var(--lavender-300)',
+    path: '/admin/shared-data',
     enabled: false,
   },
 ];
