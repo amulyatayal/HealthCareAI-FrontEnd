@@ -1,0 +1,135 @@
+import { useState, useEffect } from 'react'
+import { Bell, Info, AlertTriangle, AlertCircle, Check } from 'lucide-react'
+import { WireframeCard } from '../../../wireframes/components'
+import {
+  getNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  type PatientNotification,
+} from '../../../services/api'
+
+type Priority = 'info' | 'warning' | 'urgent'
+
+const PRIORITY_STYLES: Record<Priority, { color: string; bg: string; icon: typeof Info }> = {
+  info: { color: '#3b82f6', bg: '#eff6ff', icon: Info },
+  warning: { color: '#f59e0b', bg: '#fffbeb', icon: AlertTriangle },
+  urgent: { color: '#ef4444', bg: '#fef2f2', icon: AlertCircle },
+}
+
+const MOCK_NOTIFICATIONS: PatientNotification[] = [
+  { notification_id: '1', title: 'New Resources Available', message: 'Your care team has added new post-surgery recovery resources.', priority: 'info', created_at: '2025-03-28T14:30:00Z', read: false },
+  { notification_id: '2', title: 'Appointment Reminder', message: 'Please remember to update your symptom log before your upcoming appointment.', priority: 'warning', created_at: '2025-03-25T08:00:00Z', read: false },
+  { notification_id: '3', title: 'System Maintenance', message: 'Tara will undergo scheduled maintenance on Saturday from 2:00 AM to 4:00 AM GMT.', priority: 'info', created_at: '2025-03-22T09:00:00Z', read: true },
+]
+
+function timeAgo(value: string): string {
+  try {
+    const date = new Date(value)
+    if (isNaN(date.getTime())) return ''
+    const diff = Date.now() - date.getTime()
+    const mins = Math.floor(diff / 60000)
+    if (mins < 1) return 'Just now'
+    if (mins < 60) return `${mins}m ago`
+    const hrs = Math.floor(mins / 60)
+    if (hrs < 24) return `${hrs}h ago`
+    const days = Math.floor(hrs / 24)
+    if (days < 7) return `${days}d ago`
+    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+  } catch { return '' }
+}
+
+export function Notifications() {
+  const [notifications, setNotifications] = useState<PatientNotification[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      try {
+        const data = await getNotifications()
+        if (!cancelled) setNotifications(data.notifications ?? [])
+      } catch {
+        if (!cancelled) setNotifications(MOCK_NOTIFICATIONS)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [])
+
+  const unreadCount = notifications.filter((n) => !n.read).length
+
+  async function handleMarkRead(id: string) {
+    setNotifications((prev) =>
+      prev.map((n) => (n.notification_id === id ? { ...n, read: true } : n))
+    )
+    try {
+      await markNotificationRead(id)
+    } catch (err) {
+      console.error('Failed to mark notification read:', err)
+    }
+  }
+
+  async function handleMarkAllRead() {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+    try {
+      await markAllNotificationsRead()
+    } catch (err) {
+      console.error('Failed to mark all notifications read:', err)
+    }
+  }
+
+  if (loading) return null
+
+  return (
+    <WireframeCard
+      title={
+        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          Notifications
+          {unreadCount > 0 && (
+            <span className="wf-notif-unread-badge">{unreadCount}</span>
+          )}
+        </span>
+      }
+      action={
+        unreadCount > 0 ? (
+          <button onClick={handleMarkAllRead} className="wf-notif-mark-all">
+            <Check size={14} /> Mark all read
+          </button>
+        ) : undefined
+      }
+    >
+      {notifications.length === 0 ? (
+        <div style={{ padding: '24px', textAlign: 'center', color: 'var(--wf-gray-400)' }}>
+          <Bell size={28} strokeWidth={1.4} style={{ marginBottom: '8px' }} />
+          <div style={{ fontSize: '14px' }}>No notifications</div>
+        </div>
+      ) : (
+        notifications.map((n) => {
+          const style = PRIORITY_STYLES[n.priority]
+          const PriorityIcon = style.icon
+          return (
+            <button
+              key={n.notification_id}
+              className={`wf-notif-item ${n.read ? 'read' : ''}`}
+              onClick={() => handleMarkRead(n.notification_id)}
+            >
+              <div className="wf-notif-icon" style={{ background: style.bg }}>
+                <PriorityIcon size={18} style={{ color: style.color }} />
+              </div>
+              <div className="wf-notif-content">
+                <div className="wf-notif-title-row">
+                  <span className="wf-notif-title">{n.title}</span>
+                  <span className="wf-notif-time">{timeAgo(n.created_at)}</span>
+                </div>
+                <div className="wf-notif-message">{n.message}</div>
+              </div>
+              {!n.read && <div className="wf-notif-dot" />}
+            </button>
+          )
+        })
+      )}
+    </WireframeCard>
+  )
+}

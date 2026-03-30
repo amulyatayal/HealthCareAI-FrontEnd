@@ -6,6 +6,7 @@ import { usePathwayResources } from './hooks/usePathwayResources'
 import { HeroWelcome } from './components/HeroWelcome'
 import { WellnessStats } from './components/WellnessStats'
 import { DailyQuote } from './components/DailyQuote'
+import { Notifications } from './components/Notifications'
 import { UpcomingAppointments } from './components/UpcomingAppointments'
 import { PathwayResources } from './components/PathwayResources'
 import { ClinicalTrials } from './components/ClinicalTrials'
@@ -24,6 +25,7 @@ export function DashboardPage() {
       <HeroWelcome firstName={firstName} streakDays={dashboard.streak_days} basePath={basePath} />
       <WellnessStats dashboard={dashboard} />
       {dashboard.daily_quote && <DailyQuote quote={dashboard.daily_quote} />}
+      <Notifications />
       <UpcomingAppointments basePath={basePath} />
       <PathwayResources categories={resourceCategories} hasStageSelected={hasStageSelected} basePath={basePath} />
       <ClinicalTrials />

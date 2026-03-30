@@ -5,6 +5,9 @@ import type {
   AdminLoginResponse,
   AccessCode,
   AccessCodeListResponse,
+  AdminNotification,
+  AdminNotificationListResponse,
+  NotificationCreateRequest,
 } from '../types/admin';
 
 const API_BASE = '/api/v2/admin';
@@ -102,6 +105,24 @@ export async function createAccessCode(hospitalId: string): Promise<AccessCode> 
 
 export async function deleteAccessCode(code: string): Promise<{ message: string }> {
   return fetchAdminJson(`${API_BASE}/access-codes/${encodeURIComponent(code)}`, {
+    method: 'DELETE',
+  });
+}
+
+// Notifications CRUD
+export async function getAdminNotifications(): Promise<AdminNotificationListResponse> {
+  return fetchAdminJson(`${API_BASE}/notifications`);
+}
+
+export async function createNotification(data: NotificationCreateRequest): Promise<AdminNotification> {
+  return fetchAdminJson(`${API_BASE}/notifications`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteNotification(id: string): Promise<{ message: string }> {
+  return fetchAdminJson(`${API_BASE}/notifications/${encodeURIComponent(id)}`, {
     method: 'DELETE',
   });
 }

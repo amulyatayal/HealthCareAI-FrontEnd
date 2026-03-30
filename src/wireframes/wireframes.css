@@ -1493,3 +1493,119 @@
   letter-spacing: 0.3px;
   flex-shrink: 0;
 }
+
+/* ================================
+   Patient Notifications
+   ================================ */
+
+.wf-notif-unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  background: var(--wf-rose-500);
+  border-radius: 100px;
+}
+
+.wf-notif-mark-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--wf-rose-500);
+  background: none;
+  border: 1px solid var(--wf-rose-200);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background 0.15s;
+}
+
+.wf-notif-mark-all:hover {
+  background: var(--wf-rose-50);
+}
+
+.wf-notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  border-radius: 10px;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.wf-notif-item:hover {
+  background: var(--wf-gray-50);
+}
+
+.wf-notif-item.read {
+  opacity: 0.65;
+}
+
+.wf-notif-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.wf-notif-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.wf-notif-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.wf-notif-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--wf-gray-800);
+}
+
+.wf-notif-time {
+  font-size: 11px;
+  color: var(--wf-gray-400);
+  flex-shrink: 0;
+}
+
+.wf-notif-message {
+  font-size: 13px;
+  color: var(--wf-gray-500);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wf-notif-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--wf-rose-500);
+  flex-shrink: 0;
+  margin-top: 6px;
+}

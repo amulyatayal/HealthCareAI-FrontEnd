@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FolderOpen, Share2, KeyRound, MessageSquare, Calendar } from 'lucide-react';
+import { FolderOpen, Share2, KeyRound, MessageSquare, Calendar, Bell } from 'lucide-react';
 
 const CARDS = [
   {
@@ -36,6 +36,15 @@ const CARDS = [
     iconBg: 'linear-gradient(135deg, #fff3e0, #fff8e1)',
     iconColor: '#ef6c00',
     path: '/admin/events',
+    enabled: true,
+  },
+  {
+    title: 'Notifications',
+    description: 'Send announcements and alerts to all patients connected to your team.',
+    icon: Bell,
+    iconBg: 'linear-gradient(135deg, #e3f2fd, #bbdefb)',
+    iconColor: '#1565c0',
+    path: '/admin/notifications',
     enabled: true,
   },
   {

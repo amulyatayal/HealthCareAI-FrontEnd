@@ -108,3 +108,27 @@ export interface AccessCodeCreateRequest {
 export interface AccessCodeListResponse {
   codes: AccessCode[];
 }
+
+// Notifications
+export type NotificationPriority = 'info' | 'warning' | 'urgent';
+
+export interface AdminNotification {
+  notification_id: string;
+  title: string;
+  message: string;
+  priority: NotificationPriority;
+  clinician_id: string;
+  clinician_name: string;
+  created_at: string;
+  recipient_count: number;
+}
+
+export interface AdminNotificationListResponse {
+  notifications: AdminNotification[];
+}
+
+export interface NotificationCreateRequest {
+  title: string;
+  message: string;
+  priority: NotificationPriority;
+}

@@ -7,6 +7,7 @@ import { AdminResourcesPage } from './pages/AdminResourcesPage';
 import { AdminAccessCodesPage } from './pages/AdminAccessCodesPage';
 import { AdminCommunityPage } from './pages/AdminCommunityPage';
 import { AdminEventsPage } from './pages/AdminEventsPage';
+import { AdminNotificationsPage } from './pages/AdminNotificationsPage';
 import './admin.css';
 
 export function AdminApp() {
@@ -24,6 +25,7 @@ export function AdminApp() {
                 <Route path="/access-codes" element={<AdminAccessCodesPage />} />
                 <Route path="/community" element={<AdminCommunityPage />} />
                 <Route path="/events" element={<AdminEventsPage />} />
+                <Route path="/notifications" element={<AdminNotificationsPage />} />
               </Routes>
             </AdminLayout>
           }

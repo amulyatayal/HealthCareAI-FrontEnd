@@ -1,7 +1,7 @@
 import { ReactNode, CSSProperties } from 'react'
 
 interface WireframeCardProps {
-  title?: string
+  title?: ReactNode
   subtitle?: string
   children: ReactNode
   action?: ReactNode

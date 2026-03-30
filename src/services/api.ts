@@ -411,6 +411,31 @@ export async function deleteAppointment(id: string): Promise<{ message: string }
 }
 
 // ================================
+// Notifications API (v2)
+// ================================
+
+export interface PatientNotification {
+  notification_id: string;
+  title: string;
+  message: string;
+  priority: 'info' | 'warning' | 'urgent';
+  created_at: string;
+  read: boolean;
+}
+
+export async function getNotifications(): Promise<{ notifications: PatientNotification[] }> {
+  return fetchJson(`${API_BASE_V2}/notifications`);
+}
+
+export async function markNotificationRead(id: string): Promise<{ message: string }> {
+  return fetchJson(`${API_BASE_V2}/notifications/${encodeURIComponent(id)}/read`, { method: 'PATCH', body: JSON.stringify({}) });
+}
+
+export async function markAllNotificationsRead(): Promise<{ message: string }> {
+  return fetchJson(`${API_BASE_V2}/notifications/read-all`, { method: 'PATCH', body: JSON.stringify({}) });
+}
+
+// ================================
 // Documents API (v2)
 // ================================
 
