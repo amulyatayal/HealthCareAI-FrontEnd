@@ -113,7 +113,8 @@ export interface AccessCodeListResponse {
 export type NotificationPriority = 'info' | 'warning' | 'urgent';
 
 export interface AdminNotification {
-  notification_id: string;
+  notification_id?: string;
+  id?: string;
   title: string;
   message: string;
   priority: NotificationPriority;

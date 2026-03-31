@@ -415,7 +415,8 @@ export async function deleteAppointment(id: string): Promise<{ message: string }
 // ================================
 
 export interface PatientNotification {
-  notification_id: string;
+  notification_id?: string;
+  id?: string;
   title: string;
   message: string;
   priority: 'info' | 'warning' | 'urgent';

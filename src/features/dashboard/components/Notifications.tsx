@@ -16,6 +16,10 @@ const PRIORITY_STYLES: Record<Priority, { color: string; bg: string; icon: typeo
   urgent: { color: '#ef4444', bg: '#fef2f2', icon: AlertCircle },
 }
 
+function getNotifId(n: PatientNotification): string {
+  return n.notification_id || n.id || ''
+}
+
 const MOCK_NOTIFICATIONS: PatientNotification[] = [
   { notification_id: '1', title: 'New Resources Available', message: 'Your care team has added new post-surgery recovery resources.', priority: 'info', created_at: '2025-03-28T14:30:00Z', read: false },
   { notification_id: '2', title: 'Appointment Reminder', message: 'Please remember to update your symptom log before your upcoming appointment.', priority: 'warning', created_at: '2025-03-25T08:00:00Z', read: false },
@@ -61,8 +65,9 @@ export function Notifications() {
   const unreadCount = notifications.filter((n) => !n.read).length
 
   async function handleMarkRead(id: string) {
+    if (!id) return
     setNotifications((prev) =>
-      prev.map((n) => (n.notification_id === id ? { ...n, read: true } : n))
+      prev.map((n) => (getNotifId(n) === id ? { ...n, read: true } : n))
     )
     try {
       await markNotificationRead(id)
@@ -111,9 +116,9 @@ export function Notifications() {
           const PriorityIcon = style.icon
           return (
             <button
-              key={n.notification_id}
+              key={getNotifId(n) || n.title}
               className={`wf-notif-item ${n.read ? 'read' : ''}`}
-              onClick={() => handleMarkRead(n.notification_id)}
+              onClick={() => handleMarkRead(getNotifId(n))}
             >
               <div className="wf-notif-icon" style={{ background: style.bg }}>
                 <PriorityIcon size={18} style={{ color: style.color }} />

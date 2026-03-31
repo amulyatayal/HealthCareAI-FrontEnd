@@ -9,6 +9,10 @@ const PRIORITY_CONFIG: Record<NotificationPriority, { label: string; color: stri
   urgent: { label: 'Urgent', color: '#ef4444', icon: AlertCircle },
 }
 
+function getNotifId(n: AdminNotification): string {
+  return n.notification_id || n.id || ''
+}
+
 function formatSentDate(iso: string): string {
   try {
     return new Date(iso).toLocaleDateString('en-GB', {
@@ -64,12 +68,17 @@ export function AdminNotificationsPage() {
   }
 
   async function handleDelete(id: string) {
+    if (!id) {
+      setError('Cannot delete: notification ID is missing')
+      return
+    }
     setError('')
     try {
       await deleteNotification(id)
-      setNotifications((prev) => prev.filter((n) => n.notification_id !== id))
+      setNotifications((prev) => prev.filter((n) => getNotifId(n) !== id))
       setConfirmDelete(null)
     } catch (err) {
+      console.error('Delete failed for notification id:', id, err)
       setError(err instanceof Error ? err.message : 'Failed to delete notification')
     }
   }
@@ -166,7 +175,7 @@ export function AdminNotificationsPage() {
             const cfg = PRIORITY_CONFIG[n.priority]
             const PriorityIcon = cfg.icon
             return (
-              <div key={n.notification_id} className="admin-notif-item">
+              <div key={getNotifId(n)} className="admin-notif-item">
                 <div className="admin-notif-item-accent" style={{ background: cfg.color }} />
                 <div className="admin-notif-item-body">
                   <div className="admin-notif-item-header">
@@ -181,14 +190,14 @@ export function AdminNotificationsPage() {
                   <p className="admin-notif-item-message">{n.message}</p>
                   <div className="admin-notif-item-footer">
                     <span className="admin-notif-item-recipients">Sent to {n.recipient_count} patients</span>
-                    {confirmDelete === n.notification_id ? (
+                    {confirmDelete === getNotifId(n) ? (
                       <span className="admin-notif-confirm-delete">
                         <span>Delete?</span>
-                        <button className="admin-notif-btn-yes" onClick={() => handleDelete(n.notification_id)}>Yes</button>
+                        <button className="admin-notif-btn-yes" onClick={() => handleDelete(getNotifId(n))}>Yes</button>
                         <button className="admin-notif-btn-no" onClick={() => setConfirmDelete(null)}>No</button>
                       </span>
                     ) : (
-                      <button className="admin-notif-btn-delete" onClick={() => setConfirmDelete(n.notification_id)}>
+                      <button className="admin-notif-btn-delete" onClick={() => setConfirmDelete(getNotifId(n))} disabled={!getNotifId(n)}>
                         <Trash2 size={13} /> Delete
                       </button>
                     )}
