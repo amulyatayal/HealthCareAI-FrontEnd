@@ -90,3 +90,46 @@ export interface AdminLoginResponse {
   token: string;
   user: AdminUser;
 }
+
+// Access Codes
+export interface AccessCode {
+  access_code: string;
+  clinician_id: string;
+  clinician_name: string;
+  hospital_id: string;
+  created_at: string;
+  is_active: boolean;
+}
+
+export interface AccessCodeCreateRequest {
+  hospital_id: string;
+}
+
+export interface AccessCodeListResponse {
+  codes: AccessCode[];
+}
+
+// Notifications
+export type NotificationPriority = 'info' | 'warning' | 'urgent';
+
+export interface AdminNotification {
+  notification_id?: string;
+  id?: string;
+  title: string;
+  message: string;
+  priority: NotificationPriority;
+  clinician_id: string;
+  clinician_name: string;
+  created_at: string;
+  recipient_count: number;
+}
+
+export interface AdminNotificationListResponse {
+  notifications: AdminNotification[];
+}
+
+export interface NotificationCreateRequest {
+  title: string;
+  message: string;
+  priority: NotificationPriority;
+}

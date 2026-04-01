@@ -1,8 +1,12 @@
+import { useState } from 'react'
 import { FileText, ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { PhoneFrame } from '../../wireframes/components/PhoneFrame'
+import { getJurisdiction } from '../../utils/jurisdiction'
 
 export function TermsOfService() {
+  const [tab, setTab] = useState<'uk' | 'india'>(getJurisdiction)
+
   return (
     <PhoneFrame>
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 16px 64px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
@@ -14,7 +18,9 @@ export function TermsOfService() {
         <FileText size={28} style={{ color: '#f43f5e' }} />
         <h1 style={{ fontSize: 28, fontWeight: 700, color: '#111827', margin: 0 }}>Terms of Service</h1>
       </div>
-      <p style={{ fontSize: 14, color: '#6b7280', marginBottom: 32 }}>Last updated: January 2026</p>
+      <p style={{ fontSize: 14, color: '#6b7280', marginBottom: 16 }}>Last updated: January 2026</p>
+
+      <JurisdictionTabs value={tab} onChange={setTab} />
 
       <Section title="1. Acceptance of Terms">
         <p>
@@ -39,19 +45,35 @@ export function TermsOfService() {
       </Section>
 
       <Section title="3. Regulatory Status">
-        <InfoBox colour="blue">
-          <p style={{ fontWeight: 600, marginBottom: 6 }}>Important Notice</p>
-          <p>
-            The Service is <strong>not</strong> a regulated medical device under the UK Medical Devices Regulations 2002 (as amended)
-            or the EU Medical Device Regulation (MDR 2017/745). It is not intended to diagnose, treat, cure, or prevent any disease
-            or medical condition.
-          </p>
-          <p style={{ marginTop: 8 }}>
-            The Service does not replace clinical oversight, professional medical advice, or the clinician–patient relationship.
-            Any health-related features (mood tracking, symptom logging, AI chat) are provided for informational and
-            self-management purposes only.
-          </p>
-        </InfoBox>
+        {tab === 'uk' ? (
+          <InfoBox colour="blue">
+            <p style={{ fontWeight: 600, marginBottom: 6 }}>Important Notice</p>
+            <p>
+              The Service is <strong>not</strong> a regulated medical device under the UK Medical Devices Regulations 2002 (as amended)
+              or the EU Medical Device Regulation (MDR 2017/745). It is not intended to diagnose, treat, cure, or prevent any disease
+              or medical condition.
+            </p>
+            <p style={{ marginTop: 8 }}>
+              The Service does not replace clinical oversight, professional medical advice, or the clinician–patient relationship.
+              Any health-related features (mood tracking, symptom logging, AI chat) are provided for informational and
+              self-management purposes only.
+            </p>
+          </InfoBox>
+        ) : (
+          <InfoBox colour="blue">
+            <p style={{ fontWeight: 600, marginBottom: 6 }}>Important Notice</p>
+            <p>
+              The Service is <strong>not</strong> a regulated medical device under the Drugs and Cosmetics Act, 1940
+              or the Medical Devices Rules, 2017. It is not intended to diagnose, treat, cure, or prevent any disease
+              or medical condition.
+            </p>
+            <p style={{ marginTop: 8 }}>
+              The Service does not replace clinical oversight, professional medical advice, or the clinician–patient relationship.
+              Any health-related features (mood tracking, symptom logging, AI chat) are provided for informational and
+              self-management purposes only. AI features comply with ICMR Ethical Guidelines for AI in Healthcare (2023).
+            </p>
+          </InfoBox>
+        )}
       </Section>
 
       <Section title="4. Medical Disclaimer and AI Transparency">
@@ -75,6 +97,12 @@ export function TermsOfService() {
             You remain solely responsible for any decisions or actions taken based on AI-generated outputs.
             We strongly recommend independently verifying any health-related information with a qualified professional.
           </p>
+          {tab === 'india' && (
+            <p style={{ marginTop: 8 }}>
+              Under ICMR Ethical Guidelines (2023), AI does not make autonomous clinical decisions. All AI features
+              operate under Institutional Ethics Committee oversight. You can request human review of any AI-generated information.
+            </p>
+          )}
         </InfoBox>
       </Section>
 
@@ -83,7 +111,7 @@ export function TermsOfService() {
           <p style={{ fontWeight: 600, marginBottom: 6 }}>Not for Emergencies</p>
           <p>
             The Service is <strong>not</strong> intended for use in medical emergencies. If you believe you are experiencing
-            a medical emergency, call your local emergency number (e.g. 999 in the UK, 112 in the EU, 911 in the US) or
+            a medical emergency, call your local emergency number ({tab === 'uk' ? '999 in the UK, 112 in the EU' : '112 or 108 in India'}) or
             seek immediate professional medical assistance.
           </p>
           <p style={{ marginTop: 8 }}>
@@ -113,15 +141,30 @@ export function TermsOfService() {
       </Section>
 
       <Section title="8. Health Data">
-        <p>
-          Health data — including mood logs, symptom entries, physical test results, and related information — is classified
-          as <strong>special category data</strong> under Article 9 of the UK GDPR.
-        </p>
-        <p>
-          Where health data is processed, we rely on both (i) <strong>performance of contract</strong> under
-          Article 6(1)(b) UK GDPR for core service functionality, and (ii) your <strong>explicit consent</strong>{' '}
-          under Article 9(2)(a) UK GDPR for special category data. We process this data for the following purposes:
-        </p>
+        {tab === 'uk' ? (
+          <>
+            <p>
+              Health data — including mood logs, symptom entries, physical test results, and related information — is classified
+              as <strong>special category data</strong> under Article 9 of the UK GDPR.
+            </p>
+            <p>
+              Where health data is processed, we rely on both (i) <strong>performance of contract</strong> under
+              Article 6(1)(b) UK GDPR for core service functionality, and (ii) your <strong>explicit consent</strong>{' '}
+              under Article 9(2)(a) UK GDPR for special category data. We process this data for the following purposes:
+            </p>
+          </>
+        ) : (
+          <>
+            <p>
+              Health data — including mood logs, symptom entries, physical test results, and related information — is
+              processed with your <strong>free, specific, informed, and unambiguous consent</strong> under DPDPA Section 6.
+            </p>
+            <p>
+              We process this data in compliance with ICMR Ethical Guidelines for AI in Healthcare (2023) and under
+              Institutional Ethics Committee oversight. We process this data for the following purposes:
+            </p>
+          </>
+        )}
         <ul>
           <li>Providing the Service, including symptom tracking, mood logging, and trend visualisation.</li>
           <li>Document storage and management of your medical records.</li>
@@ -133,9 +176,9 @@ export function TermsOfService() {
           Withdrawal of consent does not affect the lawfulness of processing carried out before withdrawal.
         </p>
         <p>
-          Where your data is <strong>anonymised</strong> such that you are no longer identifiable (in accordance with the
-          ICO's anonymisation guidance), it may be used for research, statistical analysis, and service improvement purposes.
-          Anonymised data is no longer personal data and is not subject to data subject rights.
+          Where your data is <strong>anonymised</strong> such that you are no longer identifiable, it may be used for
+          research, statistical analysis, and service improvement purposes.
+          Anonymised data is no longer personal data and is not subject to data {tab === 'uk' ? 'subject' : 'principal'} rights.
         </p>
         <p>
           We do <strong>not</strong> use your identifiable personal data to train AI models. Any use of data for model
@@ -236,14 +279,26 @@ export function TermsOfService() {
       </Section>
 
       <Section title="14. Limitation of Liability">
-        <InfoBox colour="grey">
-          <p style={{ fontWeight: 600, marginBottom: 8 }}>Statutory Rights</p>
-          <p>
-            Nothing in these Terms excludes or limits our liability for: (a) death or personal injury caused by our
-            negligence; (b) fraud or fraudulent misrepresentation; or (c) any other liability that cannot be excluded
-            or limited under applicable law, including the Consumer Rights Act 2015.
-          </p>
-        </InfoBox>
+        {tab === 'uk' ? (
+          <InfoBox colour="grey">
+            <p style={{ fontWeight: 600, marginBottom: 8 }}>Statutory Rights</p>
+            <p>
+              Nothing in these Terms excludes or limits our liability for: (a) death or personal injury caused by our
+              negligence; (b) fraud or fraudulent misrepresentation; or (c) any other liability that cannot be excluded
+              or limited under applicable law, including the Consumer Rights Act 2015.
+            </p>
+          </InfoBox>
+        ) : (
+          <InfoBox colour="grey">
+            <p style={{ fontWeight: 600, marginBottom: 8 }}>Statutory Rights</p>
+            <p>
+              Nothing in these Terms excludes or limits our liability for: (a) death or personal injury caused by our
+              negligence; (b) fraud or fraudulent misrepresentation; or (c) any other liability that cannot be excluded
+              or limited under applicable law, including the Consumer Protection Act 2019 and the Information Technology
+              Act 2000.
+            </p>
+          </InfoBox>
+        )}
         <p>Subject to the above, and to the fullest extent permitted by law:</p>
         <ul>
           <li>The Service is provided "<strong>as is</strong>" and "<strong>as available</strong>" without warranties
@@ -252,7 +307,7 @@ export function TermsOfService() {
           <li>We are not liable for any medical decisions made, or not made, based on information from the Service.</li>
           <li>We are not liable for any loss of data, unless caused by our negligence or wilful default.</li>
           <li>Our total aggregate liability to you for any claims arising out of or in connection with these Terms
-            or the Service shall not exceed <strong>£100 or the total amount paid by you for the Service in the
+            or the Service shall not exceed <strong>{tab === 'uk' ? '£100' : '₹10,000'} or the total amount paid by you for the Service in the
             12 months preceding the claim, whichever is greater</strong>.</li>
           <li>We shall not be liable for any indirect, incidental, special, consequential, or punitive damages,
             including but not limited to loss of profits, data, goodwill, or other intangible losses.</li>
@@ -260,15 +315,31 @@ export function TermsOfService() {
       </Section>
 
       <Section title="15. International Data Transfers">
-        <p>
-          The Service may use third-party infrastructure and services (including cloud hosting, authentication providers,
-          and AI model providers) that process personal data outside the United Kingdom and the European Economic Area.
-        </p>
-        <p>
-          Where such transfers occur, we ensure that appropriate safeguards are in place, including Standard Contractual
-          Clauses (SCCs) approved by the European Commission, the UK International Data Transfer Agreement (IDTA), or
-          reliance on an adequacy decision, as applicable.
-        </p>
+        {tab === 'uk' ? (
+          <>
+            <p>
+              The Service may use third-party infrastructure and services (including cloud hosting, authentication providers,
+              and AI model providers) that process personal data outside the United Kingdom and the European Economic Area.
+            </p>
+            <p>
+              Where such transfers occur, we ensure that appropriate safeguards are in place, including Standard Contractual
+              Clauses (SCCs) approved by the European Commission, the UK International Data Transfer Agreement (IDTA), or
+              reliance on an adequacy decision, as applicable.
+            </p>
+          </>
+        ) : (
+          <>
+            <p>
+              The Service may use third-party infrastructure and services (including cloud hosting, authentication providers,
+              and AI model providers) that process personal data outside India, including in the United Kingdom and
+              European Economic Area.
+            </p>
+            <p>
+              Under DPDPA 2023, cross-border transfers are permitted except to jurisdictions restricted by the Central
+              Government. We implement appropriate contractual safeguards and encryption for all cross-border transfers.
+            </p>
+          </>
+        )}
         <p>
           For full details on international transfers and safeguards, see our{' '}
           <Link to="/privacy">Privacy Policy</Link>.
@@ -337,18 +408,71 @@ export function TermsOfService() {
       </Section>
 
       <Section title="21. Governing Law and Disputes">
-        <p>
-          These Terms are governed by and construed in accordance with the laws of <strong>England and Wales</strong>.
-          Any disputes arising out of or in connection with these Terms or the Service shall be subject to the exclusive
-          jurisdiction of the courts of England and Wales.
-        </p>
-        <p>
-          Nothing in this clause affects your statutory rights as a consumer, including your right to bring proceedings
-          in the courts of the country where you are domiciled.
-        </p>
+        {tab === 'uk' ? (
+          <>
+            <p>
+              These Terms are governed by and construed in accordance with the laws of <strong>England and Wales</strong>.
+              Any disputes arising out of or in connection with these Terms or the Service shall be subject to the exclusive
+              jurisdiction of the courts of England and Wales.
+            </p>
+            <p>
+              Nothing in this clause affects your statutory rights as a consumer, including your right to bring proceedings
+              in the courts of the country where you are domiciled.
+            </p>
+          </>
+        ) : (
+          <>
+            <p>
+              These Terms are governed by and construed in accordance with the laws of <strong>India</strong>,
+              including the Information Technology Act 2000 and the Digital Personal Data Protection Act 2023.
+              Any disputes arising out of or in connection with these Terms or the Service shall be subject to the
+              jurisdiction of the courts in India.
+            </p>
+            <p>
+              Nothing in this clause affects your statutory rights as a consumer under the Consumer Protection Act 2019.
+            </p>
+          </>
+        )}
       </Section>
 
-      <Section title="22. Contact">
+      {tab === 'india' && (
+        <Section title="22. Indian Regulatory Compliance">
+          <InfoBox colour="blue">
+            <p style={{ fontWeight: 600, marginBottom: 6 }}>DPDPA 2023 and ICMR Compliance</p>
+            <p>
+              The following provisions apply to users accessing the Service through a hospital operating in India.
+            </p>
+          </InfoBox>
+          <p><strong>Data Protection (DPDPA 2023)</strong></p>
+          <p>
+            The Service complies with the Digital Personal Data Protection Act 2023 and the DPDP Rules 2025. Your
+            consent to data processing is governed by DPDPA Section 6 and must be free, specific, informed, and
+            unambiguous.
+          </p>
+          <p>
+            You have the right to nominate a representative under DPDPA Section 14(3) to exercise your data rights
+            in case of death or incapacity. You may designate a nominee in Profile → Nominee Designation.
+          </p>
+          <p>
+            Grievances related to data processing may be submitted to our Grievance Officer (see Profile → Grievance
+            Redressal). If unresolved within 30 days, you may escalate to the Data Protection Board of India.
+          </p>
+          <p><strong>AI Ethics (ICMR 2023)</strong></p>
+          <p>
+            The AI features of the Service comply with the ICMR Ethical Guidelines for AI in Biomedical Research
+            and Healthcare (2023):
+          </p>
+          <ul>
+            <li>AI-generated responses are <strong>informational only</strong> and do not constitute medical advice.</li>
+            <li>The AI does not make autonomous clinical decisions.</li>
+            <li>All AI features operate under <strong>Institutional Ethics Committee</strong> oversight.</li>
+            <li>You can request human review of any AI-generated information.</li>
+            <li>We implement measures to ensure accountability, safety, and transparency of AI outputs.</li>
+          </ul>
+        </Section>
+      )}
+
+      <Section title={tab === 'india' ? '23. Contact' : '22. Contact'}>
         <p>
           For questions about these Terms or the Service, contact us at:
         </p>
@@ -360,6 +484,43 @@ export function TermsOfService() {
       </Section>
     </div>
     </PhoneFrame>
+  )
+}
+
+function JurisdictionTabs({ value, onChange }: { value: 'uk' | 'india'; onChange: (v: 'uk' | 'india') => void }) {
+  return (
+    <div style={{
+      display: 'flex',
+      gap: 0,
+      marginBottom: 28,
+      borderRadius: 10,
+      overflow: 'hidden',
+      border: '1px solid #e5e7eb',
+    }}>
+      {([
+        { key: 'uk' as const, label: 'United Kingdom' },
+        { key: 'india' as const, label: 'India' },
+      ]).map(({ key, label }) => (
+        <button
+          key={key}
+          type="button"
+          onClick={() => onChange(key)}
+          style={{
+            flex: 1,
+            padding: '10px 16px',
+            fontSize: 14,
+            fontWeight: 600,
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            background: value === key ? '#f43f5e' : '#f9fafb',
+            color: value === key ? 'white' : '#6b7280',
+          }}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
   )
 }
 

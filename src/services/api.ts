@@ -56,14 +56,15 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const token = getAuthToken();
   const userId = getUserId();
 
+  const hospitalId = localStorage.getItem('selected_hospital');
+
   const response = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      // For Google auth, send the JWT token
-      // For guest auth, send a custom header with user ID
       ...(token && !token.startsWith('guest:') && { 'Authorization': `Bearer ${token}` }),
       ...(userId && { 'X-User-ID': userId }),
+      ...(hospitalId && { 'X-Hospital-Id': hospitalId }),
       ...options?.headers,
     },
   });
@@ -410,6 +411,32 @@ export async function deleteAppointment(id: string): Promise<{ message: string }
 }
 
 // ================================
+// Notifications API (v2)
+// ================================
+
+export interface PatientNotification {
+  notification_id?: string;
+  id?: string;
+  title: string;
+  message: string;
+  priority: 'info' | 'warning' | 'urgent';
+  created_at: string;
+  read: boolean;
+}
+
+export async function getNotifications(): Promise<{ notifications: PatientNotification[] }> {
+  return fetchJson(`${API_BASE_V2}/notifications`);
+}
+
+export async function markNotificationRead(id: string): Promise<{ message: string }> {
+  return fetchJson(`${API_BASE_V2}/notifications/${encodeURIComponent(id)}/read`, { method: 'PATCH', body: JSON.stringify({}) });
+}
+
+export async function markAllNotificationsRead(): Promise<{ message: string }> {
+  return fetchJson(`${API_BASE_V2}/notifications/read-all`, { method: 'PATCH', body: JSON.stringify({}) });
+}
+
+// ================================
 // Documents API (v2)
 // ================================
 
@@ -681,12 +708,61 @@ export interface PatientResource {
   intents: string[];
 }
 
+export async function getAllResources(): Promise<{ resources: PatientResource[] }> {
+  return fetchJson(`${API_BASE_V2}/resources`);
+}
+
 export async function getResourcesForStage(stageId: string): Promise<{ resources: PatientResource[] }> {
   return fetchJson(`${API_BASE_V2}/resources?stage_id=${encodeURIComponent(stageId)}`);
 }
 
 export async function searchAllResources(query: string): Promise<{ resources: PatientResource[] }> {
   return fetchJson(`${API_BASE_V2}/resources/search?q=${encodeURIComponent(query)}`);
+}
+
+// --- DPDPA: Nominee Designation ---
+
+export interface NomineeData {
+  name: string;
+  relationship: string;
+  email: string;
+  phone: string;
+}
+
+export async function saveNominee(data: NomineeData): Promise<NomineeData> {
+  return fetchJson(`${API_BASE_V2}/me/nominee`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getNominee(): Promise<NomineeData | null> {
+  try {
+    return await fetchJson(`${API_BASE_V2}/me/nominee`);
+  } catch {
+    return null;
+  }
+}
+
+// --- DPDPA: Grievance Redressal ---
+
+export async function submitGrievance(subject: string, description: string): Promise<{ id: string; status: string }> {
+  return fetchJson(`${API_BASE_V2}/grievance`, {
+    method: 'POST',
+    body: JSON.stringify({ subject, description }),
+  });
+}
+
+// --- Patient-Clinician Association ---
+
+export async function associatePatient(
+  hospitalId: string,
+  accessCode?: string
+): Promise<{ clinician_id?: string; clinician_name?: string; hospital_id?: string }> {
+  return fetchJson(`${API_BASE_V2}/me/associate`, {
+    method: 'POST',
+    body: JSON.stringify({ hospital_id: hospitalId, access_code: accessCode }),
+  });
 }
 
 export { ApiError };

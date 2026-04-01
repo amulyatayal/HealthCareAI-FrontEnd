@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronRight, ChevronDown, Video, FileText, ExternalLink } from 'lucide-react'
+import { ChevronRight, ChevronDown, Video, FileText, ExternalLink as ExternalLinkIcon } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeCard } from '../../../wireframes/components'
 import { youtubeToEmbedUrl } from '../../../wireframes/utils/youtubeEmbed'
@@ -26,7 +26,7 @@ export function PathwayResources({ categories, hasStageSelected, basePath }: Pro
       </div>
       <p style={{ fontSize: '13px', color: 'var(--wf-gray-600)', marginBottom: '12px' }}>
         {hasStageSelected
-          ? 'Videos play in the app; PDFs and links open in a new tab.'
+          ? 'All resources open within the app.'
           : 'Set your treatment pathway to see personalised resources from your clinical team.'}
       </p>
       <WireframeCard>
@@ -66,31 +66,15 @@ export function PathwayResources({ categories, hasStageSelected, basePath }: Pro
                       fontSize: '14px',
                       borderBottom: '1px solid var(--wf-gray-50)',
                     } as const
-                    if (link.type === 'video') {
-                      const embedUrl = youtubeToEmbedUrl(link.url)
-                      return (
-                        <Link
-                          key={link.url}
-                          to={`${basePath}/watch?url=${encodeURIComponent(embedUrl)}`}
-                          style={linkStyle}
-                        >
-                          <Video size={16} style={{ color: 'var(--wf-gray-400)', flexShrink: 0 }} />
-                          <span style={{ flex: 1 }}>{link.label}</span>
-                        </Link>
-                      )
-                    }
+                    const viewUrl = link.type === 'video'
+                      ? `${basePath}/view?url=${encodeURIComponent(youtubeToEmbedUrl(link.url))}&type=video&title=${encodeURIComponent(link.label)}`
+                      : `${basePath}/view?url=${encodeURIComponent(link.url)}&type=${link.type}&title=${encodeURIComponent(link.label)}`
+                    const Icon = link.type === 'video' ? Video : link.type === 'pdf' ? FileText : ExternalLinkIcon
                     return (
-                      <a
-                        key={link.url}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={linkStyle}
-                      >
-                        <FileText size={16} style={{ color: 'var(--wf-gray-400)', flexShrink: 0 }} />
+                      <Link key={link.url} to={viewUrl} style={linkStyle}>
+                        <Icon size={16} style={{ color: 'var(--wf-gray-400)', flexShrink: 0 }} />
                         <span style={{ flex: 1 }}>{link.label}</span>
-                        <ExternalLink size={14} style={{ color: 'var(--wf-gray-400)' }} />
-                      </a>
+                      </Link>
                     )
                   })}
                 </div>
