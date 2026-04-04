@@ -20,7 +20,7 @@ const defaultDocs: DocItem[] = [
 ]
 
 const ACCEPTED_TYPES = ['application/pdf', 'image/jpeg', 'image/png']
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
+const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -36,6 +36,9 @@ export function DocumentsPage() {
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [dragOver, setDragOver] = useState(false)
+  const [storageBytesUsed, setStorageBytesUsed] = useState(0)
+  const [storageLimitBytes, setStorageLimitBytes] = useState(100 * 1024 * 1024)
+  const [maxFileSizeBytes, setMaxFileSizeBytes] = useState(DEFAULT_MAX_FILE_SIZE)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -44,14 +47,19 @@ export function DocumentsPage() {
       try {
         const { getDocuments } = await import('../../services/api')
         const data = await getDocuments()
-        if (!cancelled && data.documents.length > 0) {
-          setDocList(data.documents.map((d, i) => ({
-            id: d.id || i + 100,
-            name: d.name,
-            type: d.type as string,
-            date: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-            size: d.size,
-          })))
+        if (!cancelled) {
+          if (data.documents.length > 0) {
+            setDocList(data.documents.map((d, i) => ({
+              id: d.id || i + 100,
+              name: d.name,
+              type: d.type as string,
+              date: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+              size: d.size,
+            })))
+          }
+          if (data.total_size_bytes !== undefined) setStorageBytesUsed(data.total_size_bytes)
+          if (data.storage_limit_bytes !== undefined) setStorageLimitBytes(data.storage_limit_bytes)
+          if (data.max_file_size_bytes !== undefined) setMaxFileSizeBytes(data.max_file_size_bytes)
         }
       } catch {
         // API not available
@@ -61,12 +69,14 @@ export function DocumentsPage() {
     return () => { cancelled = true }
   }, [])
 
+  const maxFileSizeMB = Math.round(maxFileSizeBytes / (1024 * 1024))
+
   const validateFile = (file: File): string | null => {
     if (!ACCEPTED_TYPES.includes(file.type)) {
       return `Invalid file type "${file.type}". Accepted: PDF, JPG, PNG.`
     }
-    if (file.size > MAX_FILE_SIZE) {
-      return `File too large (${formatSize(file.size)}). Maximum size is 10 MB.`
+    if (file.size > maxFileSizeBytes) {
+      return `File too large (${formatSize(file.size)}). Maximum size is ${maxFileSizeMB} MB.`
     }
     return null
   }
@@ -109,7 +119,7 @@ export function DocumentsPage() {
     } catch (err: unknown) {
       const apiErr = err as { status?: number; message?: string }
       if (apiErr.status === 413) {
-        setUploadError('File too large (max 10 MB). Please choose a smaller file.')
+        setUploadError(`File too large (max ${maxFileSizeMB} MB). Please choose a smaller file.`)
       } else if (apiErr.status === 422) {
         setUploadError(apiErr.message || 'Invalid file type or virus detected.')
       } else if (apiErr.status === 409) {
@@ -131,6 +141,15 @@ export function DocumentsPage() {
     setUploading(false)
   }
 
+  const handleDownloadDoc = async (docId: number | string) => {
+    try {
+      const { downloadDocument } = await import('../../services/api')
+      await downloadDocument(String(docId))
+    } catch {
+      // API not available — nothing to download locally
+    }
+  }
+
   const handleDeleteDoc = async (docId: number | string) => {
     try {
       const { deleteDocument } = await import('../../services/api')
@@ -141,7 +160,7 @@ export function DocumentsPage() {
     setDocList((prev) => prev.filter((d) => d.id !== docId))
   }
 
-  const totalSize = docList.length * 0.4 // Rough estimate in MB
+  const totalSize = storageBytesUsed / (1024 * 1024)
 
   return (
     <WireframeLayout title="My Documents" showBack>
@@ -201,7 +220,7 @@ export function DocumentsPage() {
               Tap to upload or drag files here
             </p>
             <p style={{ fontSize: '13px', color: 'var(--wf-gray-500)' }}>
-              PDF, JPG, PNG up to 10MB
+              PDF, JPG, PNG up to {maxFileSizeMB}MB
             </p>
           </div>
 
@@ -348,7 +367,7 @@ export function DocumentsPage() {
               </div>
 
               <div style={{ display: 'flex', gap: '4px' }}>
-                <button className="wf-icon-btn">
+                <button className="wf-icon-btn" onClick={() => handleDownloadDoc(doc.id)}>
                   <Download size={18} />
                 </button>
                 <button className="wf-icon-btn" style={{ color: '#dc2626' }} onClick={() => handleDeleteDoc(doc.id)}>
@@ -364,10 +383,10 @@ export function DocumentsPage() {
       <div style={{ marginTop: '16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
           <span style={{ fontSize: '13px', color: 'var(--wf-gray-600)' }}>Storage Used</span>
-          <span style={{ fontSize: '13px', color: 'var(--wf-gray-600)' }}>{totalSize.toFixed(1)} MB / 100 MB</span>
+          <span style={{ fontSize: '13px', color: 'var(--wf-gray-600)' }}>{totalSize.toFixed(1)} MB / {(storageLimitBytes / (1024 * 1024)).toFixed(0)} MB</span>
         </div>
         <div className="wf-progress">
-          <div className="wf-progress-bar" style={{ width: `${(totalSize / 100) * 100}%` }} />
+          <div className="wf-progress-bar" style={{ width: `${(storageBytesUsed / storageLimitBytes) * 100}%` }} />
         </div>
       </div>
     </WireframeLayout>

@@ -449,12 +449,46 @@ export interface DocumentMeta {
   size_bytes: number;
 }
 
-export async function getDocuments(): Promise<{ documents: DocumentMeta[]; total_count: number; total_size_bytes: number; storage_limit_bytes: number }> {
+export async function getDocuments(): Promise<{ documents: DocumentMeta[]; total_count: number; total_size_bytes: number; storage_limit_bytes: number; max_file_size_bytes: number }> {
   return fetchJson(`${API_BASE_V2}/documents`);
 }
 
 export async function deleteDocument(id: string): Promise<{ message: string }> {
   return fetchJson(`${API_BASE_V2}/documents/${id}`, { method: 'DELETE' });
+}
+
+export async function downloadDocument(id: string): Promise<void> {
+  const token = getAuthToken();
+  const userId = getUserId();
+
+  const response = await fetch(`${API_BASE_V2}/documents/${id}/download`, {
+    headers: {
+      ...(token && !token.startsWith('guest:') && { 'Authorization': `Bearer ${token}` }),
+      ...(userId && { 'X-User-ID': userId }),
+    },
+    redirect: 'follow',
+  });
+
+  if (!response.ok) {
+    throw new ApiError(response.status, 'Download failed');
+  }
+
+  const blob = await response.blob();
+  const contentDisposition = response.headers.get('Content-Disposition');
+  let filename = 'download';
+  if (contentDisposition) {
+    const match = contentDisposition.match(/filename="?([^"]+)"?/);
+    if (match) filename = match[1];
+  }
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 // ================================
