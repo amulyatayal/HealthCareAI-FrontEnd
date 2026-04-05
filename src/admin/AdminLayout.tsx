@@ -14,7 +14,7 @@ const NAV_ITEMS = [
   { path: '/admin/access-codes', label: 'Access Codes', icon: KeyRound, enabled: true },
   { path: '/admin/community', label: 'Community', icon: MessageSquare, enabled: true },
   { path: '/admin/events', label: 'Events', icon: Calendar, enabled: true },
-  { path: '/admin/shared-data', label: 'Shared Patient Data', icon: Share2, enabled: false },
+  { path: '/admin/shared-data', label: 'Shared Patient Data', icon: Share2, enabled: true },
 ];
 
 export function AdminLayout({ children }: Props) {

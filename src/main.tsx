@@ -9,6 +9,7 @@ import { PrivacyPolicy } from './components/legal/PrivacyPolicy'
 import { TermsOfService } from './components/legal/TermsOfService'
 
 import { LogoutRoute } from './components/LogoutRoute'
+import { ShareViewerPage } from './wireframes/pages/ShareViewerPage'
 import { AdminApp } from './admin/AdminApp'
 import { AuthProvider } from './contexts/AuthContext'
 import { detectDomain } from './utils/domainDetector'
@@ -98,6 +99,15 @@ function AppRouter() {
     return (
       <Routes>
         <Route path="/*" element={<WebsiteApp />} />
+      </Routes>
+    )
+  }
+
+  // Public share viewer — no auth required
+  if (location.pathname.startsWith('/share/view/')) {
+    return (
+      <Routes>
+        <Route path="/share/view/:token" element={<ShareViewerPage />} />
       </Routes>
     )
   }

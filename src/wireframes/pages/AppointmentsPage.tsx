@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Plus, Bell, Clock, MapPin, Calendar, Check, BellRing } from 'lucide-react'
-import { getAppointments, createAppointment } from '../../services/api'
+import { Plus, Bell, Clock, MapPin, Calendar, Check, BellRing, AlertTriangle } from 'lucide-react'
+import { getAppointments, createAppointment, isConsentError } from '../../services/api'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
 
@@ -61,6 +61,7 @@ export function AppointmentsPage() {
   const [newLocation, setNewLocation] = useState('')
   const [newReminder, setNewReminder] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [consentBlocked, setConsentBlocked] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -89,10 +90,15 @@ export function AppointmentsPage() {
   const handleCreateAppointment = async () => {
     if (!newTitle || !newDate || !newTime) return
     setSaving(true)
+    setConsentBlocked(false)
     try {
       await createAppointment({ title: newTitle, date: newDate, time: newTime, location: newLocation, reminder: newReminder })
-    } catch {
-      // API not available
+    } catch (err) {
+      if (isConsentError(err)) {
+        setConsentBlocked(true)
+        setSaving(false)
+        return
+      }
     }
     const newApt = {
       id: Date.now(),
@@ -118,6 +124,12 @@ export function AppointmentsPage() {
 
   return (
     <WireframeLayout title="Appointments" showBack>
+      {consentBlocked && (
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 16px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, marginBottom: 12, fontSize: 13, color: '#991b1b', lineHeight: 1.5 }}>
+          <AlertTriangle size={18} style={{ flexShrink: 0, marginTop: 1 }} />
+          <span>Data consent is required to create appointments. Please re-enable <strong>Health Data</strong> consent in <strong>Profile → Privacy & Data Rights → Manage Data Consent</strong>.</span>
+        </div>
+      )}
       {/* Tabs */}
       <div className="wf-tabs">
         <button 

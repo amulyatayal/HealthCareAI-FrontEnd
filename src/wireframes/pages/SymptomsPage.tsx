@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Plus, TrendingUp, TrendingDown, Minus, AlertCircle } from 'lucide-react'
-import { logSymptom, getSymptomHistory, getSymptomTrends } from '../../services/api'
+import { Plus, TrendingUp, TrendingDown, Minus, AlertCircle, AlertTriangle } from 'lucide-react'
+import { logSymptom, getSymptomHistory, getSymptomTrends, isConsentError } from '../../services/api'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
 
@@ -44,6 +44,7 @@ export function SymptomsPage() {
   const [severity, setSeverity] = useState(5)
   const [symptomNote, setSymptomNote] = useState('')
   const [saving, setSaving] = useState(false)
+  const [consentBlocked, setConsentBlocked] = useState(false)
   const [recentLogs, setRecentLogs] = useState(MOCK_RECENT_LOGS)
   const [trends, setTrends] = useState(MOCK_TRENDS)
   const [refreshKey, setRefreshKey] = useState(0)
@@ -84,10 +85,15 @@ export function SymptomsPage() {
   const handleSaveSymptom = async () => {
     if (!selectedSymptom) return
     setSaving(true)
+    setConsentBlocked(false)
     try {
       await logSymptom({ symptom_name: selectedSymptom, severity, notes: symptomNote || undefined })
-    } catch {
-      // API not available yet
+    } catch (err) {
+      if (isConsentError(err)) {
+        setConsentBlocked(true)
+        setSaving(false)
+        return
+      }
     }
     setSaving(false)
     setShowLog(false)
@@ -105,6 +111,12 @@ export function SymptomsPage() {
 
   return (
     <WireframeLayout title="Symptom Tracker" showBack>
+      {consentBlocked && (
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 16px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, marginBottom: 12, fontSize: 13, color: '#991b1b', lineHeight: 1.5 }}>
+          <AlertTriangle size={18} style={{ flexShrink: 0, marginTop: 1 }} />
+          <span>Data consent is required to log symptoms. Please re-enable <strong>Health Data</strong> consent in <strong>Profile → Privacy & Data Rights → Manage Data Consent</strong>.</span>
+        </div>
+      )}
       {/* Quick Log */}
       {showLog ? (
         <WireframeCard title="Log Symptom">

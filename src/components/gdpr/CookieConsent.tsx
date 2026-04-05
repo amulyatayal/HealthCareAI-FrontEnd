@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Shield, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { recordCookieConsent } from '../../services/api'
 
 const CONSENT_KEY = 'gdpr_consent_v1'
 
@@ -57,20 +58,32 @@ export function CookieConsent() {
     }
   }, [])
 
+  const syncToBackend = (prefs: ConsentPreferences) => {
+    recordCookieConsent(
+      { necessary: true, functional: prefs.functional, analytics: prefs.analytics, marketing: prefs.marketing },
+      'banner',
+    ).catch((err) => {
+      console.error('[CookieConsent] Backend sync failed:', err)
+    })
+  }
+
   const handleAcceptAll = () => {
     const all: ConsentPreferences = { necessary: true, functional: true, analytics: true, marketing: true }
     saveConsent(all)
+    syncToBackend(all)
     setVisible(false)
   }
 
   const handleEssentialOnly = () => {
     const essential: ConsentPreferences = { necessary: true, functional: false, analytics: false, marketing: false }
     saveConsent(essential)
+    syncToBackend(essential)
     setVisible(false)
   }
 
   const handleSaveCustom = () => {
     saveConsent(preferences)
+    syncToBackend(preferences)
     setVisible(false)
   }
 

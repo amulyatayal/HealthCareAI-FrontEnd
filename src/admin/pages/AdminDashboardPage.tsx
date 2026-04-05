@@ -54,7 +54,7 @@ const CARDS = [
     iconBg: 'linear-gradient(135deg, var(--lavender-100), var(--lavender-50))',
     iconColor: 'var(--lavender-300)',
     path: '/admin/shared-data',
-    enabled: false,
+    enabled: true,
   },
 ];
 

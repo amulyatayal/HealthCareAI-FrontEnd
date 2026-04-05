@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Shield, Heart, Activity, FileText, Users, ChevronDown, ChevronUp, Globe } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { getJurisdiction, getEthicsCommittee } from '../../utils/jurisdiction'
+import { recordDataConsent } from '../../services/api'
+import type { DataConsentPayload } from '../../services/api'
 
 const DATA_CONSENT_KEY = 'gdpr_data_consent_v1'
 
@@ -199,6 +201,23 @@ export function DataConsentScreen({ onConsent }: Props) {
     }
   }
 
+  function toPayload(c: DataConsentChoices): DataConsentPayload {
+    return {
+      core_service: true,
+      health_data: c.healthData,
+      ai_model_providers: c.aiModelProviders,
+      document_storage: c.documentStorage,
+      community: c.community,
+      clinical_sharing: true,
+    }
+  }
+
+  const syncToBackend = (c: DataConsentChoices) => {
+    recordDataConsent(toPayload(c), 'onboarding').catch((err) => {
+      console.error('[DataConsent] Backend sync failed:', err)
+    })
+  }
+
   const acceptAll = () => {
     const all = buildFinalChoices({
       healthData: true,
@@ -207,12 +226,14 @@ export function DataConsentScreen({ onConsent }: Props) {
       community: true,
     })
     saveDataConsent(all)
+    syncToBackend(all)
     onConsent(all)
   }
 
   const acceptSelected = () => {
     const final = buildFinalChoices()
     saveDataConsent(final)
+    syncToBackend(final)
     onConsent(final)
   }
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { FileText, Calendar, Settings, Bell, Shield, LogOut, ChevronRight, User, Compass, Share2, Download, Trash2, ToggleLeft, Check, Clock, Search, MessageCircle, UserPlus, AlertTriangle, BookOpen, Database, Mail, Phone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
@@ -7,6 +7,8 @@ import { useBasePath } from '../hooks/useBasePath'
 import { useAuth } from '../../contexts/AuthContext'
 import { getStoredDataConsent, saveDataConsent, clearDataConsent, type DataConsentChoices } from '../../components/gdpr/DataConsentScreen'
 import { getEthicsCommittee, isIndiaJurisdiction } from '../../utils/jurisdiction'
+import { recordDataConsent, withdrawConsent, exportMyData, deleteMyAccount, saveNominee, getNominee } from '../../services/api'
+import type { DataConsentPayload } from '../../services/api'
 
 export function ProfilePage() {
   const base = useBasePath()
@@ -56,16 +58,49 @@ export function ProfilePage() {
   const [showEthicsCommittee, setShowEthicsCommittee] = useState(false)
   const [showRetention, setShowRetention] = useState(false)
 
+  const [exportError, setExportError] = useState('')
+  const [deleteError, setDeleteError] = useState('')
+  const [nomineeError, setNomineeError] = useState('')
+
+  function toPayload(c: DataConsentChoices): DataConsentPayload {
+    return {
+      core_service: true,
+      health_data: c.healthData,
+      ai_model_providers: c.aiModelProviders,
+      document_storage: c.documentStorage,
+      community: c.community,
+      clinical_sharing: true,
+    }
+  }
+
+  useEffect(() => {
+    if (!isIndia) return
+    let cancelled = false
+    getNominee().then((data) => {
+      if (!cancelled && data) {
+        setNominee(data)
+        localStorage.setItem('dpdpa_nominee', JSON.stringify(data))
+      }
+    })
+    return () => { cancelled = true }
+  }, [isIndia])
+
   const handleExportData = async () => {
     setExporting(true)
+    setExportError('')
     try {
-      // In production: call GET /api/v2/me/export and trigger download
-      // For now, simulate with a timeout
-      await new Promise((r) => setTimeout(r, 1500))
+      const blob = await exportMyData()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'tara-data-export.zip'
+      a.click()
+      URL.revokeObjectURL(url)
       setExported(true)
       setTimeout(() => setExported(false), 3000)
     } catch (err) {
       console.error('Export failed:', err)
+      setExportError(err instanceof Error ? err.message : 'Export failed. Please try again.')
     } finally {
       setExporting(false)
     }
@@ -73,13 +108,14 @@ export function ProfilePage() {
 
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== 'DELETE MY ACCOUNT') return
+    setDeleteError('')
     try {
-      // In production: call DELETE /api/v2/me
-      // Then clear localStorage and redirect
+      await deleteMyAccount('DELETE MY ACCOUNT')
       localStorage.clear()
       window.location.href = '/'
     } catch (err) {
       console.error('Delete failed:', err)
+      setDeleteError(err instanceof Error ? err.message : 'Deletion failed. Please try again.')
     }
   }
 
@@ -269,7 +305,7 @@ export function ProfilePage() {
         </div>
         <div className="wf-list-content">
           <div className="wf-list-title">{exported ? 'Export started!' : exporting ? 'Preparing...' : 'Download my data'}</div>
-          <div className="wf-list-subtitle">Export all your data (GDPR Art. 20)</div>
+          <div className="wf-list-subtitle">{exportError || 'Export all your data (GDPR Art. 20)'}</div>
         </div>
       </button>
 
@@ -354,6 +390,9 @@ export function ProfilePage() {
               style={{ flex: 1, background: '#f43f5e', color: 'white', border: 'none', borderRadius: 8, padding: '10px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
               onClick={() => {
                 saveDataConsent(consentChoices)
+                recordDataConsent(toPayload(consentChoices), 'profile_update').catch((err) => {
+                  console.error('[Profile] Consent sync failed:', err)
+                })
                 setConsentSaved(true)
                 setTimeout(() => setConsentSaved(false), 2500)
               }}
@@ -365,6 +404,9 @@ export function ProfilePage() {
               style={{ flex: 1 }}
               onClick={() => {
                 clearDataConsent()
+                withdrawConsent('data').catch((err) => {
+                  console.error('[Profile] Consent withdrawal failed:', err)
+                })
                 window.location.reload()
               }}
             >
@@ -372,7 +414,7 @@ export function ProfilePage() {
             </button>
           </div>
           <p style={{ fontSize: 11, color: 'var(--wf-gray-400)', marginTop: 8, textAlign: 'center' }}>
-            "Reset All" clears all consent and shows the consent screen again.
+            "Reset All" withdraws data consent and shows the consent screen again.
           </p>
         </WireframeCard>
       )}
@@ -387,12 +429,10 @@ export function ProfilePage() {
           try {
             const { getActivityLog } = await import('../../services/api')
             const data = await getActivityLog(20)
-            setActivityLog(data.activities)
-          } catch {
-            setActivityLog([
-              { id: '1', type: 'consent_granted', description: 'Data processing consent granted (all categories)', timestamp: new Date().toISOString() },
-              { id: '2', type: 'account_created', description: 'Account created', timestamp: new Date(Date.now() - 86400000).toISOString() },
-            ])
+            setActivityLog(data.activities ?? [])
+          } catch (err) {
+            console.error('[Profile] Activity log failed:', err)
+            setActivityLog([])
           }
           setLoadingActivity(false)
         }}
@@ -609,13 +649,23 @@ export function ProfilePage() {
                   onChange={(e) => setNominee((prev: typeof nominee) => ({ ...prev, phone: e.target.value }))}
                 />
               </div>
+              {nomineeError && (
+                <p style={{ fontSize: 12, color: '#dc2626', marginTop: 8 }}>{nomineeError}</p>
+              )}
               <button
                 className="wf-btn"
                 style={{ width: '100%', marginTop: 12, background: '#f43f5e', color: 'white', border: 'none', borderRadius: 10, padding: '12px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
-                onClick={() => {
-                  localStorage.setItem('dpdpa_nominee', JSON.stringify(nominee))
-                  setNomineeSaved(true)
-                  setTimeout(() => setNomineeSaved(false), 2500)
+                onClick={async () => {
+                  setNomineeError('')
+                  try {
+                    await saveNominee(nominee)
+                    localStorage.setItem('dpdpa_nominee', JSON.stringify(nominee))
+                    setNomineeSaved(true)
+                    setTimeout(() => setNomineeSaved(false), 2500)
+                  } catch (err) {
+                    console.error('[Profile] Nominee save failed:', err)
+                    setNomineeError(err instanceof Error ? err.message : 'Failed to save nominee. Please try again.')
+                  }
                 }}
               >
                 {nomineeSaved ? <><Check size={14} /> Saved</> : 'Save Nominee'}
@@ -732,6 +782,9 @@ export function ProfilePage() {
               This will permanently delete all your data within 30 days. Forum posts will be anonymised.
               Type <strong>DELETE MY ACCOUNT</strong> to confirm.
             </p>
+            {deleteError && (
+              <p style={{ fontSize: 13, color: '#dc2626', marginBottom: 10 }}>{deleteError}</p>
+            )}
             <input
               type="text"
               className="wf-input"
