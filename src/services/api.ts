@@ -33,6 +33,42 @@ export function isConsentError(err: unknown): err is ApiErrorWithConsent {
   return err instanceof ApiError && err.status === 403 && !!(err as ApiErrorWithConsent).consentType;
 }
 
+/**
+ * Whether this API server exposes test-user login (ENABLE_TEST_USER_LOGIN).
+ * No frontend .env required.
+ */
+export async function fetchTestUserLoginEnabled(): Promise<boolean> {
+  try {
+    const response = await fetch(`${API_BASE_V1}/auth/test-session/status`);
+    if (!response.ok) {
+      return false;
+    }
+    const data = (await response.json()) as { enabled?: boolean };
+    return data.enabled === true;
+  } catch {
+    return false;
+  }
+}
+
+/** Non-Google session when backend ENABLE_TEST_USER_LOGIN is true (HS256 JWT from server). */
+export async function obtainTestUserSession(
+  userId: string
+): Promise<{ access_token: string; expires_in: number }> {
+  const response = await fetch(`${API_BASE_V1}/auth/test-session`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: userId.trim() }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new ApiError(
+      response.status,
+      typeof data.detail === 'string' ? data.detail : data.message || 'Test login failed'
+    );
+  }
+  return data as { access_token: string; expires_in: number };
+}
+
 // Get auth token from localStorage
 function getAuthToken(): string | null {
   return localStorage.getItem('auth_token');

@@ -7,6 +7,7 @@ import { DataConsentScreen, getStoredDataConsent, saveDataConsent } from './comp
 import type { DataConsentChoices } from './components/gdpr/DataConsentScreen'
 import { getConsentStatus } from './services/api'
 import { Heart, User, ArrowRight, Building2, KeyRound, ChevronDown } from 'lucide-react'
+import { TestUserLoginSection } from './components/TestUserLoginSection'
 
 const GOOGLE_CLIENT_ID =
   import.meta.env.VITE_GOOGLE_CLIENT_ID ||
@@ -149,6 +150,12 @@ function LoginPageWithGoogle({
       onGuestLogin(guestName.trim())
       sendAssociation()
     }
+  }
+
+  const handleTestUserToken = (accessToken: string) => {
+    persistHospitalSelection()
+    onGoogleLogin(accessToken)
+    sendAssociation()
   }
 
   return (
@@ -324,6 +331,21 @@ function LoginPageWithGoogle({
             </p>
 
             {/* Divider */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              margin: '16px 0',
+            }}>
+              <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
+              <span style={{ fontSize: 13, color: '#9ca3af' }}>or</span>
+              <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
+            </div>
+
+            <div style={{ width: '100%', marginBottom: 8 }}>
+              <TestUserLoginSection onToken={handleTestUserToken} />
+            </div>
+
             <div style={{
               display: 'flex',
               alignItems: 'center',
