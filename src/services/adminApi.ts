@@ -127,4 +127,23 @@ export async function deleteNotification(id: string): Promise<{ message: string 
   });
 }
 
+// Patient Shares (shared data from associated patients)
+export interface PatientShareEntry {
+  share_id: string;
+  patient_ref_id: string;
+  created_at: string;
+  expires_at: string;
+  revoked_at?: string | null;
+  scope: Record<string, boolean>;
+  token?: string | null;
+}
+
+export interface PatientSharesResponse {
+  shares: PatientShareEntry[];
+}
+
+export async function getPatientShares(): Promise<PatientSharesResponse> {
+  return fetchAdminJson(`${API_BASE}/patient-shares`);
+}
+
 export { AdminApiError };

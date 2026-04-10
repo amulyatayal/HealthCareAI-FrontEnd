@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Check, TrendingUp } from 'lucide-react'
-import { logMood, getMoodHistory } from '../../services/api'
+import { Check, TrendingUp, AlertTriangle } from 'lucide-react'
+import { logMood, getMoodHistory, isConsentError } from '../../services/api'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard, MoodSlider } from '../components'
 
@@ -8,6 +8,7 @@ export function BasicMoodPage() {
   const [mood, setMood] = useState(5)
   const [saved, setSaved] = useState(false)
   const [note, setNote] = useState('')
+  const [consentBlocked, setConsentBlocked] = useState(false)
 
   const [history, setHistory] = useState([
     { date: 'Today', value: null as number | null, note: null as string | null },
@@ -40,10 +41,14 @@ export function BasicMoodPage() {
   }, [saved])
 
   const handleSave = async () => {
+    setConsentBlocked(false)
     try {
       await logMood({ mood_score: mood, note: note || undefined })
-    } catch {
-      // API not available yet – still show saved state
+    } catch (err) {
+      if (isConsentError(err)) {
+        setConsentBlocked(true)
+        return
+      }
     }
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
@@ -51,6 +56,12 @@ export function BasicMoodPage() {
 
   return (
     <WireframeLayout title="Mood Diary" showBack>
+      {consentBlocked && (
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 16px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, marginBottom: 12, fontSize: 13, color: '#991b1b', lineHeight: 1.5 }}>
+          <AlertTriangle size={18} style={{ flexShrink: 0, marginTop: 1 }} />
+          <span>Data consent is required to log moods. Please re-enable <strong>Health Data</strong> consent in <strong>Profile → Privacy & Data Rights → Manage Data Consent</strong>.</span>
+        </div>
+      )}
       {/* Main Mood Input */}
       <WireframeCard title="How are you feeling?">
         <MoodSlider value={mood} onChange={setMood} />

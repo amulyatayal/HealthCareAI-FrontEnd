@@ -8,6 +8,7 @@ import { AdminAccessCodesPage } from './pages/AdminAccessCodesPage';
 import { AdminCommunityPage } from './pages/AdminCommunityPage';
 import { AdminEventsPage } from './pages/AdminEventsPage';
 import { AdminNotificationsPage } from './pages/AdminNotificationsPage';
+import { AdminSharedDataPage } from './pages/AdminSharedDataPage';
 import './admin.css';
 
 export function AdminApp() {
@@ -26,6 +27,7 @@ export function AdminApp() {
                 <Route path="/community" element={<AdminCommunityPage />} />
                 <Route path="/events" element={<AdminEventsPage />} />
                 <Route path="/notifications" element={<AdminNotificationsPage />} />
+                <Route path="/shared-data" element={<AdminSharedDataPage />} />
               </Routes>
             </AdminLayout>
           }

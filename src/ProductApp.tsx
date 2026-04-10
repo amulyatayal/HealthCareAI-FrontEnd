@@ -3,7 +3,9 @@ import { GoogleLogin, GoogleOAuthProvider, CredentialResponse } from '@react-oau
 import { useAuth } from './contexts/AuthContext'
 import { WireframeApp } from './wireframes/WireframeApp'
 import { PhoneFrame } from './wireframes/components/PhoneFrame'
-import { DataConsentScreen, getStoredDataConsent } from './components/gdpr/DataConsentScreen'
+import { DataConsentScreen, getStoredDataConsent, saveDataConsent } from './components/gdpr/DataConsentScreen'
+import type { DataConsentChoices } from './components/gdpr/DataConsentScreen'
+import { getConsentStatus } from './services/api'
 import { Heart, User, ArrowRight, Building2, KeyRound, ChevronDown } from 'lucide-react'
 
 const GOOGLE_CLIENT_ID =
@@ -21,7 +23,34 @@ export function ProductApp() {
   const [hasDataConsent, setHasDataConsent] = useState<boolean | null>(null)
 
   useEffect(() => {
-    setHasDataConsent(!!getStoredDataConsent())
+    if (!isAuthenticated) { setHasDataConsent(null); return }
+    const local = getStoredDataConsent()
+    if (local) { setHasDataConsent(true); return }
+
+    let cancelled = false
+    getConsentStatus()
+      .then((status) => {
+        if (cancelled) return
+        if (status.data_consent?.choices) {
+          const c = status.data_consent.choices
+          const hydrated: DataConsentChoices = {
+            coreService: true,
+            clinicalSharing: true,
+            healthData: c.health_data ?? false,
+            aiModelProviders: c.ai_model_providers ?? false,
+            documentStorage: c.document_storage ?? false,
+            community: c.community ?? false,
+          }
+          saveDataConsent(hydrated)
+          setHasDataConsent(true)
+        } else {
+          setHasDataConsent(false)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setHasDataConsent(false)
+      })
+    return () => { cancelled = true }
   }, [isAuthenticated])
 
   if (isLoading) {

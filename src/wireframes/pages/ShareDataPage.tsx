@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Shield, QrCode, Clock, CheckCircle, History, AlertTriangle } from 'lucide-react'
+import { Shield, Clock, CheckCircle, Check, History, AlertTriangle, Link as LinkIcon } from 'lucide-react'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
 
@@ -14,18 +14,16 @@ type ViewState = 'select' | 'qr' | 'history'
 
 interface ShareResult {
   share_id: string
-  qr_code_base64: string
   token: string
   expires_at: string
+  share_url?: string
 }
 
 interface ShareHistoryItem {
   share_id: string
-  data_types: Record<string, boolean>
   created_at: string
   expires_at: string
-  status: 'active' | 'expired' | 'revoked'
-  revoked_at?: string
+  revoked_at?: string | null
 }
 
 export function ShareDataPage() {
@@ -38,6 +36,7 @@ export function ShareDataPage() {
   const [loadingHistory, setLoadingHistory] = useState(false)
   const [revoking, setRevoking] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval>>()
 
   const toggle = (id: string) => {
@@ -76,7 +75,7 @@ export function ShareDataPage() {
     try {
       const { generateShare } = await import('../../services/api')
       const result = await generateShare({
-        data_types: {
+        scope: {
           mood: selected.has('mood'),
           pathway: selected.has('pathway'),
           symptoms: selected.has('symptoms'),
@@ -86,15 +85,8 @@ export function ShareDataPage() {
       setShareResult(result)
       setView('qr')
     } catch (err) {
-      // Fallback for when API is not available — generate a mock QR for demonstration
-      const mockToken = `share_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
-      setShareResult({
-        share_id: `sid_${Date.now()}`,
-        qr_code_base64: '',
-        token: mockToken,
-        expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
-      })
-      setView('qr')
+      console.error('[ShareData] Generate failed:', err)
+      setError(err instanceof Error ? err.message : 'Failed to generate share link. Please try again.')
     }
     setGenerating(false)
   }
@@ -111,8 +103,14 @@ export function ShareDataPage() {
       setShareResult(null)
       setView('select')
     }
-    setHistory((prev) => prev.map((h) => h.share_id === shareId ? { ...h, status: 'revoked' as const, revoked_at: new Date().toISOString() } : h))
+    setHistory((prev) => prev.map((h) => h.share_id === shareId ? { ...h, revoked_at: new Date().toISOString() } : h))
     setRevoking(null)
+  }
+
+  function deriveStatus(item: ShareHistoryItem): 'active' | 'expired' | 'revoked' {
+    if (item.revoked_at) return 'revoked'
+    if (new Date(item.expires_at).getTime() < Date.now()) return 'expired'
+    return 'active'
   }
 
   const loadHistory = async () => {
@@ -121,13 +119,10 @@ export function ShareDataPage() {
     try {
       const { getShareHistory } = await import('../../services/api')
       const data = await getShareHistory()
-      setHistory(data.shares)
-    } catch {
-      // Mock data for demonstration
-      setHistory([
-        { share_id: 'demo1', data_types: { mood: true, pathway: true, symptoms: false, documents_summary: false }, created_at: new Date(Date.now() - 86400000).toISOString(), expires_at: new Date(Date.now() - 86400000 + 600000).toISOString(), status: 'expired' },
-        { share_id: 'demo2', data_types: { mood: true, pathway: true, symptoms: true, documents_summary: true }, created_at: new Date(Date.now() - 172800000).toISOString(), expires_at: new Date(Date.now() - 172800000 + 600000).toISOString(), status: 'expired' },
-      ])
+      setHistory(data.shares ?? [])
+    } catch (err) {
+      console.error('[ShareData] History load failed:', err)
+      setHistory([])
     }
     setLoadingHistory(false)
   }
@@ -142,39 +137,46 @@ export function ShareDataPage() {
             borderRadius: 16,
             padding: 24,
             marginBottom: 16,
+            textAlign: 'center',
           }}>
-            {shareResult.qr_code_base64 ? (
-              <img
-                src={`data:image/png;base64,${shareResult.qr_code_base64}`}
-                alt="Share QR Code"
-                style={{ width: 200, height: 200, borderRadius: 12, margin: '0 auto', display: 'block' }}
-              />
-            ) : (
-              <div style={{
-                width: 200,
-                height: 200,
-                margin: '0 auto',
-                background: 'white',
-                borderRadius: 12,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '2px dashed #93c5fd',
-              }}>
-                <QrCode size={64} style={{ color: '#2563eb', marginBottom: 8 }} />
-                <span style={{ fontSize: 11, color: '#6b7280' }}>QR Code</span>
-                <span style={{ fontSize: 10, color: '#9ca3af', marginTop: 2 }}>(generated by backend)</span>
-              </div>
-            )}
+            <div style={{
+              width: 80,
+              height: 80,
+              margin: '0 auto 12px',
+              background: 'white',
+              borderRadius: 20,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(37,99,235,0.15)',
+            }}>
+              <CheckCircle size={40} style={{ color: '#16a34a' }} />
+            </div>
+            <p style={{ fontSize: 14, fontWeight: 600, color: '#1e40af', marginBottom: 6 }}>Share link created</p>
+            <button
+              type="button"
+              onClick={() => {
+                const url = `${window.location.origin}/share/view/${encodeURIComponent(shareResult.token)}`
+                navigator.clipboard?.writeText(url).then(() => {
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 2000)
+                })
+              }}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '8px 20px', background: '#2563eb', color: 'white',
+                border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              }}
+            >
+              {copied ? <><Check size={14} /> Copied!</> : 'Copy Share Link'}
+            </button>
           </div>
 
           <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--wf-gray-800)', marginBottom: 4 }}>
-            Show this to your clinician
+            Share with your clinician
           </h3>
           <p style={{ fontSize: 13, color: 'var(--wf-gray-500)', marginBottom: 16, lineHeight: 1.5 }}>
-            Your clinician can scan this QR code to view your selected health data.
-            No login required on their end.
+            Send this link to your clinician. They can open it without logging in to view a summary of your selected data.
           </p>
 
           {/* Countdown */}
@@ -252,7 +254,7 @@ export function ShareDataPage() {
             </WireframeCard>
           ) : (
             history.map((item) => {
-              const types = Object.entries(item.data_types).filter(([, v]) => v).map(([k]) => k)
+              const status = deriveStatus(item)
               return (
                 <WireframeCard key={item.share_id} style={{ marginBottom: 10 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -261,7 +263,7 @@ export function ShareDataPage() {
                         {new Date(item.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </div>
                       <div style={{ fontSize: 12, color: 'var(--wf-gray-500)' }}>
-                        {types.join(', ')}
+                        Expires: {new Date(item.expires_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                       </div>
                     </div>
                     <span style={{
@@ -269,13 +271,13 @@ export function ShareDataPage() {
                       fontWeight: 600,
                       padding: '2px 8px',
                       borderRadius: 4,
-                      background: item.status === 'active' ? '#dcfce7' : item.status === 'revoked' ? '#fef2f2' : '#f3f4f6',
-                      color: item.status === 'active' ? '#16a34a' : item.status === 'revoked' ? '#dc2626' : '#6b7280',
+                      background: status === 'active' ? '#dcfce7' : status === 'revoked' ? '#fef2f2' : '#f3f4f6',
+                      color: status === 'active' ? '#16a34a' : status === 'revoked' ? '#dc2626' : '#6b7280',
                     }}>
-                      {item.status}
+                      {status}
                     </span>
                   </div>
-                  {item.status === 'active' && (
+                  {status === 'active' && (
                     <button
                       style={{ marginTop: 8, fontSize: 12, color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, padding: 0 }}
                       onClick={() => handleRevoke(item.share_id)}
@@ -310,11 +312,11 @@ export function ShareDataPage() {
           <Shield size={20} style={{ color: '#2563eb', flexShrink: 0, marginTop: 2 }} />
           <div>
             <p style={{ fontSize: 13, color: '#1e40af', fontWeight: 500, marginBottom: 2 }}>
-              Secure QR Code Sharing
+              Secure Link Sharing
             </p>
             <p style={{ fontSize: 12, color: '#3b82f6' }}>
-              A temporary QR code will be generated for your clinician to scan.
-              It expires after 10 minutes and can be revoked at any time.
+              A temporary, secure link will be generated for your clinician.
+              It expires automatically and can be revoked at any time.
             </p>
           </div>
         </div>
@@ -374,8 +376,8 @@ export function ShareDataPage() {
           onClick={handleGenerate}
           disabled={selected.size === 0 || generating}
         >
-          <QrCode size={18} />
-          {generating ? 'Generating QR Code...' : 'Generate QR Code'}
+          <LinkIcon size={18} />
+          {generating ? 'Generating Link...' : 'Generate Share Link'}
         </button>
 
         {selected.size === 0 && (

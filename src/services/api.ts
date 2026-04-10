@@ -512,38 +512,41 @@ export async function getClinicalTeam(): Promise<{ team_members: TeamMember[] }>
 // Share Data API (v2) — QR Code Flow
 // ================================
 
+export interface ShareScope {
+  mood?: boolean;
+  pathway?: boolean;
+  symptoms?: boolean;
+  documents_summary?: boolean;
+  [key: string]: unknown;
+}
+
 export interface ShareGenerateRequest {
-  data_types: {
-    mood: boolean;
-    pathway: boolean;
-    symptoms: boolean;
-    documents_summary: boolean;
-  };
-  date_range?: { from: string; to: string };
+  scope?: ShareScope;
 }
 
 export interface ShareGenerateResponse {
   share_id: string;
-  qr_code_base64: string;
   token: string;
   expires_at: string;
-  data_types: ShareGenerateRequest['data_types'];
+  share_url?: string;
 }
 
 export interface ShareViewResponse {
-  patient_ref_id: string;
-  data_summary: Record<string, unknown>;
+  share_id: string;
   expires_at: string;
-  created_at: string;
+  profile_summary: {
+    patient_ref_id: string;
+    current_stage: string | null;
+    hospital_id: string | null;
+  };
+  scope: ShareScope;
 }
 
 export interface ShareHistoryEntry {
   share_id: string;
-  data_types: ShareGenerateRequest['data_types'];
   created_at: string;
   expires_at: string;
-  status: 'active' | 'expired' | 'revoked';
-  revoked_at?: string;
+  revoked_at?: string | null;
 }
 
 export async function generateShare(data: ShareGenerateRequest): Promise<ShareGenerateResponse> {
@@ -551,7 +554,12 @@ export async function generateShare(data: ShareGenerateRequest): Promise<ShareGe
 }
 
 export async function getShareView(token: string): Promise<ShareViewResponse> {
-  return fetchJson(`${API_BASE_V2}/share/${token}`);
+  const response = await fetch(`${API_BASE_V2}/share/view/${encodeURIComponent(token)}`);
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Share not found or expired' }));
+    throw new ApiError(response.status, error.detail || 'Share not found or expired');
+  }
+  return response.json();
 }
 
 export async function revokeShare(shareId: string): Promise<{ message: string }> {
@@ -562,21 +570,6 @@ export async function getShareHistory(): Promise<{ shares: ShareHistoryEntry[] }
   return fetchJson(`${API_BASE_V2}/share/history`);
 }
 
-// Legacy — kept for backwards compatibility
-export interface ShareDataRequest {
-  data_types: {
-    mood: boolean;
-    pathway: boolean;
-    symptoms: boolean;
-    documents_summary: boolean;
-  };
-  clinician_id?: string;
-  message?: string;
-}
-
-export async function shareDataWithClinician(data: ShareDataRequest): Promise<{ message: string; share_id: string; shared_at: string }> {
-  return fetchJson(`${API_BASE_V2}/share-to-clinician`, { method: 'POST', body: JSON.stringify(data) });
-}
 
 // ================================
 // Clinical Team API (v2) — CRUD
@@ -605,6 +598,7 @@ export interface CookieConsentChoices {
   necessary: true;
   functional: boolean;
   analytics: boolean;
+  marketing?: boolean;
 }
 
 export async function recordCookieConsent(choices: CookieConsentChoices, source: string): Promise<{ consent_id: string }> {
