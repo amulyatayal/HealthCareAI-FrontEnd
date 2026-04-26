@@ -19,6 +19,25 @@ class AdminApiError extends Error {
   }
 }
 
+function messageFromErrorBody(error: { detail?: unknown; message?: string }): string {
+  const d = error.detail;
+  if (Array.isArray(d)) {
+    return d
+      .map((e: { msg?: string }) => (typeof e === 'object' && e && 'msg' in e ? (e as { msg: string }).msg : String(e)))
+      .filter(Boolean)
+      .join(' ') || (error.message ?? 'An error occurred');
+  }
+  if (typeof d === 'string' && d.trim()) return d;
+  if (d != null && typeof d === 'object') {
+    try {
+      return JSON.stringify(d);
+    } catch {
+      return error.message || 'An error occurred';
+    }
+  }
+  return error.message || 'An error occurred';
+}
+
 function getAdminToken(): string | null {
   return localStorage.getItem('admin_auth_token');
 }
@@ -45,7 +64,7 @@ async function fetchAdminJson<T>(url: string, options?: RequestInit): Promise<T>
       window.dispatchEvent(new CustomEvent('admin:session-expired'));
     }
 
-    throw new AdminApiError(response.status, error.detail || error.message || 'An error occurred');
+    throw new AdminApiError(response.status, messageFromErrorBody(error));
   }
 
   if (response.status === 204) return {} as T;

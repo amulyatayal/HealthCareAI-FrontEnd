@@ -3,7 +3,7 @@ import {
   Plus, Trash2, Save, ChevronDown, ChevronRight, User,
   FileText, Video, ExternalLink, X, ArrowUpRight, Sparkles,
 } from 'lucide-react';
-import type { IntentType } from '../../types/admin';
+import type { IntentType, PathwayStageResource } from '../../types/admin';
 import { INTENT_OPTIONS } from '../../types/admin';
 import { StageTreeSelect } from '../components/StageTreeSelect';
 import { useAdminAuth } from '../AdminAuthContext';
@@ -87,7 +87,7 @@ const MOCK_ROWS: ResourceRow[] = [
 ];
 
 const stagesSummary = (ids: string[]) => {
-  if (ids.length === 0) return 'Select stages…';
+  if (ids.length === 0) return 'Select stages (required)…';
   const topLevel = ids.filter((id) => !id.includes('.') || !ids.includes(id.split('.').slice(0, -1).join('.')));
   const first = allStages[topLevel[0]]?.display_name || topLevel[0];
   if (ids.length === 1) return first;
@@ -100,12 +100,32 @@ const TYPE_META = {
   link: { icon: ExternalLink, label: 'Link', color: 'var(--sage-400)' },
 } as const;
 
+function pathWayResourcesToRows(resources: PathwayStageResource[]): ResourceRow[] {
+  const flatRows: ResourceRow[] = [];
+  for (const item of resources) {
+    for (const r of item.resources) {
+      flatRows.push({
+        localId: `row_${item.id}_${flatRows.length}`,
+        id: item.id,
+        pathway_stage_ids: [...item.pathway_stage_ids],
+        description: item.description || '',
+        title: r.title,
+        url: r.url,
+        type: r.type,
+        intents: [...item.intents],
+      });
+    }
+  }
+  return flatRows;
+}
+
 export function AdminResourcesPage() {
   const { adminUser } = useAdminAuth();
   const [rows, setRows] = useState<ResourceRow[]>([newRow()]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [saveToastError, setSaveToastError] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<{ rowId: string; kind: 'stages' | 'intents' } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [expandedCov, setExpandedCov] = useState<Set<string>>(new Set());
@@ -160,21 +180,7 @@ export function AdminResourcesPage() {
         const { getPathwayResources } = await import('../../services/adminApi');
         const data = await getPathwayResources();
         if (!cancelled && data.resources.length > 0) {
-          const flatRows: ResourceRow[] = [];
-          for (const item of data.resources) {
-            for (const r of item.resources) {
-              flatRows.push({
-                localId: `row_${item.id}_${flatRows.length}`,
-                id: item.id,
-                pathway_stage_ids: [...item.pathway_stage_ids],
-                description: item.description || '',
-                title: r.title,
-                url: r.url,
-                type: r.type,
-                intents: [...item.intents],
-              });
-            }
-          }
+          const flatRows = pathWayResourcesToRows(data.resources);
           if (flatRows.length > 0) setRows(flatRows);
         }
       } catch {
@@ -248,11 +254,19 @@ export function AdminResourcesPage() {
   };
 
   const handleSaveAll = async () => {
-    const validRows = rows.filter((r) => r.title.trim() && r.url.trim() && r.description.trim() && r.intents.length > 0);
+    const validRows = rows.filter(
+      (r) =>
+        r.title.trim() &&
+        r.url.trim() &&
+        r.description.trim() &&
+        r.intents.length > 0 &&
+        r.pathway_stage_ids.length > 0,
+    );
     if (validRows.length === 0) return;
 
     setSaving(true);
     setSaveMessage(null);
+    setSaveToastError(false);
 
     const localData = validRows.map((row) => ({
       pathway_stage_ids: row.pathway_stage_ids,
@@ -275,19 +289,54 @@ export function AdminResourcesPage() {
         if (row.id) {
           const { updatePathwayResource } = await import('../../services/adminApi');
           await updatePathwayResource(row.id, payload);
+          setRows((prev) =>
+            prev.map((r) => (r.localId === row.localId ? { ...r, _dirty: false } : r)),
+          );
         } else {
           const { createPathwayResource } = await import('../../services/adminApi');
-          await createPathwayResource(payload);
+          const created = await createPathwayResource(payload);
+          setRows((prev) =>
+            prev.map((r) =>
+              r.localId === row.localId
+                ? {
+                    ...r,
+                    id: created.id,
+                    _dirty: false,
+                    description: created.description,
+                    intents: [...created.intents],
+                    pathway_stage_ids: [...created.pathway_stage_ids],
+                  }
+                : r,
+            ),
+          );
         }
       }
-      setSaveMessage('All resources saved successfully.');
-    } catch {
-      setSaveMessage('Saved locally — resources will appear on the patient dashboard.');
-    }
 
-    setRows((prev) => prev.map((r) => ({ ...r, _dirty: false })));
-    setSaving(false);
-    setTimeout(() => setSaveMessage(null), 4000);
+      setSaveMessage('All resources saved successfully.');
+      setSaveToastError(false);
+      try {
+        const { getPathwayResources } = await import('../../services/adminApi');
+        const data = await getPathwayResources();
+        if (data.resources.length > 0) {
+          const next = pathWayResourcesToRows(data.resources);
+          if (next.length > 0) setRows(next);
+        }
+      } catch (re) {
+        console.warn('[AdminResources] Refetch after save failed', re);
+        setSaveMessage('Saved, but the list could not be refreshed. Reload the page to see the latest data.');
+        setSaveToastError(false);
+      }
+    } catch (err) {
+      console.error('[AdminResources] Save failed', err);
+      setSaveMessage(err instanceof Error ? err.message : 'Save failed. Please try again.');
+      setSaveToastError(true);
+    } finally {
+      setSaving(false);
+      setTimeout(() => {
+        setSaveMessage(null);
+        setSaveToastError(false);
+      }, 5000);
+    }
   };
 
   const isDropdownOpen = (rowId: string, kind: 'stages' | 'intents') =>
@@ -444,8 +493,19 @@ export function AdminResourcesPage() {
           {filteredRows.map((row, idx) => {
             const typeMeta = TYPE_META[row.type];
             const isLast = idx === filteredRows.length - 1;
-            const isValid = row.title.trim() && row.url.trim() && row.description.trim() && row.intents.length > 0;
-            const hasContent = !!(row.title || row.url || row.description || row.intents.length > 0);
+            const isValid =
+              row.title.trim() &&
+              row.url.trim() &&
+              row.description.trim() &&
+              row.intents.length > 0 &&
+              row.pathway_stage_ids.length > 0;
+            const hasContent = !!(
+              row.title ||
+              row.url ||
+              row.description ||
+              row.intents.length > 0 ||
+              row.pathway_stage_ids.length > 0
+            );
             const showRequired = hasContent && !isValid;
             return (
               <div
@@ -534,7 +594,7 @@ export function AdminResourcesPage() {
                     >
                       <button
                         type="button"
-                        className="admin-grid-dropdown-trigger"
+                        className={`admin-grid-dropdown-trigger${showRequired && row.pathway_stage_ids.length === 0 ? ' admin-field-required' : ''}`}
                         onClick={() => toggleDropdown(row.localId, 'stages')}
                       >
                         <span className={row.pathway_stage_ids.length === 0 ? 'placeholder' : ''}>
@@ -613,7 +673,11 @@ export function AdminResourcesPage() {
         </main>
       </div>
 
-      {saveMessage && <div className="admin-save-toast">{saveMessage}</div>}
+      {saveMessage && (
+        <div className={`admin-save-toast${saveToastError ? ' admin-save-toast--error' : ''}`}>
+          {saveMessage}
+        </div>
+      )}
     </>
   );
 }

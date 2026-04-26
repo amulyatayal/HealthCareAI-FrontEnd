@@ -1556,6 +1556,13 @@
   box-shadow: var(--shadow-lg);
   z-index: 300;
   animation: admin-toast-in 0.2s ease-out;
+  max-width: min(400px, calc(100vw - 40px));
+  line-height: 1.45;
+}
+
+.admin-save-toast--error {
+  background: #7f1d1d;
+  color: #fef2f2;
 }
 
 @keyframes admin-toast-in {
