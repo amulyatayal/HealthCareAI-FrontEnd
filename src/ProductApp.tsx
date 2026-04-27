@@ -6,7 +6,7 @@ import { PhoneFrame } from './wireframes/components/PhoneFrame'
 import { DataConsentScreen, getStoredDataConsent, saveDataConsent } from './components/gdpr/DataConsentScreen'
 import type { DataConsentChoices } from './components/gdpr/DataConsentScreen'
 import { getConsentStatus } from './services/api'
-import { Heart, User, ArrowRight, Building2, KeyRound, ChevronDown } from 'lucide-react'
+import { Heart, Building2, KeyRound, ChevronDown } from 'lucide-react'
 
 const GOOGLE_CLIENT_ID =
   import.meta.env.VITE_GOOGLE_CLIENT_ID ||
@@ -19,7 +19,7 @@ const GOOGLE_CLIENT_ID =
  * Flow: Loading → Login → Data Consent (first time) → App
  */
 export function ProductApp() {
-  const { isAuthenticated, isLoading, loginAsGuest, login } = useAuth()
+  const { isAuthenticated, isLoading, login } = useAuth()
   const [hasDataConsent, setHasDataConsent] = useState<boolean | null>(null)
 
   useEffect(() => {
@@ -76,7 +76,7 @@ export function ProductApp() {
   }
 
   if (!isAuthenticated) {
-    return <LoginPageWithGoogle onGuestLogin={loginAsGuest} onGoogleLogin={login} />
+    return <LoginPageWithGoogle onGoogleLogin={login} />
   }
 
   // Show data consent screen on first login (GDPR requirement)
@@ -92,17 +92,13 @@ export function ProductApp() {
 }
 
 /**
- * Full login page with Google OAuth + guest login.
+ * Full login page with Google OAuth.
  */
 function LoginPageWithGoogle({
-  onGuestLogin,
   onGoogleLogin,
 }: {
-  onGuestLogin: (name: string) => void
   onGoogleLogin: (credential: string) => void
 }) {
-  const [guestName, setGuestName] = useState('')
-  const [showGuestForm, setShowGuestForm] = useState(false)
   const [selectedHospital, setSelectedHospital] = useState('')
   const [hospitalCode, setHospitalCode] = useState('')
 
@@ -140,15 +136,6 @@ function LoginPageWithGoogle({
     if (response.credential) {
       persistHospitalSelection()
       onGoogleLogin(response.credential)
-      sendAssociation()
-    }
-  }
-
-  const handleGuestSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (guestName.trim()) {
-      persistHospitalSelection()
-      onGuestLogin(guestName.trim())
       sendAssociation()
     }
   }
@@ -324,89 +311,6 @@ function LoginPageWithGoogle({
             <p style={{ fontSize: 11, color: '#9ca3af', margin: '0 0 12px', lineHeight: 1.4 }}>
               We only use your name and email to create your account.
             </p>
-
-            {/* Divider */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              margin: '16px 0',
-            }}>
-              <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
-              <span style={{ fontSize: 13, color: '#9ca3af' }}>or</span>
-              <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
-            </div>
-
-            {/* Guest login */}
-            {!showGuestForm ? (
-              <button
-                type="button"
-                onClick={() => setShowGuestForm(true)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                  width: '100%',
-                  padding: '14px 20px',
-                  background: '#f9fafb',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: 12,
-                  cursor: 'pointer',
-                  fontSize: 15,
-                  fontWeight: 500,
-                  color: '#374151',
-                }}
-              >
-                <User size={18} />
-                Continue as Guest
-              </button>
-            ) : (
-              <form onSubmit={handleGuestSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <div style={{ position: 'relative' }}>
-                  <User size={18} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
-                  <input
-                    type="text"
-                    value={guestName}
-                    onChange={(e) => setGuestName(e.target.value)}
-                    placeholder="Enter your name"
-                    autoFocus
-                    maxLength={50}
-                    style={{
-                      width: '100%',
-                      padding: '14px 14px 14px 42px',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: 12,
-                      fontSize: 15,
-                      outline: 'none',
-                      boxSizing: 'border-box',
-                    }}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={!guestName.trim()}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 8,
-                    width: '100%',
-                    padding: '14px 20px',
-                    background: guestName.trim() ? 'linear-gradient(135deg, #f43f5e, #e11d48)' : '#e5e7eb',
-                    color: guestName.trim() ? 'white' : '#9ca3af',
-                    border: 'none',
-                    borderRadius: 12,
-                    cursor: guestName.trim() ? 'pointer' : 'not-allowed',
-                    fontSize: 15,
-                    fontWeight: 600,
-                  }}
-                >
-                  Continue
-                  <ArrowRight size={18} />
-                </button>
-              </form>
-            )}
 
             <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 24, lineHeight: 1.5 }}>
               By signing in, you agree to our{' '}
