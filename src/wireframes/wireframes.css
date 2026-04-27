@@ -1777,3 +1777,61 @@
   background: #fee2e2;
   color: #b91c1c;
 }
+
+.wf-prom-preview-card {
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.wf-prom-preview-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--wf-gray-800);
+}
+
+.wf-prom-preview-subtitle {
+  margin: 6px 0 10px;
+  font-size: 12px;
+  color: var(--wf-gray-500);
+}
+
+.wf-prom-preview-meta {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: var(--wf-gray-700);
+}
+
+.wf-prom-preview-block {
+  border: 1px solid var(--wf-gray-200);
+  border-radius: 10px;
+  padding: 8px;
+  margin-bottom: 8px;
+  background: #fafafa;
+}
+
+.wf-prom-preview-block-title {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--wf-gray-700);
+}
+
+.wf-prom-preview-block pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--wf-gray-700);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+.wf-prom-preview-last-sent {
+  margin: 8px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0369a1;
+}

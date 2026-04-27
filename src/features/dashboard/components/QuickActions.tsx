@@ -27,7 +27,7 @@ export function QuickActions({ basePath }: Props) {
             <div className="feature-icon purple">
               <ClipboardList size={24} />
             </div>
-            <div className="feature-title">PROMs</div>
+            <div className="feature-title">PROM Questionnaire</div>
             <div className="feature-desc">Complete survey</div>
           </div>
         </Link>

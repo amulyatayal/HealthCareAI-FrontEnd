@@ -2,7 +2,10 @@ import { FormEvent, useMemo, useState } from 'react'
 import { CheckCircle2, Send } from 'lucide-react'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
-import { sendBreastSatisfactionPROM } from '../../services/promEmail'
+import {
+  sendBreastSatisfactionPROM,
+  type PromEmailPreview,
+} from '../../services/promEmail'
 
 type ScaleValue = 1 | 2 | 3 | 4
 
@@ -63,6 +66,8 @@ export function BreastSatisfactionPROMPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [toast, setToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [lastSentPreview, setLastSentPreview] = useState<PromEmailPreview | null>(null)
+  const [lastSentMode, setLastSentMode] = useState<'real' | 'mock' | null>(null)
 
   const missingCount = useMemo(
     () => ALL_QUESTIONS.filter((q) => answers[q.id] == null).length,
@@ -80,6 +85,9 @@ export function BreastSatisfactionPROMPage() {
       answer: `${answers[q.id]} - ${ANSWER_LABEL[answers[q.id] as ScaleValue]}`,
     }))
 
+  const patientName = localStorage.getItem('user_name') || 'Anonymous'
+  const hospital = localStorage.getItem('selected_hospital') || undefined
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     setSubmitAttempted(true)
@@ -90,34 +98,35 @@ export function BreastSatisfactionPROMPage() {
       return
     }
 
-    const patientName = localStorage.getItem('user_name') || 'Anonymous'
-    const hospital = localStorage.getItem('selected_hospital') || undefined
+    const submittedAt = new Date().toISOString()
 
     setSubmitting(true)
     try {
-      await sendBreastSatisfactionPROM({
+      const result = await sendBreastSatisfactionPROM({
         patientName,
         hospital,
-        submittedAt: new Date().toISOString(),
+        submittedAt,
         preop: questionRows(PRE_OP_QUESTIONS),
         postop: questionRows(POST_OP_QUESTIONS),
       })
-      setToast({ type: 'success', text: 'Responses sent successfully.' })
+      setLastSentPreview(result.preview)
+      setLastSentMode(result.mode)
+      setToast({
+        type: 'success',
+        text:
+          result.mode === 'real'
+            ? 'Email sent successfully.'
+            : 'Mock email sent (demo mode).',
+      })
       setSubmitAttempted(false)
       setAnswers(getInitialAnswers())
-    } catch (err) {
-      console.error('[PROM] submit failed', err)
-      setToast({
-        type: 'error',
-        text: err instanceof Error ? err.message : 'Could not send responses. Please try again.',
-      })
     } finally {
       setSubmitting(false)
     }
   }
 
   return (
-    <WireframeLayout showBack title="Breast Satisfaction (PROM)">
+    <WireframeLayout showBack title="PROM Questionnaire">
       <form onSubmit={handleSubmit} className="wf-prom-form">
         <WireframeCard className="wf-prom-intro-card">
           <p className="wf-prom-intro">
@@ -220,6 +229,33 @@ export function BreastSatisfactionPROMPage() {
             </div>
           )}
         </WireframeCard>
+
+        {lastSentPreview && (
+          <WireframeCard className="wf-prom-preview-card">
+            <h3 className="wf-prom-preview-title">Email Preview</h3>
+            <p className="wf-prom-preview-subtitle">
+              This reflects the answers you submitted.
+            </p>
+            <div className="wf-prom-preview-meta">
+              <span><strong>To:</strong> your-clinician@yourhospital.com</span>
+              <span><strong>Subject:</strong> {lastSentPreview.subject}</span>
+            </div>
+            <div className="wf-prom-preview-block">
+              <p className="wf-prom-preview-block-title">Preoperative answers</p>
+              <pre>{lastSentPreview.preopBlock}</pre>
+            </div>
+            <div className="wf-prom-preview-block">
+              <p className="wf-prom-preview-block-title">Postoperative answers</p>
+              <pre>{lastSentPreview.postopBlock}</pre>
+            </div>
+            {lastSentMode && (
+              <p className="wf-prom-preview-last-sent">
+                Last sent: {lastSentMode === 'real' ? 'Real email' : 'Mock email'} at{' '}
+                {new Date(lastSentPreview.submittedAt).toLocaleString()}.
+              </p>
+            )}
+          </WireframeCard>
+        )}
       </form>
     </WireframeLayout>
   )

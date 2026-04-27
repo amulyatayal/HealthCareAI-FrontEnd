@@ -94,7 +94,7 @@ export function HealthHub() {
     { icon: Sparkles, title: 'Advanced Mood Diary', subtitle: 'Detailed emotions and patterns', to: `${base}/health/mood-advanced`, iconColor: 'purple', priority: 'P1' },
     { icon: Activity, title: 'Symptom Tracker', subtitle: 'Log and monitor symptoms', to: `${base}/health/symptoms`, iconColor: 'blue', priority: 'P1' },
     { icon: Timer, title: 'Physical Tests and Wearable Integration', subtitle: '1 Mile, Sit-to-Stand, Balance, device sync', to: `${base}/health/tests`, iconColor: 'green', priority: 'P1' },
-    { icon: ClipboardList, title: 'Breast Satisfaction (PROM)', subtitle: 'Patient-reported outcome questionnaire', to: `${base}/health/prom/breast-satisfaction`, iconColor: 'pink', priority: 'P1' },
+    { icon: ClipboardList, title: 'PROM Questionnaire', subtitle: 'Patient-reported outcome questionnaire', to: `${base}/health/prom/breast-satisfaction`, iconColor: 'pink', priority: 'P1' },
   ]
 
   const iconStyles: Record<string, React.CSSProperties> = {
