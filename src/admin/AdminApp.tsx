@@ -9,6 +9,7 @@ import { AdminCommunityPage } from './pages/AdminCommunityPage';
 import { AdminEventsPage } from './pages/AdminEventsPage';
 import { AdminNotificationsPage } from './pages/AdminNotificationsPage';
 import { AdminSharedDataPage } from './pages/AdminSharedDataPage';
+import { AdminTermsPage } from './pages/AdminTermsPage';
 import './admin.css';
 
 export function AdminApp() {
@@ -16,6 +17,7 @@ export function AdminApp() {
     <AdminAuthProvider>
       <Routes>
         <Route path="/login" element={<AdminLoginPage />} />
+        <Route path="/terms" element={<AdminTermsPage />} />
         <Route
           path="/*"
           element={

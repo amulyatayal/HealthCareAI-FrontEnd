@@ -1610,6 +1610,26 @@
   margin-top: 6px;
 }
 
+.wf-status-chip-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+
+.wf-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--wf-gray-200);
+  background: white;
+  color: var(--wf-gray-600);
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .wf-prom-form {
   display: flex;
   flex-direction: column;

@@ -20,12 +20,6 @@ function getNotifId(n: PatientNotification): string {
   return n.notification_id || n.id || ''
 }
 
-const MOCK_NOTIFICATIONS: PatientNotification[] = [
-  { notification_id: '1', title: 'New Resources Available', message: 'Your care team has added new post-surgery recovery resources.', priority: 'info', created_at: '2025-03-28T14:30:00Z', read: false },
-  { notification_id: '2', title: 'Appointment Reminder', message: 'Please remember to update your symptom log before your upcoming appointment.', priority: 'warning', created_at: '2025-03-25T08:00:00Z', read: false },
-  { notification_id: '3', title: 'System Maintenance', message: 'Tara will undergo scheduled maintenance on Saturday from 2:00 AM to 4:00 AM GMT.', priority: 'info', created_at: '2025-03-22T09:00:00Z', read: true },
-]
-
 function timeAgo(value: string): string {
   try {
     const date = new Date(value)
@@ -53,7 +47,7 @@ export function Notifications() {
         const data = await getNotifications()
         if (!cancelled) setNotifications(data.notifications ?? [])
       } catch {
-        if (!cancelled) setNotifications(MOCK_NOTIFICATIONS)
+        if (!cancelled) setNotifications([])
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -87,6 +81,17 @@ export function Notifications() {
 
   if (loading) return null
 
+  if (notifications.length === 0) {
+    return (
+      <div className="wf-status-chip-row">
+        <span className="wf-status-chip">
+          <Bell size={14} />
+          Notifications: None
+        </span>
+      </div>
+    )
+  }
+
   return (
     <WireframeCard
       title={
@@ -105,36 +110,29 @@ export function Notifications() {
         ) : undefined
       }
     >
-      {notifications.length === 0 ? (
-        <div style={{ padding: '24px', textAlign: 'center', color: 'var(--wf-gray-400)' }}>
-          <Bell size={28} strokeWidth={1.4} style={{ marginBottom: '8px' }} />
-          <div style={{ fontSize: '14px' }}>No notifications</div>
-        </div>
-      ) : (
-        notifications.map((n) => {
-          const style = PRIORITY_STYLES[n.priority]
-          const PriorityIcon = style.icon
-          return (
-            <button
-              key={getNotifId(n) || n.title}
-              className={`wf-notif-item ${n.read ? 'read' : ''}`}
-              onClick={() => handleMarkRead(getNotifId(n))}
-            >
-              <div className="wf-notif-icon" style={{ background: style.bg }}>
-                <PriorityIcon size={18} style={{ color: style.color }} />
+      {notifications.map((n) => {
+        const style = PRIORITY_STYLES[n.priority]
+        const PriorityIcon = style.icon
+        return (
+          <button
+            key={getNotifId(n) || n.title}
+            className={`wf-notif-item ${n.read ? 'read' : ''}`}
+            onClick={() => handleMarkRead(getNotifId(n))}
+          >
+            <div className="wf-notif-icon" style={{ background: style.bg }}>
+              <PriorityIcon size={18} style={{ color: style.color }} />
+            </div>
+            <div className="wf-notif-content">
+              <div className="wf-notif-title-row">
+                <span className="wf-notif-title">{n.title}</span>
+                <span className="wf-notif-time">{timeAgo(n.created_at)}</span>
               </div>
-              <div className="wf-notif-content">
-                <div className="wf-notif-title-row">
-                  <span className="wf-notif-title">{n.title}</span>
-                  <span className="wf-notif-time">{timeAgo(n.created_at)}</span>
-                </div>
-                <div className="wf-notif-message">{n.message}</div>
-              </div>
-              {!n.read && <div className="wf-notif-dot" />}
-            </button>
-          )
-        })
-      )}
+              <div className="wf-notif-message">{n.message}</div>
+            </div>
+            {!n.read && <div className="wf-notif-dot" />}
+          </button>
+        )
+      })}
     </WireframeCard>
   )
 }

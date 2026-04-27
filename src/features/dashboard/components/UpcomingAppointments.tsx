@@ -8,11 +8,6 @@ interface Props {
   basePath: string
 }
 
-const MOCK_APPOINTMENTS: Appointment[] = [
-  { id: 'mock-1', title: 'Dr. Thompson - Oncology', date: new Date(Date.now() + 86400000).toISOString().slice(0, 10), time: '10:30', location: 'Room 204', reminder: true, status: 'upcoming' },
-  { id: 'mock-2', title: 'Blood Test', date: new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10), time: '09:00', location: 'Lab B', reminder: false, status: 'upcoming' },
-]
-
 const ACCENT_COLORS = [
   { bg: 'linear-gradient(135deg, #eff6ff, #dbeafe)', icon: '#2563eb' },
   { bg: 'linear-gradient(135deg, #dcfce7, #bbf7d0)', icon: '#16a34a' },
@@ -50,10 +45,10 @@ export function UpcomingAppointments({ basePath }: Props) {
       try {
         const data = await getAppointments('upcoming')
         if (!cancelled) {
-          setAppointments(data.appointments?.length ? data.appointments : MOCK_APPOINTMENTS)
+          setAppointments(data.appointments ?? [])
         }
       } catch {
-        if (!cancelled) setAppointments(MOCK_APPOINTMENTS)
+        if (!cancelled) setAppointments([])
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -61,6 +56,17 @@ export function UpcomingAppointments({ basePath }: Props) {
     load()
     return () => { cancelled = true }
   }, [])
+
+  if (!loading && appointments.length === 0) {
+    return (
+      <div className="wf-status-chip-row">
+        <span className="wf-status-chip">
+          <CalendarX size={14} />
+          Upcoming appointments: None
+        </span>
+      </div>
+    )
+  }
 
   return (
     <WireframeCard
@@ -74,11 +80,6 @@ export function UpcomingAppointments({ basePath }: Props) {
       {loading ? (
         <div style={{ padding: '20px', textAlign: 'center', color: 'var(--wf-gray-400)', fontSize: '14px' }}>
           Loading appointments...
-        </div>
-      ) : appointments.length === 0 ? (
-        <div style={{ padding: '24px', textAlign: 'center', color: 'var(--wf-gray-400)' }}>
-          <CalendarX size={28} strokeWidth={1.4} style={{ marginBottom: '8px' }} />
-          <div style={{ fontSize: '14px' }}>No upcoming appointments</div>
         </div>
       ) : (
         appointments.slice(0, 3).map((appt, idx) => {
