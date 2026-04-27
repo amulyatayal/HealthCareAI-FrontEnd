@@ -23,6 +23,7 @@ import { ShareDataPage } from './pages/ShareDataPage'
 import { ClinicalTeamPage } from './pages/ClinicalTeamPage'
 import { ViewResourcePage } from './pages/ViewResourcePage'
 import { SearchResourcesPage } from './pages/SearchResourcesPage'
+import { BreastSatisfactionPROMPage } from './pages/BreastSatisfactionPROMPage'
 import { GuestGate } from './components/GuestGate'
 
 export function WireframeApp() {
@@ -43,6 +44,7 @@ export function WireframeApp() {
       <Route path="/health/mood-advanced" element={<GuestGate featureName="mood tracking"><AdvancedMoodPage /></GuestGate>} />
       <Route path="/health/symptoms" element={<GuestGate featureName="symptom tracking"><SymptomsPage /></GuestGate>} />
       <Route path="/health/tests" element={<GuestGate featureName="physical tests"><TestsPage /></GuestGate>} />
+      <Route path="/health/prom/breast-satisfaction" element={<GuestGate featureName="PROM questionnaires"><BreastSatisfactionPROMPage /></GuestGate>} />
 
       {/* Guest-gated: profile features */}
       <Route path="/profile/documents" element={<GuestGate featureName="document storage"><DocumentsPage /></GuestGate>} />

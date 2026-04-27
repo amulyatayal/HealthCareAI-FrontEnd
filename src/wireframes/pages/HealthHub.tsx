@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Smile, Sparkles, Activity, Timer, ChevronRight, TrendingUp, TrendingDown, Minus, Heart, Flame } from 'lucide-react'
+import { Smile, Sparkles, Activity, Timer, ChevronRight, TrendingUp, TrendingDown, Minus, Heart, Flame, ClipboardList } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
@@ -94,6 +94,7 @@ export function HealthHub() {
     { icon: Sparkles, title: 'Advanced Mood Diary', subtitle: 'Detailed emotions and patterns', to: `${base}/health/mood-advanced`, iconColor: 'purple', priority: 'P1' },
     { icon: Activity, title: 'Symptom Tracker', subtitle: 'Log and monitor symptoms', to: `${base}/health/symptoms`, iconColor: 'blue', priority: 'P1' },
     { icon: Timer, title: 'Physical Tests and Wearable Integration', subtitle: '1 Mile, Sit-to-Stand, Balance, device sync', to: `${base}/health/tests`, iconColor: 'green', priority: 'P1' },
+    { icon: ClipboardList, title: 'Breast Satisfaction (PROM)', subtitle: 'Patient-reported outcome questionnaire', to: `${base}/health/prom/breast-satisfaction`, iconColor: 'pink', priority: 'P1' },
   ]
 
   const iconStyles: Record<string, React.CSSProperties> = {
@@ -101,6 +102,7 @@ export function HealthHub() {
     purple: { background: 'linear-gradient(135deg, #f3e8ff, #e9d5ff)', color: '#a855f7' },
     blue: { background: 'linear-gradient(135deg, #dbeafe, #bfdbfe)', color: '#3b82f6' },
     green: { background: 'linear-gradient(135deg, #dcfce7, #bbf7d0)', color: '#22c55e' },
+    pink: { background: 'linear-gradient(135deg, #ffe4e6, #fecdd3)', color: '#e11d48' },
   }
 
   const TrendIcon = trendDir === 'up' ? TrendingUp : trendDir === 'down' ? TrendingDown : Minus
