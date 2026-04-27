@@ -28,9 +28,9 @@ export function DashboardPage() {
       <Notifications />
       <UpcomingAppointments basePath={basePath} />
       <PathwayResources categories={resourceCategories} hasStageSelected={hasStageSelected} basePath={basePath} />
-      <ClinicalTrials />
       <QuickActions basePath={basePath} />
       <CommunityActivity basePath={basePath} />
+      <ClinicalTrials />
     </WireframeLayout>
   )
 }

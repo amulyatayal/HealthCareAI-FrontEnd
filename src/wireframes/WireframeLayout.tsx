@@ -7,6 +7,8 @@ import { CookieConsent } from '../components/gdpr/CookieConsent'
 const HOSPITAL_LOGOS: Record<string, string> = {
   barts: '/barts_logo.png',
   apollo: '/apollo-logo.svg',
+  futuredreams: '/futuredreams-logo.png',
+  uhnm: '/uhnm-logo.png',
 }
 
 /**
