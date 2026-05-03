@@ -62,7 +62,7 @@ export function StageSelectorPage() {
       localStorage.setItem('patient_stage_path', JSON.stringify(path))
       window.dispatchEvent(new StorageEvent('storage', { key: 'patient_stage_path' }))
     }
-    navigate(`${base}/profile`)
+    navigate(`${base}/`, { state: { scrollToPathwayResources: true } })
   }
 
   const handleDontKnowYet = () => {
