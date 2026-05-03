@@ -1,4 +1,4 @@
-import { Video, Brain, UtensilsCrossed, Dumbbell, Shirt, ClipboardCheck } from 'lucide-react'
+import { FileText, Brain, UtensilsCrossed, Dumbbell, Shirt, ClipboardCheck } from 'lucide-react'
 import type { PatientResource } from '../../../services/api'
 import type { ResourceCategory, ResourceLink } from '../types'
 
@@ -8,7 +8,7 @@ const CATEGORY_DEFINITIONS: Omit<ResourceCategory, 'links'>[] = [
     title: 'Information about Diagnosis and Treatment',
     iconBg: 'linear-gradient(135deg, #dbeafe, #eff6ff)',
     iconColor: '#2563eb',
-    Icon: Video,
+    Icon: FileText,
   },
   {
     id: 'exercises',
