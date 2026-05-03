@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { GoogleLogin, GoogleOAuthProvider, CredentialResponse } from '@react-oauth/google'
 import { useAuth } from '../contexts/AuthContext'
 import { Heart, User, ArrowRight } from 'lucide-react'
-import { TestUserLoginSection } from './TestUserLoginSection'
 import './LoginPage.css'
 
 // Google OAuth Client ID - works with authorized origins in Google Console
@@ -58,15 +57,6 @@ export function LoginPage() {
               shape="rectangular"
             />
           </div>
-
-          <div className="login-or-divider">
-            <span>or</span>
-          </div>
-
-          <TestUserLoginSection
-            onToken={(t) => login(t)}
-            className="test-user-login"
-          />
 
           <div className="login-or-divider">
             <span>or</span>

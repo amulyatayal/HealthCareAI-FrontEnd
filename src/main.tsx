@@ -9,6 +9,7 @@ import { PrivacyPolicy } from './components/legal/PrivacyPolicy'
 import { TermsOfService } from './components/legal/TermsOfService'
 
 import { LogoutRoute } from './components/LogoutRoute'
+import { TestUserLoginPage } from './components/TestUserLoginPage'
 import { ShareViewerPage } from './wireframes/pages/ShareViewerPage'
 import { AdminApp } from './admin/AdminApp'
 import { AuthProvider } from './contexts/AuthContext'
@@ -119,6 +120,7 @@ function AppRouter() {
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
       <Route path="/logout" element={<LogoutRoute />} />
+      <Route path="/test" element={<TestUserLoginPage />} />
       <Route path="/legacy/*" element={<App />} />
       <Route path="/*" element={<ProductApp />} />
     </Routes>

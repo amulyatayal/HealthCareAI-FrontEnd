@@ -106,11 +106,6 @@
 }
 
 /* Or Divider */
-.test-user-login {
-  margin: var(--space-md) 0;
-  text-align: left;
-}
-
 .login-or-divider {
   display: flex;
   align-items: center;
