@@ -5,7 +5,7 @@ import type { ResourceCategory, ResourceLink } from '../types'
 const CATEGORY_DEFINITIONS: Omit<ResourceCategory, 'links'>[] = [
   {
     id: 'procedure',
-    title: 'Information about procedure',
+    title: 'Information about Diagnosis and Treatment',
     iconBg: 'linear-gradient(135deg, #dbeafe, #eff6ff)',
     iconColor: '#2563eb',
     Icon: Video,
