@@ -53,16 +53,6 @@ function detectTypeFromUrl(url: string): 'pdf' | 'video' | 'link' | null {
   return null;
 }
 
-function collectAncestorIds(stageId: string): string[] {
-  const ids = [stageId];
-  const parts = stageId.split('.');
-  while (parts.length > 1) {
-    parts.pop();
-    ids.unshift(parts.join('.'));
-  }
-  return ids;
-}
-
 const MOCK_ROWS: ResourceRow[] = [
   {
     localId: 'demo-1',
@@ -204,13 +194,13 @@ export function AdminResourcesPage() {
   }, [openDropdown]);
 
   const addRow = () => {
-    const row = newRow(activeStage ? collectAncestorIds(activeStage) : undefined);
+    const row = newRow(activeStage ? [activeStage] : undefined);
     setRows((prev) => [...prev, row]);
     setTimeout(() => newCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
   };
 
   const addRowForStage = (stageId: string) => {
-    const row = newRow(collectAncestorIds(stageId));
+    const row = newRow([stageId]);
     setRows((prev) => [...prev, row]);
     setActiveStage(stageId);
     setTimeout(() => newCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
