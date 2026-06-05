@@ -26,11 +26,17 @@ export function PathwayResources({ categories, hasStageSelected, basePath }: Pro
       </div>
       <p style={{ fontSize: '13px', color: 'var(--wf-gray-600)', marginBottom: '12px' }}>
         {hasStageSelected
-          ? 'All resources open within the app.'
+          ? categories.length > 0
+            ? 'All resources open within the app.'
+            : 'No resources are available for your selection yet.'
           : 'Choose which area you\'d like information about to see resources from your clinical team.'}
       </p>
       <WireframeCard>
-        {categories.map((cat) => {
+        {categories.length === 0 && hasStageSelected ? (
+          <p style={{ fontSize: '14px', color: 'var(--wf-gray-500)', margin: 0, padding: '8px 4px' }}>
+            Your clinical team has not added resources for this area yet. Try a different selection or check back later.
+          </p>
+        ) : categories.map((cat) => {
           const isExpanded = expandedCategory === cat.id
           return (
             <div key={cat.id} style={{ borderBottom: '1px solid var(--wf-gray-100)' }}>
