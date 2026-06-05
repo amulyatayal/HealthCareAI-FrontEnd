@@ -1,15 +1,16 @@
 import { MessageCircle, ChevronRight, Flame } from 'lucide-react'
-import { Link } from 'react-router-dom'
 import { WireframeCard } from '../../../wireframes/components'
+import { ComingSoonBadge } from './ComingSoonBadge'
 
-interface Props {
-  basePath: string
-}
-
-export function CommunityActivity({ basePath }: Props) {
+export function CommunityActivity() {
   return (
-    <WireframeCard title="Community Activity" className="wf-card-accent">
-      <Link to={`${basePath}/community/chat`} className="wf-list-item" style={{ textDecoration: 'none' }}>
+    <WireframeCard
+      title="Community Activity"
+      action={<ComingSoonBadge />}
+      className="wf-card-accent"
+    >
+      <div className="wf-card-coming-soon">
+      <div className="wf-list-item">
         <div className="wf-avatar-enhanced">
           <div className="avatar-inner">
             <MessageCircle size={20} />
@@ -24,9 +25,9 @@ export function CommunityActivity({ basePath }: Props) {
           <ChevronRight size={18} style={{ color: 'var(--wf-gray-400)' }} />
           <span className="wf-notification-dot">12</span>
         </div>
-      </Link>
+      </div>
 
-      <Link to={`${basePath}/community/events`} className="wf-list-item" style={{ textDecoration: 'none' }}>
+      <div className="wf-list-item">
         <div className="wf-list-avatar" style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)' }}>
           <Flame size={20} style={{ color: '#d97706' }} />
         </div>
@@ -35,7 +36,8 @@ export function CommunityActivity({ basePath }: Props) {
           <div className="wf-list-subtitle" style={{ color: '#d97706', fontWeight: '500' }}>Starting in 2 hours</div>
         </div>
         <span className="wf-badge wf-badge-warning">Live Soon</span>
-      </Link>
+      </div>
+      </div>
     </WireframeCard>
   )
 }

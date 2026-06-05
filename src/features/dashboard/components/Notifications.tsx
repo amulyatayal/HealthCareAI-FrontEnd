@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Bell, Info, AlertTriangle, AlertCircle, Check } from 'lucide-react'
 import { WireframeCard } from '../../../wireframes/components'
+import { DashboardEmptyCard } from './DashboardEmptyCard'
 import {
   getNotifications,
   markNotificationRead,
@@ -83,12 +84,13 @@ export function Notifications() {
 
   if (notifications.length === 0) {
     return (
-      <div className="wf-status-chip-row">
-        <span className="wf-status-chip">
-          <Bell size={14} />
-          Notifications: None
-        </span>
-      </div>
+      <DashboardEmptyCard
+        title="Notifications"
+        icon={<Bell size={22} style={{ color: '#f43f5e' }} />}
+        iconStyle={{ background: 'linear-gradient(135deg, #fff1f2, #fce7f3)' }}
+        headline="You're all caught up"
+        subtext="New updates from your care team will appear here"
+      />
     )
   }
 

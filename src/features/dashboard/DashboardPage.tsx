@@ -47,7 +47,7 @@ export function DashboardPage() {
         <PathwayResources categories={resourceCategories} hasStageSelected={hasStageSelected} basePath={basePath} />
       </div>
       <QuickActions basePath={basePath} />
-      <CommunityActivity basePath={basePath} />
+      <CommunityActivity />
       <ClinicalTrials />
     </WireframeLayout>
   )

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Calendar, Bell, ChevronRight, CalendarX } from 'lucide-react'
+import { Calendar, Bell, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeCard } from '../../../wireframes/components'
+import { DashboardEmptyCard } from './DashboardEmptyCard'
 import { getAppointments, type Appointment } from '../../../services/api'
 
 interface Props {
@@ -59,12 +60,19 @@ export function UpcomingAppointments({ basePath }: Props) {
 
   if (!loading && appointments.length === 0) {
     return (
-      <div className="wf-status-chip-row">
-        <span className="wf-status-chip">
-          <CalendarX size={14} />
-          Upcoming appointments: None
-        </span>
-      </div>
+      <DashboardEmptyCard
+        title="Upcoming"
+        action={
+          <Link to={`${basePath}/profile/appointments`} style={{ color: 'var(--wf-rose-500)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            View All <ChevronRight size={16} />
+          </Link>
+        }
+        icon={<Calendar size={22} style={{ color: '#2563eb' }} />}
+        iconStyle={{ background: 'linear-gradient(135deg, #eff6ff, #dbeafe)' }}
+        headline="No upcoming appointments"
+        subtext="Add one to stay on top of your care schedule"
+        cta={{ label: 'Manage appointments', to: `${basePath}/profile/appointments` }}
+      />
     )
   }
 

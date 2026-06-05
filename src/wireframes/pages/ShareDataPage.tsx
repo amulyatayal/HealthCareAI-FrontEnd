@@ -5,7 +5,7 @@ import { WireframeCard } from '../components'
 
 const DATA_OPTIONS = [
   { id: 'mood', label: 'Mood & wellness data', description: 'Mood diary, scores and trends' },
-  { id: 'pathway', label: 'Treatment pathway', description: 'Where I am in my journey' },
+  { id: 'pathway', label: 'Treatment pathway', description: 'Topics I\'ve selected for information' },
   { id: 'symptoms', label: 'Symptom log', description: 'Logged symptoms and patterns' },
   { id: 'documents', label: 'Documents summary', description: 'List of uploaded documents (not files)' },
 ]

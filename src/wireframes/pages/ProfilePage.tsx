@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { FileText, Calendar, Settings, Bell, Shield, LogOut, ChevronRight, User, Compass, Share2, Download, Trash2, ToggleLeft, Check, Clock, Search, MessageCircle, UserPlus, AlertTriangle, BookOpen, Database, Mail, Phone } from 'lucide-react'
+import { FileText, Calendar, Settings, Shield, LogOut, ChevronRight, User, Compass, Share2, Download, Trash2, ToggleLeft, Check, Clock, Search, MessageCircle, UserPlus, AlertTriangle, BookOpen, Database, Mail, Phone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
@@ -123,7 +123,7 @@ export function ProfilePage() {
     {
       icon: Compass,
       title: 'Treatment pathway',
-      subtitle: 'Where you are in your journey',
+      subtitle: 'Which area you need more information about',
       to: `${base}/profile/stage`,
     },
     {
@@ -143,18 +143,6 @@ export function ProfilePage() {
       title: 'Share my Data',
       subtitle: 'Send my data to my clinician',
       to: `${base}/profile/share`,
-    },
-    {
-      icon: Bell,
-      title: 'Notifications',
-      subtitle: 'Manage your alerts',
-      to: `${base}/profile`,
-    },
-    {
-      icon: Shield,
-      title: 'Privacy & Security',
-      subtitle: 'Data protection settings',
-      to: `${base}/profile`,
     },
     {
       icon: Settings,

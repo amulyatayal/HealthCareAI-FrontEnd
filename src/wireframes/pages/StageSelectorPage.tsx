@@ -77,7 +77,7 @@ export function StageSelectorPage() {
       <WireframeLayout title="Treatment pathway" showBack>
         <div className="wf-main-content" style={{ padding: '16px' }}>
           <p style={{ fontSize: '15px', color: 'var(--wf-gray-700)', marginBottom: '12px' }}>
-            You selected:
+            You want information about:
           </p>
           <div
             style={{
@@ -100,7 +100,7 @@ export function StageSelectorPage() {
             )}
           </div>
           <p className="stage-summary-note">
-            We use this to personalise your experience. Nothing is shared without your consent.
+            We use this to show you relevant resources. Nothing is shared without your consent.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <button
@@ -108,7 +108,7 @@ export function StageSelectorPage() {
               className="wf-btn wf-btn-primary wf-btn-full"
               onClick={handleSave}
             >
-              Save my pathway
+              Save and show resources
             </button>
             <button
               type="button"
@@ -135,7 +135,7 @@ export function StageSelectorPage() {
       <div className="wf-main-content" style={{ padding: '16px' }}>
         <p style={{ fontSize: '15px', color: 'var(--wf-gray-700)', marginBottom: '16px' }}>
           {isRootStep
-            ? 'Where are you in your journey? Choose the option that best describes you.'
+            ? 'Which area would you like more information about? Choose the option that fits best.'
             : 'Would you like to add more detail? Choose one or skip.'}
         </p>
 
@@ -158,7 +158,7 @@ export function StageSelectorPage() {
             style={{ marginTop: '16px' }}
             onClick={handleSave}
           >
-            Save
+            Save selection
           </button>
         )}
         {!isRootStep && currentOptions.length > 0 && (

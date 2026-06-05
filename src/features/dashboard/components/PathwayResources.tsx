@@ -27,7 +27,7 @@ export function PathwayResources({ categories, hasStageSelected, basePath }: Pro
       <p style={{ fontSize: '13px', color: 'var(--wf-gray-600)', marginBottom: '12px' }}>
         {hasStageSelected
           ? 'All resources open within the app.'
-          : 'Set your treatment pathway to see personalised resources from your clinical team.'}
+          : 'Choose which area you\'d like information about to see resources from your clinical team.'}
       </p>
       <WireframeCard>
         {categories.map((cat) => {
