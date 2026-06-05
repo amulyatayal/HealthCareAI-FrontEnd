@@ -101,6 +101,8 @@ function LoginPageWithGoogle({
 }) {
   const [selectedHospital, setSelectedHospital] = useState('')
   const [hospitalCode, setHospitalCode] = useState('')
+  const [codeError, setCodeError] = useState('')
+  const canSignIn = hospitalCode.trim().length > 0
 
   const HOSPITALS = [
     { value: 'barts', label: 'Barts Health NHS Trust' },
@@ -118,22 +120,25 @@ function LoginPageWithGoogle({
     if (selectedHospital) {
       localStorage.setItem('selected_hospital', selectedHospital)
     }
-    if (hospitalCode.trim()) {
-      localStorage.setItem('hospital_code', hospitalCode.trim())
-    }
+    localStorage.setItem('hospital_code', hospitalCode.trim())
   }
 
   const sendAssociation = () => {
-    if (!selectedHospital) return
+    if (!selectedHospital || !hospitalCode.trim()) return
     import('./services/api').then(({ associatePatient }) => {
-      associatePatient(selectedHospital, hospitalCode.trim() || undefined).catch(() => {
+      associatePatient(selectedHospital, hospitalCode.trim()).catch(() => {
         // Non-blocking — backend may not be ready yet
       })
     })
   }
 
   const handleGoogleSuccess = (response: CredentialResponse) => {
+    if (!hospitalCode.trim()) {
+      setCodeError('Access code is required')
+      return
+    }
     if (response.credential) {
+      setCodeError('')
       persistHospitalSelection()
       onGoogleLogin(response.credential)
       sendAssociation()
@@ -253,7 +258,7 @@ function LoginPageWithGoogle({
               </p>
             </div>
 
-            {/* Hospital access code (optional) */}
+            {/* Hospital access code */}
             <div style={{ marginBottom: 20, textAlign: 'left' }}>
               <label style={{
                 display: 'block',
@@ -264,18 +269,22 @@ function LoginPageWithGoogle({
               }}>
                 <KeyRound size={14} style={{ display: 'inline', verticalAlign: '-2px', marginRight: 6 }} />
                 Access code
-                <span style={{ fontWeight: 400, color: '#9ca3af', marginLeft: 4 }}>(optional)</span>
               </label>
               <input
                 type="text"
                 value={hospitalCode}
-                onChange={(e) => setHospitalCode(e.target.value.toUpperCase())}
+                onChange={(e) => {
+                  setHospitalCode(e.target.value.toUpperCase())
+                  if (codeError) setCodeError('')
+                }}
                 placeholder="e.g. BARTS-2026-A1B2"
                 maxLength={30}
+                required
+                aria-invalid={Boolean(codeError)}
                 style={{
                   width: '100%',
                   padding: '12px 14px',
-                  border: '1px solid #e5e7eb',
+                  border: `1px solid ${codeError ? '#f43f5e' : '#e5e7eb'}`,
                   borderRadius: 12,
                   fontSize: 14,
                   background: '#f9fafb',
@@ -287,17 +296,23 @@ function LoginPageWithGoogle({
               />
               <p style={{
                 fontSize: 11,
-                color: '#9ca3af',
+                color: codeError ? '#e11d48' : '#9ca3af',
                 marginTop: 4,
                 marginBottom: 0,
                 lineHeight: 1.4,
               }}>
-                Enter a code if provided by your hospital.
+                {codeError || 'Enter the access code provided by your hospital.'}
               </p>
             </div>
 
             {/* Google Sign-In */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              marginBottom: 4,
+              opacity: canSignIn ? 1 : 0.45,
+              pointerEvents: canSignIn ? 'auto' : 'none',
+            }}>
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={() => console.error('Google Login Failed')}
@@ -308,6 +323,11 @@ function LoginPageWithGoogle({
                 shape="rectangular"
               />
             </div>
+            {!canSignIn && (
+              <p style={{ fontSize: 11, color: '#9ca3af', margin: '0 0 12px', lineHeight: 1.4 }}>
+                Enter your access code to sign in.
+              </p>
+            )}
             <p style={{ fontSize: 11, color: '#9ca3af', margin: '0 0 12px', lineHeight: 1.4 }}>
               We only use your name and email to create your account.
             </p>

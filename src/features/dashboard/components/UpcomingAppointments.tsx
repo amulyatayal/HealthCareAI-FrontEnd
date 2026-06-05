@@ -69,9 +69,9 @@ export function UpcomingAppointments({ basePath }: Props) {
         }
         icon={<Calendar size={22} style={{ color: '#2563eb' }} />}
         iconStyle={{ background: 'linear-gradient(135deg, #eff6ff, #dbeafe)' }}
-        headline="No upcoming appointments"
+        headline="No upcoming reminders"
         subtext="Add one to stay on top of your care schedule"
-        cta={{ label: 'Manage appointments', to: `${basePath}/profile/appointments` }}
+        cta={{ label: 'Manage appointments and reminders', to: `${basePath}/profile/appointments` }}
       />
     )
   }

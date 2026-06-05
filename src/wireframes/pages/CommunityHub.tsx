@@ -94,7 +94,9 @@ export function CommunityHub() {
         </div>
       </WireframeCard>
 
-      <div style={{
+      <div
+        className="wf-card-coming-soon"
+        style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
