@@ -48,6 +48,36 @@ function getAllLocalResources(): PatientResource[] {
   return all
 }
 
+function resourceUrlKey(url: string): string {
+  const trimmed = url.trim()
+  const driveMatch = trimmed.match(/drive\.google\.com\/file\/d\/([^/]+)/i)
+  if (driveMatch) return `drive:${driveMatch[1].toLowerCase()}`
+  try {
+    const u = new URL(trimmed)
+    u.hash = ''
+    return u.toString().toLowerCase()
+  } catch {
+    return trimmed.toLowerCase()
+  }
+}
+
+function dedupeResourcesByUrl(resources: PatientResource[]): PatientResource[] {
+  const byUrl = new Map<string, PatientResource>()
+  for (const r of resources) {
+    const key = resourceUrlKey(r.url)
+    const existing = byUrl.get(key)
+    if (!existing) {
+      byUrl.set(key, r)
+      continue
+    }
+    byUrl.set(key, {
+      ...existing,
+      intents: [...new Set([...existing.intents, ...r.intents])],
+    })
+  }
+  return [...byUrl.values()]
+}
+
 function filterResources(resources: PatientResource[], query: string): PatientResource[] {
   const q = query.toLowerCase().trim()
   if (!q) return resources
@@ -74,8 +104,9 @@ export function SearchResourcesPage() {
       try {
         const data = await getAllResources()
         if (!cancelled && data.resources.length > 0) {
-          setAllResources(data.resources)
-          setCategories(patientResourcesToCategories(data.resources))
+          const deduped = dedupeResourcesByUrl(data.resources)
+          setAllResources(deduped)
+          setCategories(patientResourcesToCategories(deduped))
           setLoading(false)
           return
         }
@@ -83,9 +114,9 @@ export function SearchResourcesPage() {
         /* backend unavailable, fall through */
       }
       if (!cancelled) {
-        const local = getAllLocalResources()
-        setAllResources(local)
-        setCategories(patientResourcesToCategories(local))
+        const deduped = dedupeResourcesByUrl(getAllLocalResources())
+        setAllResources(deduped)
+        setCategories(patientResourcesToCategories(deduped))
         setLoading(false)
       }
     }
@@ -95,7 +126,7 @@ export function SearchResourcesPage() {
 
   useEffect(() => {
     if (!allResources.length) return
-    const matched = filterResources(allResources, query)
+    const matched = dedupeResourcesByUrl(filterResources(allResources, query))
     setCategories(patientResourcesToCategories(matched))
   }, [query, allResources])
 

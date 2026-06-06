@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAdminAuth } from '../AdminAuthContext';
 
 export function AdminLoginPage() {
   const { adminLogin, adminDemoLogin, loginError, isAdminAuthenticated } = useAdminAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -66,7 +67,26 @@ export function AdminLoginPage() {
             />
           </div>
 
-          <button type="submit" className="admin-login-btn" disabled={submitting || !email.trim() || !password.trim()}>
+          <label className="admin-terms-check">
+            <input
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+            />
+            <span>
+              I agree to the{' '}
+              <Link to="/admin/terms" target="_blank" rel="noreferrer">
+                Admin Terms of Service
+              </Link>
+              .
+            </span>
+          </label>
+
+          <button
+            type="submit"
+            className="admin-login-btn"
+            disabled={submitting || !email.trim() || !password.trim() || !acceptedTerms}
+          >
             {submitting ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
@@ -81,6 +101,12 @@ export function AdminLoginPage() {
         >
           Continue in Demo Mode
         </button>
+
+        <p className="admin-login-legal-links">
+          <Link to="/admin/terms" target="_blank" rel="noreferrer">Admin Terms of Service</Link>
+          <span>·</span>
+          <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>
+        </p>
       </div>
     </div>
   );

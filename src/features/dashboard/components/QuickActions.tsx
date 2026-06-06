@@ -1,4 +1,4 @@
-import { Calendar, MessageCircle, TrendingUp, Sparkles } from 'lucide-react'
+import { Calendar, ClipboardList, TrendingUp, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 interface Props {
@@ -22,13 +22,13 @@ export function QuickActions({ basePath }: Props) {
           </div>
         </Link>
 
-        <Link to={`${basePath}/community/chat`} style={{ textDecoration: 'none' }}>
+        <Link to={`${basePath}/health/prom/breast-satisfaction`} style={{ textDecoration: 'none' }}>
           <div className="wf-feature-card">
             <div className="feature-icon purple">
-              <MessageCircle size={24} />
+              <ClipboardList size={24} />
             </div>
-            <div className="feature-title">Community</div>
-            <div className="feature-desc">Connect</div>
+            <div className="feature-title">PROM Questionnaire</div>
+            <div className="feature-desc">Complete survey</div>
           </div>
         </Link>
 

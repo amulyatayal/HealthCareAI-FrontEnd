@@ -5,6 +5,8 @@ import type { AccessCode } from '../../types/admin'
 
 const HOSPITALS = [
   { value: 'barts', label: 'Barts Health NHS Trust' },
+  { value: 'futuredreams', label: 'FutureDreams' },
+  { value: 'uhnm', label: 'University Hospitals of North Midlands NHS Trust (UHNM)' },
   { value: 'apollo', label: 'Apollo Hospitals' },
   { value: 'uclh', label: 'University College London Hospitals' },
   { value: 'guys', label: "Guy's and St Thomas' NHS Trust" },

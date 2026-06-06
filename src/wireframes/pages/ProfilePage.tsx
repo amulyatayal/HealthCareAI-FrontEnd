@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { FileText, Calendar, Settings, Bell, Shield, LogOut, ChevronRight, User, Compass, Share2, Download, Trash2, ToggleLeft, Check, Clock, Search, MessageCircle, UserPlus, AlertTriangle, BookOpen, Database, Mail, Phone } from 'lucide-react'
+import { FileText, Calendar, Settings, Shield, LogOut, ChevronRight, User, Compass, Share2, Download, Trash2, ToggleLeft, Check, Clock, Search, MessageCircle, UserPlus, AlertTriangle, BookOpen, Database, Mail, Phone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
@@ -9,6 +9,15 @@ import { getStoredDataConsent, saveDataConsent, clearDataConsent, type DataConse
 import { getEthicsCommittee, isIndiaJurisdiction } from '../../utils/jurisdiction'
 import { recordDataConsent, withdrawConsent, exportMyData, deleteMyAccount, saveNominee, getNominee } from '../../services/api'
 import type { DataConsentPayload } from '../../services/api'
+import { ComingSoonBadge } from '../../features/dashboard/components/ComingSoonBadge'
+
+interface ProfileMenuItem {
+  icon: typeof Compass
+  title: string
+  subtitle: string
+  to: string
+  comingSoon?: boolean
+}
 
 export function ProfilePage() {
   const base = useBasePath()
@@ -119,11 +128,11 @@ export function ProfilePage() {
     }
   }
 
-  const menuItems = [
+  const menuItems: ProfileMenuItem[] = [
     {
       icon: Compass,
       title: 'Treatment pathway',
-      subtitle: 'Where you are in your journey',
+      subtitle: 'Which area you need more information about',
       to: `${base}/profile/stage`,
     },
     {
@@ -131,10 +140,11 @@ export function ProfilePage() {
       title: 'My Documents',
       subtitle: 'Upload and manage medical records',
       to: `${base}/profile/documents`,
+      comingSoon: true,
     },
     {
       icon: Calendar,
-      title: 'Appointments',
+      title: 'Appointments and reminders',
       subtitle: 'Manage reminders and schedule',
       to: `${base}/profile/appointments`,
     },
@@ -145,22 +155,11 @@ export function ProfilePage() {
       to: `${base}/profile/share`,
     },
     {
-      icon: Bell,
-      title: 'Notifications',
-      subtitle: 'Manage your alerts',
-      to: `${base}/profile`,
-    },
-    {
-      icon: Shield,
-      title: 'Privacy & Security',
-      subtitle: 'Data protection settings',
-      to: `${base}/profile`,
-    },
-    {
       icon: Settings,
       title: 'Settings',
       subtitle: 'App preferences',
       to: `${base}/profile`,
+      comingSoon: true,
     },
   ]
 
@@ -220,27 +219,42 @@ export function ProfilePage() {
         <span className="wf-section-title">Account</span>
       </div>
 
-      {menuItems.map((item) => (
-        <Link 
-          key={item.title} 
-          to={item.to} 
-          style={{ textDecoration: 'none' }}
-        >
+      {menuItems.map((item) => {
+        const row = (
           <div className="wf-list-item" style={{ background: 'white', borderRadius: '12px', marginBottom: '8px' }}>
-            <div 
-              className="wf-icon-btn" 
-              style={{ background: 'var(--wf-rose-50)', color: 'var(--wf-rose-500)' }}
+            <div
+              className={item.comingSoon ? 'wf-card-coming-soon' : undefined}
+              style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}
             >
-              <item.icon size={20} />
+              <div
+                className="wf-icon-btn"
+                style={{ background: 'var(--wf-rose-50)', color: 'var(--wf-rose-500)' }}
+              >
+                <item.icon size={20} />
+              </div>
+              <div className="wf-list-content">
+                <div className="wf-list-title">{item.title}</div>
+                <div className="wf-list-subtitle">{item.subtitle}</div>
+              </div>
             </div>
-            <div className="wf-list-content">
-              <div className="wf-list-title">{item.title}</div>
-              <div className="wf-list-subtitle">{item.subtitle}</div>
-            </div>
-            <ChevronRight size={18} style={{ color: 'var(--wf-gray-400)' }} />
+            {item.comingSoon ? (
+              <ComingSoonBadge />
+            ) : (
+              <ChevronRight size={18} style={{ color: 'var(--wf-gray-400)' }} />
+            )}
           </div>
-        </Link>
-      ))}
+        )
+
+        if (item.comingSoon) {
+          return <div key={item.title}>{row}</div>
+        }
+
+        return (
+          <Link key={item.title} to={item.to} style={{ textDecoration: 'none' }}>
+            {row}
+          </Link>
+        )
+      })}
 
       {/* Navigation Mode Toggle */}
       <div className="wf-section-header">

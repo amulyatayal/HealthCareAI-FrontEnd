@@ -3,28 +3,22 @@ import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
 import { useBasePath } from '../hooks/useBasePath'
+import { ComingSoonBadge } from '../../features/dashboard/components/ComingSoonBadge'
+
+interface CommunityFeature {
+  icon: typeof MessageCircle
+  title: string
+  subtitle: string
+  to: string
+  badge?: string
+  iconColor: string
+  priority?: 'P0'
+  comingSoon?: boolean
+}
 
 export function CommunityHub() {
   const base = useBasePath()
-  const features = [
-    {
-      icon: MessageCircle,
-      title: 'Community Chats',
-      subtitle: 'Connect with others on similar journeys',
-      to: `${base}/community/chat`,
-      badge: '12 new',
-      iconColor: 'purple',
-      priority: 'P0'
-    },
-    {
-      icon: Users,
-      title: 'Buddy System',
-      subtitle: 'Find a support buddy near you',
-      to: `${base}/community/buddy`,
-      badge: '3 requests',
-      iconColor: 'rose',
-      priority: 'P1'
-    },
+  const features: CommunityFeature[] = [
     {
       icon: Calendar,
       title: 'Events',
@@ -32,7 +26,6 @@ export function CommunityHub() {
       to: `${base}/community/events`,
       badge: '2 upcoming',
       iconColor: 'amber',
-      priority: 'P1'
     },
     {
       icon: Heart,
@@ -40,16 +33,30 @@ export function CommunityHub() {
       subtitle: 'Support organizations and helpful links',
       to: `${base}/community/charities`,
       iconColor: 'green',
-      priority: 'P1'
+    },
+    {
+      icon: MessageCircle,
+      title: 'Community Chats',
+      subtitle: 'Connect with others on similar journeys',
+      to: `${base}/community/chat`,
+      iconColor: 'purple',
+      comingSoon: true,
+    },
+    {
+      icon: Users,
+      title: 'Buddy System',
+      subtitle: 'Find a support buddy near you',
+      to: `${base}/community/buddy`,
+      iconColor: 'rose',
+      comingSoon: true,
     },
     {
       icon: ShoppingBag,
       title: 'Marketplace',
       subtitle: 'Buy, sell, or donate items',
       to: `${base}/community/marketplace`,
-      badge: '5 new',
       iconColor: 'blue',
-      priority: 'P1'
+      comingSoon: true,
     },
   ]
 
@@ -63,7 +70,6 @@ export function CommunityHub() {
 
   return (
     <WireframeLayout>
-      {/* Hero section */}
       <WireframeCard className="wf-hero-card" style={{ marginBottom: '20px' }}>
         <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '8px 0' }}>
           <div style={{
@@ -88,12 +94,11 @@ export function CommunityHub() {
         </div>
       </WireframeCard>
 
-      {/* Active members indicator */}
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: 'center',
-        gap: '8px', 
+        gap: '8px',
         marginBottom: '20px',
         padding: '10px 16px',
         background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)',
@@ -104,83 +109,95 @@ export function CommunityHub() {
       }}>
         <Sparkles size={16} />
         <span>247 members online now</span>
-        <span style={{ 
-          width: '8px', 
-          height: '8px', 
-          background: '#22c55e', 
+        <span style={{
+          width: '8px',
+          height: '8px',
+          background: '#22c55e',
           borderRadius: '50%',
           animation: 'pulse 2s infinite',
         }} />
       </div>
 
-      {features.map((feature, index) => (
-        <Link 
-          key={feature.title} 
-          to={feature.to} 
-          style={{ textDecoration: 'none' }}
-        >
-          <WireframeCard 
+      {features.map((feature, index) => {
+        const card = (
+          <WireframeCard
             className={index === 0 ? 'wf-card-accent' : ''}
-            style={{ 
-              transition: 'all 0.2s ease',
-              cursor: 'pointer',
-            }}
+            style={feature.comingSoon ? undefined : { transition: 'all 0.2s ease', cursor: 'pointer' }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{
-                width: '52px',
-                height: '52px',
-                borderRadius: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                ...iconStyles[feature.iconColor],
-              }}>
-                <feature.icon size={24} />
-              </div>
-              <div className="wf-list-content" style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                  <span style={{ 
-                    fontSize: '15px', 
-                    fontWeight: 600, 
-                    color: 'var(--wf-gray-800)' 
-                  }}>
-                    {feature.title}
-                  </span>
-                  {feature.priority === 'P0' && (
+              <div
+                className={feature.comingSoon ? 'wf-card-coming-soon' : undefined}
+                style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}
+              >
+                <div style={{
+                  width: '52px',
+                  height: '52px',
+                  borderRadius: '14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  ...iconStyles[feature.iconColor],
+                }}>
+                  <feature.icon size={24} />
+                </div>
+                <div className="wf-list-content" style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
                     <span style={{
-                      fontSize: '10px',
+                      fontSize: '15px',
                       fontWeight: 600,
-                      padding: '2px 6px',
-                      background: 'linear-gradient(135deg, #f43f5e, #ec4899)',
-                      color: 'white',
-                      borderRadius: '4px',
-                      textTransform: 'uppercase',
+                      color: 'var(--wf-gray-800)',
                     }}>
-                      Popular
+                      {feature.title}
+                    </span>
+                    {feature.priority === 'P0' && (
+                      <span style={{
+                        fontSize: '10px',
+                        fontWeight: 600,
+                        padding: '2px 6px',
+                        background: 'linear-gradient(135deg, #f43f5e, #ec4899)',
+                        color: 'white',
+                        borderRadius: '4px',
+                        textTransform: 'uppercase',
+                      }}>
+                        Popular
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '13px', color: 'var(--wf-gray-500)' }}>
+                    {feature.subtitle}
+                  </div>
+                </div>
+              </div>
+              {feature.comingSoon ? (
+                <ComingSoonBadge />
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {feature.badge && (
+                    <span className="wf-badge wf-badge-success" style={{
+                      fontSize: '11px',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {feature.badge}
                     </span>
                   )}
+                  <ChevronRight size={20} style={{ color: 'var(--wf-gray-300)' }} />
                 </div>
-                <div style={{ fontSize: '13px', color: 'var(--wf-gray-500)' }}>
-                  {feature.subtitle}
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {feature.badge && (
-                  <span className="wf-badge wf-badge-success" style={{ 
-                    fontSize: '11px',
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {feature.badge}
-                  </span>
-                )}
-                <ChevronRight size={20} style={{ color: 'var(--wf-gray-300)' }} />
-              </div>
+              )}
             </div>
           </WireframeCard>
-        </Link>
-      ))}
+        )
+
+        if (feature.comingSoon) {
+          return <div key={feature.title}>{card}</div>
+        }
+
+        return (
+          <Link key={feature.title} to={feature.to} style={{ textDecoration: 'none' }}>
+            {card}
+          </Link>
+        )
+      })}
 
       <style>{`
         @keyframes pulse {

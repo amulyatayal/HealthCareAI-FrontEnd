@@ -30,15 +30,6 @@ function getAllDescendants(stageId: string): string[] {
   return result;
 }
 
-function getAncestors(stageId: string): string[] {
-  const parts = stageId.split('.');
-  const ancestors: string[] = [];
-  for (let i = 1; i < parts.length; i++) {
-    ancestors.push(parts.slice(0, i).join('.'));
-  }
-  return ancestors;
-}
-
 // Individual tree node component (needed so hooks are called properly)
 function TreeNode({
   stageId,
@@ -136,20 +127,6 @@ export function StageTreeSelect({ selectedStageIds, onChange }: Props) {
         for (const id of allIds) newSet.add(id);
       }
 
-      const ancestors = getAncestors(stageId);
-      for (const ancestorId of ancestors) {
-        const anc = stages[ancestorId];
-        if (!anc) continue;
-        const ancDescendants = getAllDescendants(ancestorId);
-        const allChecked = ancDescendants.every((id) => newSet.has(id));
-
-        if (allChecked) {
-          newSet.add(ancestorId);
-        } else {
-          newSet.delete(ancestorId);
-        }
-      }
-
       onChange([...newSet]);
     },
     [selectedSet, getCheckState, onChange]
@@ -159,8 +136,6 @@ export function StageTreeSelect({ selectedStageIds, onChange }: Props) {
     (stageId: string) => {
       const descendants = getAllDescendants(stageId);
       const toRemove = new Set([stageId, ...descendants]);
-      const ancestors = getAncestors(stageId);
-      for (const a of ancestors) toRemove.add(a);
       onChange(selectedStageIds.filter((id) => !toRemove.has(id)));
     },
     [selectedStageIds, onChange]

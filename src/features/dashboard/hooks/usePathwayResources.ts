@@ -4,9 +4,15 @@ import type { PatientResource } from '../../../services/api'
 import type { ResourceCategory } from '../types'
 import {
   FALLBACK_CATEGORIES,
-  DEMO_ADMIN_RESOURCES,
   patientResourcesToCategories,
 } from '../data/fallbackResources'
+
+interface AdminPathwayResource {
+  pathway_stage_ids: string[]
+  description: string
+  intents: string[]
+  resources: { title: string; url: string; type: 'video' | 'pdf' | 'link' }[]
+}
 
 function getPatientStageIds(): string[] {
   try {
@@ -16,8 +22,8 @@ function getPatientStageIds(): string[] {
   return []
 }
 
-function matchResources(
-  adminItems: typeof DEMO_ADMIN_RESOURCES,
+function matchAdminResources(
+  adminItems: AdminPathwayResource[],
   patientStageIds: string[],
 ): PatientResource[] {
   const matched: PatientResource[] = []
@@ -38,7 +44,7 @@ function matchResources(
 }
 
 export function usePathwayResources() {
-  const [resourceCategories, setResourceCategories] = useState<ResourceCategory[]>(FALLBACK_CATEGORIES)
+  const [resourceCategories, setResourceCategories] = useState<ResourceCategory[]>([])
   const [patientStageIds, setPatientStageIds] = useState<string[]>(getPatientStageIds)
   const hasStageSelected = patientStageIds.length > 0
 
@@ -61,27 +67,22 @@ export function usePathwayResources() {
   const stageKey = patientStageIds.join(',')
   useEffect(() => {
     if (!hasStageSelected) {
-      console.info('[PathwayResources] No stage selected, showing defaults')
       setResourceCategories(FALLBACK_CATEGORIES)
       return
     }
+
     let cancelled = false
     const leafStageId = patientStageIds[patientStageIds.length - 1]
 
     async function loadResources() {
-      console.info(`[PathwayResources] Fetching from backend for stage: ${leafStageId}`)
       try {
         const data = await getResourcesForStage(leafStageId)
         if (!cancelled && data.resources.length > 0) {
-          console.info(`[PathwayResources] Backend returned ${data.resources.length} resources`)
           setResourceCategories(patientResourcesToCategories(data.resources))
           return
         }
-        if (!cancelled) {
-          console.info('[PathwayResources] Backend returned empty, trying fallbacks')
-        }
       } catch (err) {
-        console.info('[PathwayResources] Backend unavailable, trying fallbacks', err)
+        console.info('[PathwayResources] Backend unavailable', err)
       }
 
       if (cancelled) return
@@ -89,31 +90,23 @@ export function usePathwayResources() {
       try {
         const adminDataRaw = localStorage.getItem('admin_pathway_resources')
         if (adminDataRaw) {
-          const adminItems = JSON.parse(adminDataRaw)
-          const matched = matchResources(adminItems, patientStageIds)
+          const adminItems = JSON.parse(adminDataRaw) as AdminPathwayResource[]
+          const matched = matchAdminResources(adminItems, patientStageIds)
           if (matched.length > 0) {
-            console.info(`[PathwayResources] Using localStorage admin resources (${matched.length} matched)`)
             setResourceCategories(patientResourcesToCategories(matched))
             return
           }
         }
       } catch { /* ignore */ }
 
-      if (cancelled) return
-
-      const matched = matchResources(DEMO_ADMIN_RESOURCES, patientStageIds)
-      if (matched.length > 0) {
-        console.info(`[PathwayResources] Using demo fallback resources (${matched.length} matched)`)
-        setResourceCategories(patientResourcesToCategories(matched))
-      } else {
-        console.info('[PathwayResources] No resources matched, showing defaults')
-        setResourceCategories(FALLBACK_CATEGORIES)
+      if (!cancelled) {
+        setResourceCategories([])
       }
     }
 
     loadResources()
     return () => { cancelled = true }
-  }, [stageKey])
+  }, [stageKey, hasStageSelected])
 
   return { resourceCategories, hasStageSelected }
 }

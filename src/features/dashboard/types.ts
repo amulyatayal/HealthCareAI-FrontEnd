@@ -1,11 +1,11 @@
-import type { Video, FileText, Brain, UtensilsCrossed, ExternalLink, Dumbbell, Shirt, ClipboardCheck } from 'lucide-react'
+import type { FileText, Brain, UtensilsCrossed, Dumbbell } from 'lucide-react'
 
 export interface ResourceCategory {
   id: string
   title: string
   iconBg: string
   iconColor: string
-  Icon: typeof Video | typeof FileText | typeof Brain | typeof UtensilsCrossed | typeof ExternalLink | typeof Dumbbell | typeof Shirt | typeof ClipboardCheck
+  Icon: typeof FileText | typeof Brain | typeof UtensilsCrossed | typeof Dumbbell
   links: ResourceLink[]
 }
 

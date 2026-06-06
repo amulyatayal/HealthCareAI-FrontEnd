@@ -1,17 +1,19 @@
 import { FileText, ChevronRight } from 'lucide-react'
 import { WireframeCard } from '../../../wireframes/components'
+import { ComingSoonBadge } from './ComingSoonBadge'
 
 export function ClinicalTrials() {
   return (
     <>
       <div className="wf-section-header">
         <span className="wf-section-title">Clinical trials</span>
+        <ComingSoonBadge />
       </div>
-      <WireframeCard>
+      <WireframeCard className="wf-card-coming-soon">
         <p style={{ fontSize: '14px', color: 'var(--wf-gray-700)', marginBottom: '12px' }}>
           Find trials that may be relevant to you.
         </p>
-        <div className="wf-list-item" style={{ cursor: 'pointer' }}>
+        <div className="wf-list-item">
           <div className="wf-list-avatar" style={{ background: 'linear-gradient(135deg, #dbeafe, #eff6ff)' }}>
             <FileText size={20} style={{ color: '#2563eb' }} />
           </div>

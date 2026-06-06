@@ -123,6 +123,120 @@
   background: var(--warm-gray-200);
 }
 
+.admin-terms-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--warm-gray-600);
+  line-height: 1.4;
+}
+
+.admin-terms-check input {
+  margin-top: 2px;
+  accent-color: var(--rose-500);
+}
+
+.admin-terms-check a {
+  color: var(--rose-600);
+  text-decoration: underline;
+}
+
+.admin-login-legal-links {
+  margin: 14px 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--warm-gray-400);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.admin-login-legal-links a {
+  color: var(--warm-gray-500);
+  text-decoration: underline;
+}
+
+.admin-login-legal-links a:hover {
+  color: var(--warm-gray-700);
+}
+
+.admin-terms-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--cream-50) 0%, var(--lavender-50) 50%, var(--rose-50) 100%);
+  font-family: var(--font-sans);
+  padding: 24px;
+}
+
+.admin-terms-card {
+  width: 100%;
+  max-width: 760px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  padding: 32px;
+}
+
+.admin-terms-header {
+  margin-bottom: 20px;
+}
+
+.admin-terms-header h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  color: var(--warm-gray-800);
+}
+
+.admin-terms-header p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--warm-gray-500);
+}
+
+.admin-terms-section {
+  margin-bottom: 14px;
+  padding: 14px;
+  border: 1px solid var(--warm-gray-100);
+  border-radius: 10px;
+  background: var(--cream-50);
+}
+
+.admin-terms-section h2 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  color: var(--warm-gray-800);
+}
+
+.admin-terms-section p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--warm-gray-600);
+}
+
+.admin-terms-footer {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--warm-gray-100);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--warm-gray-400);
+}
+
+.admin-terms-footer a {
+  color: var(--rose-600);
+  text-decoration: underline;
+  font-weight: 600;
+}
+
 /* ================================
    Layout: Sidebar + Content
    ================================ */
@@ -1556,6 +1670,13 @@
   box-shadow: var(--shadow-lg);
   z-index: 300;
   animation: admin-toast-in 0.2s ease-out;
+  max-width: min(400px, calc(100vw - 40px));
+  line-height: 1.45;
+}
+
+.admin-save-toast--error {
+  background: #7f1d1d;
+  color: #fef2f2;
 }
 
 @keyframes admin-toast-in {

@@ -1,14 +1,14 @@
-import { Video, Brain, UtensilsCrossed, Dumbbell, Shirt, ClipboardCheck } from 'lucide-react'
+import { FileText, Brain, UtensilsCrossed, Dumbbell } from 'lucide-react'
 import type { PatientResource } from '../../../services/api'
 import type { ResourceCategory, ResourceLink } from '../types'
 
 const CATEGORY_DEFINITIONS: Omit<ResourceCategory, 'links'>[] = [
   {
     id: 'procedure',
-    title: 'Information about procedure',
+    title: 'Information about Diagnosis and Treatment',
     iconBg: 'linear-gradient(135deg, #dbeafe, #eff6ff)',
     iconColor: '#2563eb',
-    Icon: Video,
+    Icon: FileText,
   },
   {
     id: 'exercises',
@@ -31,20 +31,6 @@ const CATEGORY_DEFINITIONS: Omit<ResourceCategory, 'links'>[] = [
     iconColor: '#16a34a',
     Icon: UtensilsCrossed,
   },
-  {
-    id: 'follow-up-care',
-    title: 'Follow-up care',
-    iconBg: 'linear-gradient(135deg, #e0f2fe, #f0f9ff)',
-    iconColor: '#0891b2',
-    Icon: ClipboardCheck,
-  },
-  {
-    id: 'lifestyle',
-    title: 'Lifestyle',
-    iconBg: 'linear-gradient(135deg, #fce7f3, #fdf2f8)',
-    iconColor: '#db2777',
-    Icon: Shirt,
-  },
 ]
 
 const INTENT_TO_CATEGORY: Record<string, string> = {
@@ -64,9 +50,11 @@ const INTENT_TO_CATEGORY: Record<string, string> = {
   exercise: 'exercises',
   emotional_support: 'mental-health',
   nutrition: 'diet',
-  follow_up_care: 'follow-up-care',
-  clothing: 'lifestyle',
+  follow_up_care: 'procedure',
+  clothing: 'procedure',
 }
+
+const INTENT_PRIORITY: string[] = ['exercise', 'emotional_support', 'nutrition']
 
 export const FALLBACK_CATEGORIES: ResourceCategory[] = [
   {
@@ -156,9 +144,11 @@ export const MOCK_DASHBOARD = {
 }
 
 function resolveCategoryId(intents: string[]): string {
-  for (const intent of intents) {
-    const catId = INTENT_TO_CATEGORY[intent]
-    if (catId) return catId
+  const intentSet = new Set(intents)
+  for (const priorityIntent of INTENT_PRIORITY) {
+    if (intentSet.has(priorityIntent)) {
+      return INTENT_TO_CATEGORY[priorityIntent]
+    }
   }
   return 'procedure'
 }

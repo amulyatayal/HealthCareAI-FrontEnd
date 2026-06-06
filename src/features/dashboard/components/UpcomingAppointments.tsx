@@ -1,17 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Calendar, Bell, ChevronRight, CalendarX } from 'lucide-react'
+import { Calendar, Bell, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeCard } from '../../../wireframes/components'
+import { DashboardEmptyCard } from './DashboardEmptyCard'
 import { getAppointments, type Appointment } from '../../../services/api'
 
 interface Props {
   basePath: string
 }
-
-const MOCK_APPOINTMENTS: Appointment[] = [
-  { id: 'mock-1', title: 'Dr. Thompson - Oncology', date: new Date(Date.now() + 86400000).toISOString().slice(0, 10), time: '10:30', location: 'Room 204', reminder: true, status: 'upcoming' },
-  { id: 'mock-2', title: 'Blood Test', date: new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10), time: '09:00', location: 'Lab B', reminder: false, status: 'upcoming' },
-]
 
 const ACCENT_COLORS = [
   { bg: 'linear-gradient(135deg, #eff6ff, #dbeafe)', icon: '#2563eb' },
@@ -50,10 +46,10 @@ export function UpcomingAppointments({ basePath }: Props) {
       try {
         const data = await getAppointments('upcoming')
         if (!cancelled) {
-          setAppointments(data.appointments?.length ? data.appointments : MOCK_APPOINTMENTS)
+          setAppointments(data.appointments ?? [])
         }
       } catch {
-        if (!cancelled) setAppointments(MOCK_APPOINTMENTS)
+        if (!cancelled) setAppointments([])
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -61,6 +57,24 @@ export function UpcomingAppointments({ basePath }: Props) {
     load()
     return () => { cancelled = true }
   }, [])
+
+  if (!loading && appointments.length === 0) {
+    return (
+      <DashboardEmptyCard
+        title="Upcoming"
+        action={
+          <Link to={`${basePath}/profile/appointments`} style={{ color: 'var(--wf-rose-500)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            View All <ChevronRight size={16} />
+          </Link>
+        }
+        icon={<Calendar size={22} style={{ color: '#2563eb' }} />}
+        iconStyle={{ background: 'linear-gradient(135deg, #eff6ff, #dbeafe)' }}
+        headline="No upcoming appointments"
+        subtext="Add one to stay on top of your care schedule"
+        cta={{ label: 'Manage appointments', to: `${basePath}/profile/appointments` }}
+      />
+    )
+  }
 
   return (
     <WireframeCard
@@ -74,11 +88,6 @@ export function UpcomingAppointments({ basePath }: Props) {
       {loading ? (
         <div style={{ padding: '20px', textAlign: 'center', color: 'var(--wf-gray-400)', fontSize: '14px' }}>
           Loading appointments...
-        </div>
-      ) : appointments.length === 0 ? (
-        <div style={{ padding: '24px', textAlign: 'center', color: 'var(--wf-gray-400)' }}>
-          <CalendarX size={28} strokeWidth={1.4} style={{ marginBottom: '8px' }} />
-          <div style={{ fontSize: '14px' }}>No upcoming appointments</div>
         </div>
       ) : (
         appointments.slice(0, 3).map((appt, idx) => {
