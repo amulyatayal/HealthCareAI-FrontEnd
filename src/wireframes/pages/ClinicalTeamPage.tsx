@@ -35,7 +35,7 @@ export function ClinicalTeamPage() {
   }, [])
 
   return (
-    <WireframeLayout title="My Clinical Team" showBack>
+    <WireframeLayout title="Key Contacts" showBack>
       <div style={{ padding: '16px' }}>
         <p style={{ fontSize: '14px', color: 'var(--wf-gray-600)', marginBottom: '16px' }}>
           Your clinical team, managed by your care team. Contact details are provided for your reference only.
