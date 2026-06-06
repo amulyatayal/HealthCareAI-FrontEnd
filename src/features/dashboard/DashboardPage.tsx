@@ -6,10 +6,9 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useDashboardData } from './hooks/useDashboardData'
 import { usePathwayResources } from './hooks/usePathwayResources'
 import { HeroWelcome } from './components/HeroWelcome'
-import { Notifications } from './components/Notifications'
-import { UpcomingAppointments } from './components/UpcomingAppointments'
+import { ForYouInbox } from './components/ForYouInbox'
+import { DashboardTeasers } from './components/DashboardTeasers'
 import { PathwayResources } from './components/PathwayResources'
-import { QuickActions } from './components/QuickActions'
 
 export function DashboardPage() {
   const basePath = useBasePath()
@@ -42,16 +41,13 @@ export function DashboardPage() {
           dashboard={dashboard}
         />
 
-        <section className="wf-your-week">
-          <Notifications />
-          <UpcomingAppointments basePath={basePath} />
-        </section>
+        <ForYouInbox basePath={basePath} />
 
         <div ref={pathwayResourcesAnchorRef} id="pathway-resources">
           <PathwayResources categories={resourceCategories} hasStageSelected={hasStageSelected} basePath={basePath} />
         </div>
 
-        <QuickActions basePath={basePath} />
+        <DashboardTeasers basePath={basePath} />
       </div>
     </WireframeLayout>
   )
