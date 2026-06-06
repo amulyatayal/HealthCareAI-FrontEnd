@@ -3,6 +3,9 @@ import { Check, TrendingUp, AlertTriangle } from 'lucide-react'
 import { logMood, getMoodHistory, isConsentError } from '../../services/api'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard, MoodSlider } from '../components'
+import { isBasicMoodEntry, normalizeMoodEntry } from '../utils/moodEntries'
+
+type HistoryRow = { id: string; date: string; value: number | null; note: string | null }
 
 export function BasicMoodPage() {
   const [mood, setMood] = useState(5)
@@ -10,30 +13,26 @@ export function BasicMoodPage() {
   const [note, setNote] = useState('')
   const [consentBlocked, setConsentBlocked] = useState(false)
 
-  const [history, setHistory] = useState([
-    { date: 'Today', value: null as number | null, note: null as string | null },
-    { date: 'Yesterday', value: 8, note: 'Feeling positive after a good walk' },
-    { date: 'Jan 18', value: 7, note: null as string | null },
-    { date: 'Jan 17', value: 6, note: 'A bit tired from treatment' },
-    { date: 'Jan 16', value: 8, note: null as string | null },
-    { date: 'Jan 15', value: 9, note: 'Great day with family' },
-    { date: 'Jan 14', value: 7, note: null as string | null },
-  ])
+  const [history, setHistory] = useState<HistoryRow[]>([])
 
   useEffect(() => {
     let cancelled = false
     async function load() {
       try {
         const data = await getMoodHistory(7)
-        if (!cancelled && data.entries.length > 0) {
-          setHistory(data.entries.map((e) => ({
+        if (!cancelled) {
+          const basicEntries = data.entries
+            .map((e) => normalizeMoodEntry(e as Parameters<typeof normalizeMoodEntry>[0]))
+            .filter(isBasicMoodEntry)
+          setHistory(basicEntries.map((e) => ({
+            id: e.entry_id,
             date: new Date(e.timestamp).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' }),
-            value: e.mood_score,
+            value: e.mood_score ?? null,
             note: e.note,
           })))
         }
       } catch {
-        // API not available yet – keep mock data
+        // API not available yet – keep empty history
       }
     }
     load()
@@ -43,7 +42,7 @@ export function BasicMoodPage() {
   const handleSave = async () => {
     setConsentBlocked(false)
     try {
-      await logMood({ mood_score: mood, note: note || undefined })
+      await logMood({ entry_type: 'basic', mood_score: mood, note: note || undefined })
     } catch (err) {
       if (isConsentError(err)) {
         setConsentBlocked(true)
@@ -127,9 +126,14 @@ export function BasicMoodPage() {
           </div>
         }
       >
-        {history.map((entry, i) => (
+        {history.length === 0 ? (
+          <p style={{ fontSize: '14px', color: 'var(--wf-gray-500)', margin: 0, textAlign: 'center' }}>
+            No basic mood entries yet.
+          </p>
+        ) : (
+          history.map((entry, i) => (
           <div 
-            key={entry.date}
+            key={entry.id}
             style={{ 
               padding: '10px 0',
               borderBottom: i < history.length - 1 ? '1px solid var(--wf-gray-100)' : 'none'
@@ -170,7 +174,8 @@ export function BasicMoodPage() {
               </div>
             )}
           </div>
-        ))}
+        ))
+        )}
       </WireframeCard>
     </WireframeLayout>
   )

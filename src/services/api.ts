@@ -52,6 +52,22 @@ function getUserId(): string | null {
   return null;
 }
 
+function formatApiDetail(detail: unknown): string | undefined {
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) {
+    const messages = detail
+      .map((item) => {
+        if (typeof item === 'object' && item !== null && 'msg' in item) {
+          return String((item as { msg: unknown }).msg);
+        }
+        return typeof item === 'string' ? item : undefined;
+      })
+      .filter(Boolean);
+    return messages.length > 0 ? messages.join(' ') : undefined;
+  }
+  return undefined;
+}
+
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const token = getAuthToken();
   const userId = getUserId();
@@ -95,7 +111,10 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
       throw apiErr;
     }
 
-    throw new ApiError(response.status, error.detail || error.message || 'An error occurred');
+    throw new ApiError(
+      response.status,
+      formatApiDetail(error.detail) || error.message || 'An error occurred',
+    );
   }
 
   return response.json();
@@ -303,7 +322,8 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
 
 export interface MoodEntry {
   entry_id: string;
-  mood_score: number;
+  entry_type?: 'basic' | 'advanced';
+  mood_score?: number;
   note: string | null;
   emotions: string[] | null;
   triggers: string[] | null;
@@ -316,7 +336,8 @@ export interface MoodEntry {
 }
 
 export interface MoodLogRequest {
-  mood_score: number;
+  entry_type?: 'basic' | 'advanced';
+  mood_score?: number;
   note?: string;
   emotions?: string[];
   triggers?: string[];

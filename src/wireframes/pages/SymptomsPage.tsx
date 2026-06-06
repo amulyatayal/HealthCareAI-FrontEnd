@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, TrendingUp, TrendingDown, Minus, AlertCircle, AlertTriangle } from 'lucide-react'
+import { Plus, TrendingUp, TrendingDown, Minus, AlertTriangle } from 'lucide-react'
 import { logSymptom, getSymptomHistory, getSymptomTrends, isConsentError } from '../../services/api'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
@@ -291,28 +291,6 @@ export function SymptomsPage() {
         </WireframeCard>
       ))}
 
-      {/* Alert threshold info */}
-      <div 
-        style={{ 
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: '12px',
-          padding: '12px 16px',
-          background: '#fef3c7',
-          borderRadius: '12px',
-          marginTop: '8px'
-        }}
-      >
-        <AlertCircle size={20} style={{ color: '#d97706', flexShrink: 0, marginTop: '2px' }} />
-        <div>
-          <p style={{ fontSize: '13px', color: '#92400e', fontWeight: '500' }}>
-            Symptom alerts enabled
-          </p>
-          <p style={{ fontSize: '12px', color: '#b45309' }}>
-            You'll be notified if any symptom reaches severity 8+
-          </p>
-        </div>
-      </div>
     </WireframeLayout>
   )
 }
