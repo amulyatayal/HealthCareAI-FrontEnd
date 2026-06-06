@@ -16,6 +16,7 @@ import type {
   PatientEvent,
   PatientEventListResponse,
   PatientEventRsvpResponse,
+  ClinicalTeamResponse,
 } from '../types';
 
 const API_BASE_V1 = '/api/v1';
@@ -504,16 +505,9 @@ export async function deleteDocument(id: string): Promise<{ message: string }> {
 // Clinical Team API (v2)
 // ================================
 
-export interface TeamMember {
-  id: string;
-  name: string;
-  role: string;
-  specialty: string | null;
-  avatar_url: string | null;
-  contact_email: string | null;
-}
+export type TeamMember = import('../types').ClinicalTeamMember;
 
-export async function getClinicalTeam(): Promise<{ team_members: TeamMember[] }> {
+export async function getClinicalTeam(): Promise<ClinicalTeamResponse> {
   return fetchJson(`${API_BASE_V2}/clinical-team`);
 }
 
@@ -579,25 +573,6 @@ export async function getShareHistory(): Promise<{ shares: ShareHistoryEntry[] }
   return fetchJson(`${API_BASE_V2}/share/history`);
 }
 
-
-// ================================
-// Clinical Team API (v2) — CRUD
-// ================================
-
-export interface AddTeamMemberRequest {
-  name: string;
-  role: string;
-  specialty?: string;
-  contact_email?: string;
-}
-
-export async function addClinicalTeamMember(data: AddTeamMemberRequest): Promise<TeamMember & { message: string }> {
-  return fetchJson(`${API_BASE_V2}/clinical-team`, { method: 'POST', body: JSON.stringify(data) });
-}
-
-export async function removeClinicalTeamMember(id: string): Promise<{ message: string }> {
-  return fetchJson(`${API_BASE_V2}/clinical-team/${id}`, { method: 'DELETE' });
-}
 
 // ================================
 // GDPR / Data Rights API (v2)

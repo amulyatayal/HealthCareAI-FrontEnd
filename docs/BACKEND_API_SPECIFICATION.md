@@ -26,6 +26,7 @@
 16. [Error Handling Conventions](#16-error-handling-conventions)
 17. [Frontend Feature → API Mapping](#17-frontend-feature--api-mapping)
 18. [NEW – Community Events](#18-new--community-events)
+19. [NEW – Clinician Clinical Team](#19-new--clinician-clinical-team)
 
 ---
 
@@ -978,32 +979,21 @@ Delete a document.
 
 ## 12. NEW – Clinical Team
 
+> **Updated:** Team roster is clinician-managed (Section 19). Patient endpoint is **read-only**. Patient `POST`/`DELETE` on this path are **deprecated** — use admin CRUD at `/api/v2/admin/clinical-team` instead.
+
 ### GET `/api/v2/clinical-team`
 
-Get the patient's assigned clinical team.
+Get the clinical team roster for the patient's associated clinician.
 
 **Used by:** ClinicalTeamPage (Team tab)
 
-**Response:**
-```json
-{
-  "team_members": [
-    {
-      "id": "string",
-      "name": "string",
-      "role": "string (e.g. 'Consultant surgeon', 'CNS', 'Oncologist')",
-      "specialty": "string | null",
-      "avatar_url": "string | null",
-      "contact_email": "string | null",
-      "contact_phone": "string | null"
-    }
-  ]
-}
-```
+**Auth:** `Authorization: Bearer <patient_jwt>` required.
+
+**Response:** See Section 19.2.
 
 **Notes:**
-- If no team is assigned, return `{ "team_members": [] }`.
-- Team assignment is managed by hospital admin or via patient link (`POST /api/v2/profile/link`).
+- Scoped to `PatientProfiles.clinician_id` (after `POST /api/v2/me/associate`); not filtered by `X-Hospital-Id`.
+- If not associated or no roster, return `{ "team_members": [], "total_count": 0, "clinician_id": null }`.
 
 ---
 
@@ -1430,7 +1420,9 @@ Upload a document (multipart/form-data).
 - 422: `{ "detail": "Invalid file type" }` or `{ "detail": "Virus detected" }`
 - 409: `{ "detail": "Storage limit reached", "current_bytes": 104857600, "limit_bytes": 104857600 }`
 
-### POST `/api/v2/clinical-team`
+### POST `/api/v2/clinical-team` — DEPRECATED
+
+> **Deprecated:** Replaced by admin `POST /api/v2/admin/clinical-team` (Section 19). Patient self-report is no longer supported.
 
 Add a self-reported clinical team member.
 
@@ -1457,7 +1449,9 @@ Add a self-reported clinical team member.
 }
 ```
 
-### DELETE `/api/v2/clinical-team/{id}`
+### DELETE `/api/v2/clinical-team/{id}` — DEPRECATED
+
+> **Deprecated:** Replaced by admin `DELETE /api/v2/admin/clinical-team/{id}` (Section 19).
 
 Remove a clinical team member.
 
@@ -1527,7 +1521,11 @@ All API errors should follow this format:
 | **Upload document** | DocumentsPage | `POST /api/v2/documents/upload` | ❌ New |
 | **Download document** | DocumentsPage | `GET /api/v2/documents/{id}/download` | ❌ New |
 | **Delete document** | DocumentsPage | `DELETE /api/v2/documents/{id}` | ❌ New |
-| **Clinical team** | ClinicalTeamPage | `GET /api/v2/clinical-team` | ❌ New |
+| **Clinical team** | ClinicalTeamPage | `GET /api/v2/clinical-team` | ❌ New (read-only, Section 19) |
+| **Admin clinical team list** | AdminClinicalTeamPage | `GET /api/v2/admin/clinical-team` | ❌ New |
+| **Add team member** | AdminClinicalTeamPage | `POST /api/v2/admin/clinical-team` | ❌ New |
+| **Update team member** | AdminClinicalTeamPage | `PUT /api/v2/admin/clinical-team/{id}` | ❌ New |
+| **Remove team member** | AdminClinicalTeamPage | `DELETE /api/v2/admin/clinical-team/{id}` | ❌ New |
 | **Share data** | ShareDataPage | `POST /api/v2/share-to-clinician` | ❌ New |
 | **Log test result** | TestsPage | `POST /api/v2/tests/results` | ❌ New |
 | **Test history** | TestsPage | `GET /api/v2/tests/results` | ❌ New |
@@ -1789,6 +1787,141 @@ Remove RSVP.
 
 ---
 
+## 19. NEW – Clinician Clinical Team
+
+Clinician-managed care team roster. Admin CRUD; patient read-only on Team tab.
+
+**Used by:** AdminClinicalTeamPage (`/admin/clinical-team`), ClinicalTeamPage (`/team`)
+
+**Base paths:** Admin `/api/v2/admin/clinical-team` · Patient `/api/v2/clinical-team` (GET only)
+
+### Scoping
+
+| Topic | Backend behavior |
+|-------|------------------|
+| **Ownership** | Each team member belongs to one `clinician_id` (admin JWT `sub`) |
+| **Admin CRUD** | Clinician manages only their own roster |
+| **Patient GET** | Returns roster for `PatientProfiles.clinician_id` after associate; **not** filtered by `X-Hospital-Id` |
+| **Patient write** | No patient POST/PUT/DELETE — roster is clinician-managed only |
+
+**Auth:**
+- Admin: `Authorization: Bearer <admin_token>`
+- Patient: `Authorization: Bearer <patient_jwt>` required for GET
+
+**Prerequisites:** Patient must be associated with a clinician (`POST /api/v2/me/associate`) or team list is empty.
+
+**Out of scope (v1):** Hospital-wide team directory, patient self-reporting, avatar upload, linking members to user accounts.
+
+### Team member object (response)
+
+```json
+{
+  "id": "uuid",
+  "clinician_id": "string",
+  "name": "string",
+  "role": "string",
+  "specialty": "string | null",
+  "contact_email": "string | null",
+  "contact_phone": "string | null",
+  "avatar_url": "string | null",
+  "display_order": "number (default 0)",
+  "created_at": "ISO8601",
+  "updated_at": "ISO8601"
+}
+```
+
+**Sorting:** `display_order` ASC, then `name` ASC.
+
+---
+
+### 19.1 Admin Clinical Team
+
+**Base path:** `/api/v2/admin/clinical-team`
+
+#### GET `/api/v2/admin/clinical-team`
+
+List this clinician's team members.
+
+**Query params (optional):** `limit` (default `50`, max `200`), `offset` (default `0`)
+
+**Response:**
+```json
+{
+  "team_members": ["(Team member object)"],
+  "total_count": "number"
+}
+```
+
+#### POST `/api/v2/admin/clinical-team`
+
+Add a team member.
+
+**Request:**
+```json
+{
+  "name": "string (required)",
+  "role": "string (required)",
+  "specialty": "string | null (optional)",
+  "contact_email": "string | null (optional)",
+  "contact_phone": "string | null (optional)",
+  "display_order": "number (optional)"
+}
+```
+
+**Response:** `201`
+```json
+{
+  "id": "uuid",
+  "message": "Team member added",
+  "team_member": "(Team member object)"
+}
+```
+
+#### PUT `/api/v2/admin/clinical-team/{id}`
+
+Update team member. Same request shape as POST; all fields optional (partial update).
+
+**Response:**
+```json
+{
+  "message": "Team member updated",
+  "team_member": "(Team member object)"
+}
+```
+
+#### DELETE `/api/v2/admin/clinical-team/{id}`
+
+Remove team member (hard delete).
+
+**Response:** `{ "message": "Team member removed" }`
+
+**Errors:** `404` — wrong id or member belongs to another clinician · `400` — invalid/placeholder id
+
+---
+
+### 19.2 Patient Clinical Team (read-only)
+
+**Base path:** `/api/v2/clinical-team`
+
+#### GET `/api/v2/clinical-team`
+
+Get the care team roster for the patient's associated clinician.
+
+**Auth:** `Authorization: Bearer <patient_jwt>` required.
+
+**Response:**
+```json
+{
+  "team_members": ["(Team member object)"],
+  "total_count": "number",
+  "clinician_id": "string | null"
+}
+```
+
+**Errors:** Standard 401/404 patterns from Section 16. Empty list when patient has no clinician association.
+
+---
+
 ## Summary of New Endpoints Required
 
 | # | Method | Path | Priority |
@@ -1810,7 +1943,7 @@ Remove RSVP.
 | 15 | POST | `/api/v2/documents/upload` | High |
 | 16 | GET | `/api/v2/documents/{id}/download` | Medium |
 | 17 | DELETE | `/api/v2/documents/{id}` | Medium |
-| 18 | GET | `/api/v2/clinical-team` | High |
+| 18 | GET | `/api/v2/clinical-team` | High (read-only, Section 19) |
 | 19 | POST | `/api/v2/share-to-clinician` | High |
 | 20 | POST | `/api/v2/tests/results` | Medium |
 | 21 | GET | `/api/v2/tests/results` | Medium |
@@ -1827,5 +1960,11 @@ Remove RSVP.
 | 32 | GET | `/api/v2/events/{id}` | Medium ✅ |
 | 33 | POST | `/api/v2/events/{id}/rsvp` | Medium ✅ |
 | 34 | DELETE | `/api/v2/events/{id}/rsvp` | Medium ✅ |
+| 35 | GET | `/api/v2/admin/clinical-team` | Medium |
+| 36 | POST | `/api/v2/admin/clinical-team` | Medium |
+| 37 | PUT | `/api/v2/admin/clinical-team/{id}` | Medium |
+| 38 | DELETE | `/api/v2/admin/clinical-team/{id}` | Medium |
 
-**Total: 34 new endpoints** (15 High priority, 15 Medium, 4 Low)
+**Total: 38 new endpoints** (15 High priority, 19 Medium, 4 Low)
+
+**Deprecated:** Patient `POST` / `DELETE` on `/api/v2/clinical-team` (replaced by admin CRUD, Section 19).

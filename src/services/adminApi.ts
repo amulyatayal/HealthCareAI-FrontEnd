@@ -13,6 +13,11 @@ import type {
   EventUpdateRequest,
   EventCreateResponse,
   EventUpdateResponse,
+  ClinicalTeamListResponse,
+  ClinicalTeamMemberCreateRequest,
+  ClinicalTeamMemberUpdateRequest,
+  ClinicalTeamMemberCreateResponse,
+  ClinicalTeamMemberUpdateResponse,
 } from '../types/admin';
 
 const API_BASE = '/api/v2/admin';
@@ -184,6 +189,48 @@ export async function updateEvent(id: string, data: EventUpdateRequest): Promise
 
 export async function cancelEvent(id: string): Promise<{ message: string }> {
   return fetchAdminJson(`${API_BASE}/events/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  });
+}
+
+// Clinical Team CRUD
+export interface GetAdminClinicalTeamParams {
+  limit?: number;
+  offset?: number;
+}
+
+export async function getAdminClinicalTeam(
+  params: GetAdminClinicalTeamParams = {}
+): Promise<ClinicalTeamListResponse> {
+  const { limit = 50, offset = 0 } = params;
+  const query = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+  return fetchAdminJson(`${API_BASE}/clinical-team?${query}`);
+}
+
+export async function createClinicalTeamMember(
+  data: ClinicalTeamMemberCreateRequest
+): Promise<ClinicalTeamMemberCreateResponse> {
+  return fetchAdminJson(`${API_BASE}/clinical-team`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateClinicalTeamMember(
+  id: string,
+  data: ClinicalTeamMemberUpdateRequest
+): Promise<ClinicalTeamMemberUpdateResponse> {
+  return fetchAdminJson(`${API_BASE}/clinical-team/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteClinicalTeamMember(id: string): Promise<{ message: string }> {
+  return fetchAdminJson(`${API_BASE}/clinical-team/${encodeURIComponent(id)}`, {
     method: 'DELETE',
   });
 }

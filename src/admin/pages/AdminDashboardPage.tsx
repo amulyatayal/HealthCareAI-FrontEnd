@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FolderOpen, Share2, KeyRound, MessageSquare, Calendar, Bell } from 'lucide-react';
+import { FolderOpen, Share2, KeyRound, MessageSquare, Calendar, Bell, Users } from 'lucide-react';
 
 const CARDS = [
   {
@@ -18,6 +18,15 @@ const CARDS = [
     iconBg: 'linear-gradient(135deg, var(--rose-100), var(--rose-50))',
     iconColor: 'var(--rose-400)',
     path: '/admin/access-codes',
+    enabled: true,
+  },
+  {
+    title: 'Clinical Team',
+    description: 'Manage the care team roster shown to patients associated with you.',
+    icon: Users,
+    iconBg: 'linear-gradient(135deg, #e8eaf6, #c5cae9)',
+    iconColor: '#3949ab',
+    path: '/admin/clinical-team',
     enabled: true,
   },
   {

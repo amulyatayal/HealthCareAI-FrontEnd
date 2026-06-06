@@ -9,6 +9,7 @@ import { AdminCommunityPage } from './pages/AdminCommunityPage';
 import { AdminEventsPage } from './pages/AdminEventsPage';
 import { AdminNotificationsPage } from './pages/AdminNotificationsPage';
 import { AdminSharedDataPage } from './pages/AdminSharedDataPage';
+import { AdminClinicalTeamPage } from './pages/AdminClinicalTeamPage';
 import { AdminTermsPage } from './pages/AdminTermsPage';
 import './admin.css';
 
@@ -30,6 +31,7 @@ export function AdminApp() {
                 <Route path="/events" element={<AdminEventsPage />} />
                 <Route path="/notifications" element={<AdminNotificationsPage />} />
                 <Route path="/shared-data" element={<AdminSharedDataPage />} />
+                <Route path="/clinical-team" element={<AdminClinicalTeamPage />} />
               </Routes>
             </AdminLayout>
           }

@@ -100,15 +100,13 @@ DELETE /api/v2/consent/{consent_type}
 - Preserve existing data (do not delete on withdrawal)
 - Return 403 with `consent_required` on subsequent requests to disabled features
 
-### 3.3 Clinical Team CRUD
+### 3.3 Clinical Team CRUD — DEPRECATED
+
+> **Replaced by Section 3.7.** Patient self-report POST/DELETE is no longer used. See Section 19 in BACKEND_API_SPECIFICATION.md.
 
 ```
-POST   /api/v2/clinical-team
-  Request:  { name, role, specialty?, contact_email? }
-  Response: { id, name, role, specialty, contact_email, message }
-
-DELETE /api/v2/clinical-team/{id}
-  Response: { message: "Team member removed" }
+POST   /api/v2/clinical-team          (DEPRECATED)
+DELETE /api/v2/clinical-team/{id}    (DEPRECATED)
 ```
 
 ### 3.4 Activity Audit Log
@@ -195,6 +193,42 @@ DELETE /api/v2/events/{id}/rsvp
 **Prerequisites:** Patient associated via `POST /api/v2/me/associate`; admin JWT `sub` matches event creator.
 
 **Out of scope (v1):** patient-proposed events, calendar dot API, capacity/waitlists, reminders, hospital-wide feed via X-Hospital-Id only, frontend wiring (separate PR).
+
+### 3.7 Clinician Clinical Team (Admin + Patient read-only)
+
+**Scoping:** Clinician-scoped (`clinician_id` from admin JWT `sub`; patient reads via `PatientProfiles.clinician_id` after associate). **Not** hospital-filtered via `X-Hospital-Id`.
+
+**Admin** — `Authorization: Bearer <admin_token>`:
+
+```
+GET    /api/v2/admin/clinical-team?limit=50&offset=0
+  Response: { team_members: [TeamMember], total_count }
+
+POST   /api/v2/admin/clinical-team
+  Request:  { name, role, specialty?, contact_email?, contact_phone?, display_order? }
+  Response: 201 { id, message, team_member }
+
+PUT    /api/v2/admin/clinical-team/{id}
+  Request:  partial update (same fields as POST, all optional)
+  Response: { message, team_member }
+
+DELETE /api/v2/admin/clinical-team/{id}
+  Response: { message: "Team member removed" }
+```
+
+**Patient** — `Authorization: Bearer <patient_jwt>` required; **GET only**:
+
+```
+GET    /api/v2/clinical-team
+  Response: { team_members: [TeamMember], total_count, clinician_id }
+  Notes:   empty when not associated; sort display_order ASC, name ASC
+```
+
+**Team member:** `id`, `clinician_id`, `name`, `role`, `specialty`, `contact_email`, `contact_phone`, `avatar_url`, `display_order`, `created_at`, `updated_at`.
+
+**Replaces:** patient self-report `POST`/`DELETE` on `/api/v2/clinical-team` (Section 3.3).
+
+**Prerequisites:** Patient associated via `POST /api/v2/me/associate`.
 
 ---
 

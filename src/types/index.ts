@@ -221,3 +221,24 @@ export interface PatientEventRsvpResponse {
   event: PatientEvent;
 }
 
+// Clinical Team (patient read-only)
+export interface ClinicalTeamMember {
+  id: string;
+  clinician_id?: string;
+  name: string;
+  role: string;
+  specialty: string | null;
+  avatar_url: string | null;
+  contact_email: string | null;
+  contact_phone?: string | null;
+  display_order?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ClinicalTeamResponse {
+  team_members: ClinicalTeamMember[];
+  total_count: number;
+  clinician_id: string | null;
+}
+
