@@ -2699,6 +2699,44 @@
   font-family: var(--font-sans);
 }
 
+.admin-ev-card--cancelled {
+  opacity: 0.65;
+}
+
+.admin-ev-card--cancelled .admin-ev-card-title {
+  text-decoration: line-through;
+  color: var(--warm-gray-500);
+}
+
+.admin-ev-status-cancelled {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--warm-gray-600);
+  background: var(--warm-gray-100);
+  border-radius: 4px;
+}
+
+.admin-ev-section-title {
+  margin: 32px 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--warm-gray-600);
+}
+
+.admin-ev-empty--compact {
+  padding: 24px 16px;
+  margin-bottom: 8px;
+}
+
+.admin-ev-empty--compact h3 {
+  font-size: 16px;
+}
+
 /* ================================
    Notifications Page
    ================================ */

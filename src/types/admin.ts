@@ -133,3 +133,50 @@ export interface NotificationCreateRequest {
   message: string;
   priority: NotificationPriority;
 }
+
+// Community Events
+export type EventType = 'wellness' | 'support' | 'education';
+export type EventStatus = 'published' | 'cancelled';
+
+export interface AdminEventApi {
+  id: string;
+  hospital_id: string | null;
+  title: string;
+  starts_at: string;
+  location: string | null;
+  type: EventType;
+  is_virtual: boolean;
+  description: string | null;
+  status: EventStatus;
+  attendee_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminEventListResponse {
+  events: AdminEventApi[];
+  total_count: number;
+}
+
+export interface EventCreateRequest {
+  title: string;
+  date: string;
+  time: string;
+  location?: string | null;
+  type?: EventType;
+  is_virtual?: boolean;
+  description?: string | null;
+}
+
+export type EventUpdateRequest = Partial<EventCreateRequest>;
+
+export interface EventCreateResponse {
+  id: string;
+  message: string;
+  event: AdminEventApi;
+}
+
+export interface EventUpdateResponse {
+  message: string;
+  event: AdminEventApi;
+}

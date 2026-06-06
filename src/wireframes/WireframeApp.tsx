@@ -59,7 +59,7 @@ export function WireframeApp() {
       <Route path="/community/chat" element={<CommunityChatPage />} />
       <Route path="/community/chat/:roomId" element={<CommunityChatPage />} />
       <Route path="/community/buddy" element={<BuddyPage />} />
-      <Route path="/community/events" element={<EventsPage />} />
+      <Route path="/community/events" element={<GuestGate featureName="community events"><EventsPage /></GuestGate>} />
       <Route path="/community/charities" element={<CharitiesPage />} />
       <Route path="/community/marketplace" element={<MarketplacePage />} />
       </Routes>

@@ -25,6 +25,7 @@
 15. [NEW – GDPR / Data Rights](#15-new--gdpr--data-rights)
 16. [Error Handling Conventions](#16-error-handling-conventions)
 17. [Frontend Feature → API Mapping](#17-frontend-feature--api-mapping)
+18. [NEW – Community Events](#18-new--community-events)
 
 ---
 
@@ -1535,6 +1536,256 @@ All API errors should follow this format:
 | **Get consent** | PrivacySettings | `GET /api/v2/consent` | ❌ New |
 | **Export data** | ProfilePage | `GET /api/v2/me/export` | ❌ New |
 | **Delete account** | ProfilePage | `DELETE /api/v2/me` | ❌ New |
+| **Admin events list** | AdminEventsPage | `GET /api/v2/admin/events` | ✅ Exists |
+| **Create event** | AdminEventsPage | `POST /api/v2/admin/events` | ✅ Exists |
+| **Update event** | AdminEventsPage | `PUT /api/v2/admin/events/{id}` | ✅ Exists |
+| **Cancel event** | AdminEventsPage | `DELETE /api/v2/admin/events/{id}` | ✅ Exists |
+| **List events** | EventsPage | `GET /api/v2/events` | ✅ Exists |
+| **Event detail** | EventsPage | `GET /api/v2/events/{id}` | ✅ Exists |
+| **RSVP to event** | EventsPage | `POST /api/v2/events/{id}/rsvp` | ✅ Exists |
+| **Cancel RSVP** | EventsPage | `DELETE /api/v2/events/{id}/rsvp` | ✅ Exists |
+
+---
+
+## 18. NEW – Community Events
+
+**Status:** ✅ Implemented (OpenAPI tag: Community Events / Admin Portal — `http://localhost:8000/docs`)
+
+Clinician-scoped community events with admin CRUD and patient read + RSVP.
+
+**Used by:** AdminEventsPage (`/admin/events`), EventsPage (`/community/events`), CommunityHub (optional upcoming count)
+
+**Base paths:** Admin `/api/v2/admin/events` · Patient `/api/v2/events`
+
+### Scoping (implemented behavior)
+
+| Topic | Backend behavior |
+|-------|------------------|
+| **Admin list** | Clinician-scoped via JWT `sub` — admin sees only events they created |
+| **Patient list** | Events from `PatientProfiles.clinician_id` (after `POST /api/v2/me/associate`); **not** filtered by `X-Hospital-Id` |
+| **`hospital_id` on Event** | Metadata from admin JWT (e.g. `"barts"` or `null`); not used for filtering |
+| **Event id in JSON** | Field is `id` (UUID). Use in URLs: `/events/{id}/rsvp` |
+| **`starts_at`** | Server combines admin `date` + `time` as UTC ISO8601 with `Z` suffix |
+| **Browse vs RSVP** | Patient `GET` requires auth only. RSVP requires `community` consent (`choices.community: true`) |
+
+**Auth:**
+- Admin: `Authorization: Bearer <admin_token>` (same as other `/api/v2/admin/*` routes)
+- Patient: `Authorization: Bearer <patient_jwt>` required for `GET` and RSVP. Optional `X-User-ID`, `X-Hospital-Id` headers are accepted but **not used** for event filtering.
+
+**Prerequisites:**
+- Patient must be associated with a clinician (`POST /api/v2/me/associate`) or event lists return empty / 404 on detail
+- Admin token `sub` must match the clinician who created the events
+
+**Out of scope (v1):** Patient-proposed events (FAB on EventsPage), calendar dot API, capacity limits / waitlists, email/push reminders, forum/buddy integration, hospital-wide event feed via `X-Hospital-Id` only.
+
+### Event object (response)
+
+```json
+{
+  "id": "uuid",
+  "hospital_id": "barts | null",
+  "title": "string",
+  "starts_at": "2026-07-01T14:30:00Z",
+  "location": "string | null",
+  "type": "wellness | support | education",
+  "is_virtual": "boolean",
+  "description": "string | null",
+  "status": "published | cancelled",
+  "attendee_count": "number",
+  "user_has_rsvp": "boolean (patient endpoints only; omitted or null on admin list)",
+  "created_at": "ISO8601",
+  "updated_at": "ISO8601"
+}
+```
+
+**Notes:**
+- `attendee_count` is the count of active RSVPs (replaces mock `attendees` in AdminEventsPage).
+- Admin `DELETE` sets `status` to `cancelled` (soft-delete); cancelled events are excluded from patient upcoming/past lists but remain visible in admin list.
+- JSON field names use snake_case (`is_virtual`, `attendee_count`, `user_has_rsvp`).
+
+### RSVP record (internal)
+
+```json
+{
+  "event_id": "string",
+  "user_id": "string",
+  "rsvp_at": "ISO8601"
+}
+```
+
+Unique constraint on `(event_id, user_id)`.
+
+---
+
+### 18.1 Admin Events
+
+**Base path:** `/api/v2/admin/events`
+
+#### GET `/api/v2/admin/events`
+
+List this clinician's events (including cancelled).
+
+**Query params:**
+
+| Param | Values | Default |
+|-------|--------|---------|
+| `status` | `all` \| `published` \| `cancelled` | `all` |
+| `limit` | number | `50` (max `200`) |
+| `offset` | number | `0` |
+
+**Response:**
+```json
+{
+  "events": ["(Event object without user_has_rsvp)"],
+  "total_count": "number"
+}
+```
+
+**Errors:** `404` — wrong id or event belongs to another clinician · `400` — invalid/placeholder id (e.g. `undefined`)
+
+#### POST `/api/v2/admin/events`
+
+Create event.
+
+**Request:**
+```json
+{
+  "title": "string (required)",
+  "date": "YYYY-MM-DD (required)",
+  "time": "HH:MM 24h (required)",
+  "location": "string | null (optional)",
+  "type": "wellness | support | education (default wellness)",
+  "is_virtual": "boolean (default false)",
+  "description": "string | null (optional)"
+}
+```
+
+**Response:** `201`
+```json
+{
+  "id": "uuid",
+  "message": "Event created",
+  "event": "(Event object)"
+}
+```
+
+#### PUT `/api/v2/admin/events/{id}`
+
+Update event. Same request shape as POST; all fields optional (partial update).
+
+**Schedule rule:** If updating date/time, **both** `date` and `time` must be sent together.
+
+**Response:**
+```json
+{
+  "message": "Event updated",
+  "event": "(Event object)"
+}
+```
+
+#### DELETE `/api/v2/admin/events/{id}`
+
+Soft-cancel event (`status → cancelled`). Preserves RSVP history.
+
+**Response:** `{ "message": "Event cancelled" }`
+
+---
+
+### 18.2 Patient Events & RSVP
+
+**Base path:** `/api/v2/events`
+
+#### GET `/api/v2/events`
+
+List published events for the patient's associated clinician.
+
+**Auth:** `Authorization: Bearer <patient_jwt>` required.
+
+**Query params:**
+
+| Param | Values | Default | Purpose |
+|-------|--------|---------|---------|
+| `when` | `upcoming` \| `past` | `upcoming` | Future vs history (`past` = all past published events) |
+| `type` | `wellness` \| `support` \| `education` | all | Optional filter |
+| `limit` | number | 50 | Pagination |
+| `offset` | number | 0 | Pagination |
+
+**Sorting:** `starts_at` ASC for upcoming, DESC for past.
+
+**Filtering:** Exclude `status: cancelled`. Scope to patient's associated clinician (not `X-Hospital-Id`).
+
+**Response:**
+```json
+{
+  "events": ["(Event object with user_has_rsvp)"],
+  "total_count": "number"
+}
+```
+
+**Frontend mapping:**
+
+| UI tab | API call |
+|--------|----------|
+| Upcoming | `GET /api/v2/events?when=upcoming` |
+| My Events | Same response, filter client-side where `user_has_rsvp === true` |
+| History (future UI) | `GET /api/v2/events?when=past` |
+
+**Errors:** `404` — no clinician association, wrong event, or cancelled/unpublished for detail
+
+#### GET `/api/v2/events/{id}`
+
+Single event detail (for "View Details" on My Events tab).
+
+**Response:** `{ "event": "(Event object with user_has_rsvp)" }`
+
+#### POST `/api/v2/events/{id}/rsvp`
+
+RSVP the authenticated user.
+
+**Consent:** Requires `community` consent. No new consent API — use existing endpoints:
+- Grant: `POST /api/v2/consent/data` with `choices.community: true`
+- Check: `GET /api/v2/consent` → `data_consent.choices.community`
+- On `403`, prompt user to enable community in Settings.
+
+**Rules:**
+- Event must exist, be `published`, and have `starts_at` in the future
+- Idempotent: second POST returns `200` with existing RSVP (no duplicate)
+
+**Response:**
+```json
+{
+  "message": "RSVP confirmed",
+  "event": "(Event object, user_has_rsvp: true, updated attendee_count)"
+}
+```
+
+**Errors:**
+- `422` — RSVP to past event
+- `403` — community consent missing:
+```json
+{
+  "detail": {
+    "message": "Community consent is required to RSVP to events...",
+    "consent_type": "community"
+  }
+}
+```
+
+#### DELETE `/api/v2/events/{id}/rsvp`
+
+Remove RSVP.
+
+**Rules:** Idempotent — deleting when not RSVP'd returns `200`.
+
+**Response:**
+```json
+{
+  "message": "RSVP removed",
+  "event": "(Event object, user_has_rsvp: false)"
+}
+```
+
+**Errors:** Standard 404 patterns from Section 16.
 
 ---
 
@@ -1568,5 +1819,13 @@ All API errors should follow this format:
 | 24 | GET | `/api/v2/consent` | High (GDPR) |
 | 25 | GET | `/api/v2/me/export` | High (GDPR) |
 | 26 | DELETE | `/api/v2/me` | High (GDPR) |
+| 27 | GET | `/api/v2/admin/events` | Medium ✅ |
+| 28 | POST | `/api/v2/admin/events` | Medium ✅ |
+| 29 | PUT | `/api/v2/admin/events/{id}` | Medium ✅ |
+| 30 | DELETE | `/api/v2/admin/events/{id}` | Medium ✅ |
+| 31 | GET | `/api/v2/events` | Medium ✅ |
+| 32 | GET | `/api/v2/events/{id}` | Medium ✅ |
+| 33 | POST | `/api/v2/events/{id}/rsvp` | Medium ✅ |
+| 34 | DELETE | `/api/v2/events/{id}/rsvp` | Medium ✅ |
 
-**Total: 26 new endpoints** (15 High priority, 7 Medium, 4 Low)
+**Total: 34 new endpoints** (15 High priority, 15 Medium, 4 Low)

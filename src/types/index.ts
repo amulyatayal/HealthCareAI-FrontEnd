@@ -192,3 +192,32 @@ export interface IndexesResponse {
   indexes: IndexInfo[];
 }
 
+// Community Events (patient portal)
+export type PatientEventType = 'wellness' | 'support' | 'education';
+
+export interface PatientEvent {
+  id: string;
+  hospital_id: string | null;
+  title: string;
+  starts_at: string;
+  location: string | null;
+  type: PatientEventType;
+  is_virtual: boolean;
+  description: string | null;
+  status: 'published' | 'cancelled';
+  attendee_count: number;
+  user_has_rsvp: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PatientEventListResponse {
+  events: PatientEvent[];
+  total_count: number;
+}
+
+export interface PatientEventRsvpResponse {
+  message: string;
+  event: PatientEvent;
+}
+

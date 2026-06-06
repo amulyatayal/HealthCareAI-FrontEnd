@@ -12,7 +12,10 @@ import type {
   ChatHistory,
   FeedbackRequest,
   HealthStatus,
-  IndexesResponse
+  IndexesResponse,
+  PatientEvent,
+  PatientEventListResponse,
+  PatientEventRsvpResponse,
 } from '../types';
 
 const API_BASE_V1 = '/api/v1';
@@ -54,6 +57,11 @@ function getUserId(): string | null {
 
 function formatApiDetail(detail: unknown): string | undefined {
   if (typeof detail === 'string') return detail;
+  if (detail != null && typeof detail === 'object' && !Array.isArray(detail)) {
+    if ('message' in detail && typeof (detail as { message: unknown }).message === 'string') {
+      return (detail as { message: string }).message;
+    }
+  }
   if (Array.isArray(detail)) {
     const messages = detail
       .map((item) => {
@@ -64,6 +72,16 @@ function formatApiDetail(detail: unknown): string | undefined {
       })
       .filter(Boolean);
     return messages.length > 0 ? messages.join(' ') : undefined;
+  }
+  return undefined;
+}
+
+function consentTypeFromError(error: { consent_type?: string; detail?: unknown }): string | undefined {
+  if (typeof error.consent_type === 'string') return error.consent_type;
+  const detail = error.detail;
+  if (detail != null && typeof detail === 'object' && !Array.isArray(detail) && 'consent_type' in detail) {
+    const ct = (detail as { consent_type: unknown }).consent_type;
+    return typeof ct === 'string' ? ct : undefined;
   }
   return undefined;
 }
@@ -105,9 +123,13 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
     }
 
     // 403 — consent required or guest blocked
-    if (response.status === 403 && error.consent_type) {
-      const apiErr = new ApiError(response.status, error.message || 'Consent required');
-      (apiErr as ApiErrorWithConsent).consentType = error.consent_type;
+    const consentType = consentTypeFromError(error);
+    if (response.status === 403 && consentType) {
+      const apiErr = new ApiError(
+        response.status,
+        formatApiDetail(error.detail) || error.message || 'Consent required'
+      );
+      (apiErr as ApiErrorWithConsent).consentType = consentType;
       throw apiErr;
     }
 
@@ -778,6 +800,40 @@ export async function associatePatient(
     method: 'POST',
     body: JSON.stringify({ hospital_id: hospitalId, access_code: accessCode }),
   });
+}
+
+// ================================
+// Community Events API (v2)
+// ================================
+
+export interface GetEventsParams {
+  when?: 'upcoming' | 'past';
+  type?: 'wellness' | 'support' | 'education';
+  limit?: number;
+  offset?: number;
+}
+
+export async function getEvents(params: GetEventsParams = {}): Promise<PatientEventListResponse> {
+  const { when = 'upcoming', limit = 50, offset = 0, type } = params;
+  const query = new URLSearchParams({
+    when,
+    limit: String(limit),
+    offset: String(offset),
+  });
+  if (type) query.set('type', type);
+  return fetchJson(`${API_BASE_V2}/events?${query}`);
+}
+
+export async function getEvent(id: string): Promise<{ event: PatientEvent }> {
+  return fetchJson(`${API_BASE_V2}/events/${encodeURIComponent(id)}`);
+}
+
+export async function rsvpEvent(id: string): Promise<PatientEventRsvpResponse> {
+  return fetchJson(`${API_BASE_V2}/events/${encodeURIComponent(id)}/rsvp`, { method: 'POST' });
+}
+
+export async function cancelRsvp(id: string): Promise<PatientEventRsvpResponse> {
+  return fetchJson(`${API_BASE_V2}/events/${encodeURIComponent(id)}/rsvp`, { method: 'DELETE' });
 }
 
 export { ApiError };

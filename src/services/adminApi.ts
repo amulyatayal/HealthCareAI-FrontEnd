@@ -8,6 +8,11 @@ import type {
   AdminNotification,
   AdminNotificationListResponse,
   NotificationCreateRequest,
+  AdminEventListResponse,
+  EventCreateRequest,
+  EventUpdateRequest,
+  EventCreateResponse,
+  EventUpdateResponse,
 } from '../types/admin';
 
 const API_BASE = '/api/v2/admin';
@@ -142,6 +147,43 @@ export async function createNotification(data: NotificationCreateRequest): Promi
 
 export async function deleteNotification(id: string): Promise<{ message: string }> {
   return fetchAdminJson(`${API_BASE}/notifications/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  });
+}
+
+// Community Events CRUD
+export interface GetAdminEventsParams {
+  status?: 'all' | 'published' | 'cancelled';
+  limit?: number;
+  offset?: number;
+}
+
+export async function getAdminEvents(params: GetAdminEventsParams = {}): Promise<AdminEventListResponse> {
+  const { status = 'all', limit = 50, offset = 0 } = params;
+  const query = new URLSearchParams({
+    status,
+    limit: String(limit),
+    offset: String(offset),
+  });
+  return fetchAdminJson(`${API_BASE}/events?${query}`);
+}
+
+export async function createEvent(data: EventCreateRequest): Promise<EventCreateResponse> {
+  return fetchAdminJson(`${API_BASE}/events`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateEvent(id: string, data: EventUpdateRequest): Promise<EventUpdateResponse> {
+  return fetchAdminJson(`${API_BASE}/events/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function cancelEvent(id: string): Promise<{ message: string }> {
+  return fetchAdminJson(`${API_BASE}/events/${encodeURIComponent(id)}`, {
     method: 'DELETE',
   });
 }
