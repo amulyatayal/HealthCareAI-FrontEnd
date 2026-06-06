@@ -5,53 +5,29 @@ interface Props {
   basePath: string
 }
 
+const ACTIONS = [
+  { to: 'search', icon: Search, label: 'Search' },
+  { to: 'health/prom/breast-satisfaction', icon: ClipboardList, label: 'PROM' },
+  { to: 'health/symptoms', icon: TrendingUp, label: 'Symptoms' },
+  { to: 'community/events', icon: Calendar, label: 'Events' },
+] as const
+
 export function QuickActions({ basePath }: Props) {
   return (
-    <>
+    <div className="wf-quick-strip-section">
       <div className="wf-section-header">
-        <span className="wf-section-title">Quick Actions</span>
+        <span className="wf-section-label">Quick actions</span>
       </div>
-      <div className="wf-grid-2" style={{ marginBottom: '16px' }}>
-        <Link to={`${basePath}/search`} style={{ textDecoration: 'none' }}>
-          <div className="wf-feature-card">
-            <div className="feature-icon rose">
-              <Search size={24} />
-            </div>
-            <div className="feature-title">Search Resources</div>
-            <div className="feature-desc">Find care resources</div>
-          </div>
-        </Link>
-
-        <Link to={`${basePath}/health/prom/breast-satisfaction`} style={{ textDecoration: 'none' }}>
-          <div className="wf-feature-card">
-            <div className="feature-icon purple">
-              <ClipboardList size={24} />
-            </div>
-            <div className="feature-title">PROM Questionnaire</div>
-            <div className="feature-desc">Complete survey</div>
-          </div>
-        </Link>
-
-        <Link to={`${basePath}/health/symptoms`} style={{ textDecoration: 'none' }}>
-          <div className="wf-feature-card">
-            <div className="feature-icon blue">
-              <TrendingUp size={24} />
-            </div>
-            <div className="feature-title">Symptoms</div>
-            <div className="feature-desc">Track health</div>
-          </div>
-        </Link>
-
-        <Link to={`${basePath}/community/events`} style={{ textDecoration: 'none' }}>
-          <div className="wf-feature-card">
-            <div className="feature-icon amber">
-              <Calendar size={24} />
-            </div>
-            <div className="feature-title">Events</div>
-            <div className="feature-desc">Join activities</div>
-          </div>
-        </Link>
+      <div className="wf-quick-strip">
+        {ACTIONS.map(({ to, icon: Icon, label }) => (
+          <Link key={to} to={`${basePath}/${to}`} className="wf-quick-strip-item">
+            <span className="wf-quick-strip-icon">
+              <Icon size={20} />
+            </span>
+            <span className="wf-quick-strip-label">{label}</span>
+          </Link>
+        ))}
       </div>
-    </>
+    </div>
   )
 }

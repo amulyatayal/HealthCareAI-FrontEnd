@@ -17,19 +17,17 @@ export function PathwayResources({ categories, hasStageSelected, basePath }: Pro
   return (
     <>
       <div className="wf-section-header">
-        <span className="wf-section-title">Resources for your pathway</span>
-        {!hasStageSelected && (
-          <Link to={`${basePath}/profile/stage`} style={{ fontSize: 12, color: 'var(--wf-rose-500)', textDecoration: 'none' }}>
-            Set your pathway
-          </Link>
-        )}
+        <span className="wf-section-label">Resources for your pathway</span>
+        <Link to={`${basePath}/profile/stage`} className="wf-card-action-link" style={{ fontSize: 12 }}>
+          {hasStageSelected ? 'Change pathway' : 'Set your pathway'}
+        </Link>
       </div>
-      <p style={{ fontSize: '13px', color: 'var(--wf-gray-600)', marginBottom: '12px' }}>
+      <p className="wf-pathway-helper">
         {hasStageSelected
           ? categories.length > 0
-            ? 'All resources open within the app.'
-            : 'No resources are available for your selection yet.'
-          : 'Choose which area you\'d like information about to see resources from your clinical team.'}
+            ? 'Resources from your clinical team.'
+            : 'No resources for your selection yet.'
+          : 'Set your pathway to see resources from your clinical team.'}
       </p>
       <WireframeCard>
         {categories.length === 0 && hasStageSelected ? (

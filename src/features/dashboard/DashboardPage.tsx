@@ -6,14 +6,10 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useDashboardData } from './hooks/useDashboardData'
 import { usePathwayResources } from './hooks/usePathwayResources'
 import { HeroWelcome } from './components/HeroWelcome'
-import { WellnessStats } from './components/WellnessStats'
-import { DailyQuote } from './components/DailyQuote'
 import { Notifications } from './components/Notifications'
 import { UpcomingAppointments } from './components/UpcomingAppointments'
 import { PathwayResources } from './components/PathwayResources'
-import { ClinicalTrials } from './components/ClinicalTrials'
 import { QuickActions } from './components/QuickActions'
-import { CommunityActivity } from './components/CommunityActivity'
 
 export function DashboardPage() {
   const basePath = useBasePath()
@@ -38,17 +34,25 @@ export function DashboardPage() {
 
   return (
     <WireframeLayout>
-      <HeroWelcome firstName={firstName} streakDays={dashboard.streak_days} basePath={basePath} />
-      <WellnessStats dashboard={dashboard} />
-      {dashboard.daily_quote && <DailyQuote quote={dashboard.daily_quote} />}
-      <Notifications />
-      <UpcomingAppointments basePath={basePath} />
-      <div ref={pathwayResourcesAnchorRef} id="pathway-resources">
-        <PathwayResources categories={resourceCategories} hasStageSelected={hasStageSelected} basePath={basePath} />
+      <div className="wf-dashboard">
+        <HeroWelcome
+          firstName={firstName}
+          streakDays={dashboard.streak_days}
+          basePath={basePath}
+          dashboard={dashboard}
+        />
+
+        <section className="wf-your-week">
+          <Notifications />
+          <UpcomingAppointments basePath={basePath} />
+        </section>
+
+        <div ref={pathwayResourcesAnchorRef} id="pathway-resources">
+          <PathwayResources categories={resourceCategories} hasStageSelected={hasStageSelected} basePath={basePath} />
+        </div>
+
+        <QuickActions basePath={basePath} />
       </div>
-      <QuickActions basePath={basePath} />
-      <CommunityActivity />
-      <ClinicalTrials />
     </WireframeLayout>
   )
 }

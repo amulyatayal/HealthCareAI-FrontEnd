@@ -6,6 +6,28 @@ interface Props {
   dashboard: DashboardSummary
 }
 
+export function HeroWellnessStats({ dashboard }: Props) {
+  const trendPrefix = dashboard.trend_direction === 'down' ? '' : '+'
+
+  return (
+    <div className="wf-hero-stats">
+      <div className="wf-hero-stat">
+        <span className="wf-hero-stat-emoji" aria-hidden="true">😊</span>
+        <span className="wf-hero-stat-value">{(dashboard.avg_mood ?? 0).toFixed(1)}</span>
+        <span className="wf-hero-stat-label">Avg mood</span>
+      </div>
+      <div className="wf-hero-stat-divider" aria-hidden="true" />
+      <div className="wf-hero-stat">
+        <TrendingUp size={16} className="wf-hero-stat-icon trend" aria-hidden="true" />
+        <span className="wf-hero-stat-value trend">
+          {trendPrefix}{dashboard.trend_percentage ?? 0}%
+        </span>
+        <span className="wf-hero-stat-label">This week</span>
+      </div>
+    </div>
+  )
+}
+
 const statCardStyle = {
   display: 'flex',
   alignItems: 'center',
@@ -17,41 +39,24 @@ export function WellnessStats({ dashboard }: Props) {
   return (
     <div className="wf-grid-2">
       <WireframeCard style={statCardStyle}>
-        <div style={{
-          width: '44px',
-          height: '44px',
-          borderRadius: '12px',
-          background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '24px',
-        }}>
+        <div className="wf-wellness-stat-icon mood">
           😊
         </div>
         <div>
-          <div style={{ fontSize: '20px', fontWeight: '700', color: 'var(--wf-gray-800)' }}>{(dashboard.avg_mood ?? 0).toFixed(1)}</div>
-          <div style={{ fontSize: '12px', color: 'var(--wf-gray-500)' }}>Avg Mood</div>
+          <div className="wf-wellness-stat-value">{(dashboard.avg_mood ?? 0).toFixed(1)}</div>
+          <div className="wf-wellness-stat-label">Avg Mood</div>
         </div>
       </WireframeCard>
 
       <WireframeCard style={statCardStyle}>
-        <div style={{
-          width: '44px',
-          height: '44px',
-          borderRadius: '12px',
-          background: 'linear-gradient(135deg, #dcfce7, #bbf7d0)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <TrendingUp size={22} style={{ color: '#16a34a' }} />
+        <div className="wf-wellness-stat-icon trend">
+          <TrendingUp size={22} />
         </div>
         <div>
-          <div style={{ fontSize: '20px', fontWeight: '700', color: '#16a34a' }}>
+          <div className="wf-wellness-stat-value trend">
             {dashboard.trend_direction === 'down' ? '' : '+'}{dashboard.trend_percentage ?? 0}%
           </div>
-          <div style={{ fontSize: '12px', color: 'var(--wf-gray-500)' }}>This week</div>
+          <div className="wf-wellness-stat-label">This week</div>
         </div>
       </WireframeCard>
     </div>

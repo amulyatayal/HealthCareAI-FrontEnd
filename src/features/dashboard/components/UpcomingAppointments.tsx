@@ -2,18 +2,18 @@ import { useState, useEffect } from 'react'
 import { Calendar, Bell, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeCard } from '../../../wireframes/components'
-import { DashboardEmptyCard } from './DashboardEmptyCard'
+import { DashboardCompactEmpty } from './DashboardCompactEmpty'
 import { getAppointments, type Appointment } from '../../../services/api'
 
 interface Props {
   basePath: string
 }
 
+const MAX_VISIBLE = 2
+
 const ACCENT_COLORS = [
   { bg: 'linear-gradient(135deg, #eff6ff, #dbeafe)', icon: '#2563eb' },
   { bg: 'linear-gradient(135deg, #dcfce7, #bbf7d0)', icon: '#16a34a' },
-  { bg: 'linear-gradient(135deg, #fef3c7, #fde68a)', icon: '#d97706' },
-  { bg: 'linear-gradient(135deg, #fce7f3, #fbcfe8)', icon: '#db2777' },
 ]
 
 function formatAppointmentDate(date: string, time: string): string {
@@ -58,39 +58,29 @@ export function UpcomingAppointments({ basePath }: Props) {
     return () => { cancelled = true }
   }, [])
 
-  if (!loading && appointments.length === 0) {
-    return (
-      <DashboardEmptyCard
-        title="Upcoming"
-        action={
-          <Link to={`${basePath}/profile/appointments`} style={{ color: 'var(--wf-rose-500)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            View All <ChevronRight size={16} />
-          </Link>
-        }
-        icon={<Calendar size={22} style={{ color: '#2563eb' }} />}
-        iconStyle={{ background: 'linear-gradient(135deg, #eff6ff, #dbeafe)' }}
-        headline="No upcoming reminders"
-        subtext="Add one to stay on top of your care schedule"
-        cta={{ label: 'Manage appointments and reminders', to: `${basePath}/profile/appointments` }}
-      />
-    )
-  }
+  const visibleAppointments = appointments.slice(0, MAX_VISIBLE)
+  const appointmentsPath = `${basePath}/profile/appointments`
 
   return (
     <WireframeCard
       title="Upcoming"
       action={
-        <Link to={`${basePath}/profile/appointments`} style={{ color: 'var(--wf-rose-500)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-          View All <ChevronRight size={16} />
+        <Link to={appointmentsPath} className="wf-card-action-link">
+          View all <ChevronRight size={16} />
         </Link>
       }
     >
       {loading ? (
-        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--wf-gray-400)', fontSize: '14px' }}>
-          Loading appointments...
+        <div className="wf-compact-skeleton">
+          <div className="wf-compact-skeleton-line" />
         </div>
+      ) : appointments.length === 0 ? (
+        <DashboardCompactEmpty
+          message="No upcoming reminders"
+          link={{ label: 'Manage appointments', to: appointmentsPath }}
+        />
       ) : (
-        appointments.slice(0, 3).map((appt, idx) => {
+        visibleAppointments.map((appt, idx) => {
           const color = ACCENT_COLORS[idx % ACCENT_COLORS.length]
           return (
             <div key={appt.id} className="wf-list-item" style={idx === 0 ? { background: color.bg, border: 'none' } : undefined}>

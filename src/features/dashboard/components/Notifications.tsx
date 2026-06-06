@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Bell, Info, AlertTriangle, AlertCircle, Check } from 'lucide-react'
+import { Info, AlertTriangle, AlertCircle, Check } from 'lucide-react'
 import { WireframeCard } from '../../../wireframes/components'
-import { DashboardEmptyCard } from './DashboardEmptyCard'
+import { DashboardCompactEmpty } from './DashboardCompactEmpty'
 import {
   getNotifications,
   markNotificationRead,
@@ -16,6 +16,8 @@ const PRIORITY_STYLES: Record<Priority, { color: string; bg: string; icon: typeo
   warning: { color: '#f59e0b', bg: '#fffbeb', icon: AlertTriangle },
   urgent: { color: '#ef4444', bg: '#fef2f2', icon: AlertCircle },
 }
+
+const MAX_VISIBLE = 2
 
 function getNotifId(n: PatientNotification): string {
   return n.notification_id || n.id || ''
@@ -58,6 +60,8 @@ export function Notifications() {
   }, [])
 
   const unreadCount = notifications.filter((n) => !n.read).length
+  const visibleNotifications = notifications.slice(0, MAX_VISIBLE)
+  const hasMore = notifications.length > MAX_VISIBLE
 
   async function handleMarkRead(id: string) {
     if (!id) return
@@ -80,61 +84,60 @@ export function Notifications() {
     }
   }
 
-  if (loading) return null
-
-  if (notifications.length === 0) {
-    return (
-      <DashboardEmptyCard
-        title="Notifications"
-        icon={<Bell size={22} style={{ color: '#f43f5e' }} />}
-        iconStyle={{ background: 'linear-gradient(135deg, #fff1f2, #fce7f3)' }}
-        headline="You're all caught up"
-        subtext="New updates from your care team will appear here"
-      />
-    )
-  }
-
   return (
     <WireframeCard
       title={
         <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           Notifications
-          {unreadCount > 0 && (
+          {!loading && unreadCount > 0 && (
             <span className="wf-notif-unread-badge">{unreadCount}</span>
           )}
         </span>
       }
       action={
-        unreadCount > 0 ? (
+        !loading && unreadCount > 0 ? (
           <button onClick={handleMarkAllRead} className="wf-notif-mark-all">
             <Check size={14} /> Mark all read
           </button>
         ) : undefined
       }
     >
-      {notifications.map((n) => {
-        const style = PRIORITY_STYLES[n.priority]
-        const PriorityIcon = style.icon
-        return (
-          <button
-            key={getNotifId(n) || n.title}
-            className={`wf-notif-item ${n.read ? 'read' : ''}`}
-            onClick={() => handleMarkRead(getNotifId(n))}
-          >
-            <div className="wf-notif-icon" style={{ background: style.bg }}>
-              <PriorityIcon size={18} style={{ color: style.color }} />
-            </div>
-            <div className="wf-notif-content">
-              <div className="wf-notif-title-row">
-                <span className="wf-notif-title">{n.title}</span>
-                <span className="wf-notif-time">{timeAgo(n.created_at)}</span>
-              </div>
-              <div className="wf-notif-message">{n.message}</div>
-            </div>
-            {!n.read && <div className="wf-notif-dot" />}
-          </button>
-        )
-      })}
+      {loading ? (
+        <div className="wf-compact-skeleton">
+          <div className="wf-compact-skeleton-line" />
+        </div>
+      ) : notifications.length === 0 ? (
+        <DashboardCompactEmpty message="You're all caught up — updates from your care team appear here." />
+      ) : (
+        <>
+          {visibleNotifications.map((n) => {
+            const style = PRIORITY_STYLES[n.priority]
+            const PriorityIcon = style.icon
+            return (
+              <button
+                key={getNotifId(n) || n.title}
+                className={`wf-notif-item ${n.read ? 'read' : ''}`}
+                onClick={() => handleMarkRead(getNotifId(n))}
+              >
+                <div className="wf-notif-icon" style={{ background: style.bg }}>
+                  <PriorityIcon size={18} style={{ color: style.color }} />
+                </div>
+                <div className="wf-notif-content">
+                  <div className="wf-notif-title-row">
+                    <span className="wf-notif-title">{n.title}</span>
+                    <span className="wf-notif-time">{timeAgo(n.created_at)}</span>
+                  </div>
+                  <div className="wf-notif-message">{n.message}</div>
+                </div>
+                {!n.read && <div className="wf-notif-dot" />}
+              </button>
+            )
+          })}
+          {hasMore && (
+            <p className="wf-view-all-hint">+{notifications.length - MAX_VISIBLE} more notification{notifications.length - MAX_VISIBLE !== 1 ? 's' : ''}</p>
+          )}
+        </>
+      )}
     </WireframeCard>
   )
 }
