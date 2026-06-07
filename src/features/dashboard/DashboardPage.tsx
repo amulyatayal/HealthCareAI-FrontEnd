@@ -8,6 +8,7 @@ import { usePathwayResources } from './hooks/usePathwayResources'
 import { HeroWelcome } from './components/HeroWelcome'
 import { ForYouInbox } from './components/ForYouInbox'
 import { DashboardTeasers } from './components/DashboardTeasers'
+import { DonateCard } from './components/DonateCard'
 import { PathwayResources } from './components/PathwayResources'
 
 export function DashboardPage() {
@@ -48,6 +49,8 @@ export function DashboardPage() {
         </div>
 
         <DashboardTeasers basePath={basePath} />
+
+        <DonateCard />
       </div>
     </WireframeLayout>
   )
