@@ -24,6 +24,7 @@ import { ClinicalTeamPage } from './pages/ClinicalTeamPage'
 import { ViewResourcePage } from './pages/ViewResourcePage'
 import { SearchResourcesPage } from './pages/SearchResourcesPage'
 import { BreastSatisfactionPROMPage } from './pages/BreastSatisfactionPROMPage'
+import { RecipePage } from './pages/RecipePage'
 import { GuestGate } from './components/GuestGate'
 
 export function WireframeApp() {
@@ -38,6 +39,7 @@ export function WireframeApp() {
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/view" element={<ViewResourcePage />} />
       <Route path="/search" element={<SearchResourcesPage />} />
+      <Route path="/recipes" element={<RecipePage />} />
 
       {/* Guest-gated: health features */}
       <Route path="/health/mood" element={<GuestGate featureName="mood tracking"><BasicMoodPage /></GuestGate>} />

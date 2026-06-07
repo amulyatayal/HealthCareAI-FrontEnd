@@ -1,4 +1,4 @@
-import { Calendar, ClipboardList, TrendingUp, Sparkles } from 'lucide-react'
+import { Calendar, ChefHat, ClipboardList, TrendingUp, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 interface Props {
@@ -49,6 +49,16 @@ export function QuickActions({ basePath }: Props) {
             </div>
             <div className="feature-title">Events</div>
             <div className="feature-desc">Join activities</div>
+          </div>
+        </Link>
+
+        <Link to={`${basePath}/recipes`} style={{ textDecoration: 'none' }}>
+          <div className="wf-feature-card">
+            <div className="feature-icon green">
+              <ChefHat size={24} />
+            </div>
+            <div className="feature-title">Recipes</div>
+            <div className="feature-desc">Healthy eating</div>
           </div>
         </Link>
       </div>

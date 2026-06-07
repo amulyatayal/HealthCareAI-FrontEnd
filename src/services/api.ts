@@ -829,5 +829,53 @@ export async function associatePatient(
   });
 }
 
+// ================================
+// Recipe API (recipe chatbot — meal data lives in the backend)
+// ================================
+export interface DietOption {
+  value: string;
+  emoji: string;
+  desc: string;
+}
+
+export interface RecipeConfig {
+  diet_options: DietOption[];
+  common_allergies: string[];
+}
+
+export interface MealSummary {
+  id: string;
+  name: string;
+  emoji: string;
+  desc: string;
+  time: string;
+  calories: number;
+}
+
+export interface Recipe extends MealSummary {
+  diets: string[];
+  allergens: string[];
+  ingredients: string[];
+  steps: string[];
+}
+
+export async function getRecipeConfig(): Promise<RecipeConfig> {
+  return fetchJson<RecipeConfig>(`${API_BASE_V2}/recipes/config`);
+}
+
+export async function getRecipeSuggestions(
+  diet: string,
+  allergies: string[] = [],
+  offset = 0
+): Promise<{ meals: MealSummary[]; has_more: boolean }> {
+  const params = new URLSearchParams({ diet, offset: String(offset) });
+  if (allergies.length) params.set('allergies', allergies.join(','));
+  return fetchJson<{ meals: MealSummary[]; has_more: boolean }>(`${API_BASE_V2}/recipes/suggestions?${params.toString()}`);
+}
+
+export async function getRecipe(mealId: string): Promise<Recipe> {
+  return fetchJson<Recipe>(`${API_BASE_V2}/recipes/${mealId}`);
+}
+
 export { ApiError };
 
