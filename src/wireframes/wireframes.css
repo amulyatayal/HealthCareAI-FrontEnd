@@ -638,6 +638,45 @@
   margin-top: 4px;
 }
 
+/* Ask Tara chat — use full phone width for responses and input */
+.wf-main:has(.wf-chat-layout) {
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-bottom: calc(var(--wf-nav-height) + 12px);
+}
+
+.wireframe-container .wf-chat-layout .messages-container {
+  padding: 8px 4px;
+}
+
+.wireframe-container .wf-chat-layout .messages-list {
+  max-width: 100%;
+}
+
+.wireframe-container .wf-chat-layout .message-bubble.assistant .message-avatar {
+  display: none;
+}
+
+.wireframe-container .wf-chat-layout .message-bubble.assistant {
+  gap: 0;
+}
+
+.wireframe-container .wf-chat-layout .message-bubble.assistant .message-content {
+  max-width: 100%;
+}
+
+.wireframe-container .wf-chat-layout .message-bubble.user .message-content {
+  max-width: 92%;
+}
+
+.wireframe-container .wf-chat-layout .chat-input-container {
+  padding: 8px 4px 12px;
+}
+
+.wireframe-container .wf-chat-layout .chat-input-section {
+  max-width: 100%;
+}
+
 /* Grid layouts */
 .wf-grid-2 {
   display: grid;
