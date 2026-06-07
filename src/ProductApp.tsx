@@ -108,11 +108,6 @@ function LoginPageWithGoogle({
     { value: 'barts', label: 'Barts Health NHS Trust' },
     { value: 'uhnm', label: 'University Hospitals of North Midlands NHS Trust (UHNM)' },
     { value: 'apollo', label: 'Apollo Hospitals' },
-    { value: 'uclh', label: 'University College London Hospitals' },
-    { value: 'guys', label: "Guy's and St Thomas' NHS Trust" },
-    { value: 'imperial', label: 'Imperial College Healthcare' },
-    { value: 'kings', label: "King's College Hospital" },
-    { value: 'other', label: 'Other' },
   ]
 
   const persistHospitalSelection = () => {
