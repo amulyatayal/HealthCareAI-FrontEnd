@@ -133,3 +133,92 @@ export interface NotificationCreateRequest {
   message: string;
   priority: NotificationPriority;
 }
+
+// Community Events
+export type EventType = 'wellness' | 'support' | 'education';
+export type EventStatus = 'published' | 'cancelled';
+
+export interface AdminEventApi {
+  id: string;
+  hospital_id: string | null;
+  title: string;
+  starts_at: string;
+  location: string | null;
+  type: EventType;
+  is_virtual: boolean;
+  description: string | null;
+  status: EventStatus;
+  attendee_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminEventListResponse {
+  events: AdminEventApi[];
+  total_count: number;
+}
+
+export interface EventCreateRequest {
+  title: string;
+  date: string;
+  time: string;
+  location?: string | null;
+  type?: EventType;
+  is_virtual?: boolean;
+  description?: string | null;
+}
+
+export type EventUpdateRequest = Partial<EventCreateRequest>;
+
+export interface EventCreateResponse {
+  id: string;
+  message: string;
+  event: AdminEventApi;
+}
+
+export interface EventUpdateResponse {
+  message: string;
+  event: AdminEventApi;
+}
+
+// Clinical Team (clinician-managed roster)
+export interface ClinicalTeamMemberApi {
+  id: string;
+  clinician_id: string;
+  name: string;
+  role: string;
+  specialty: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  avatar_url: string | null;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ClinicalTeamListResponse {
+  team_members: ClinicalTeamMemberApi[];
+  total_count: number;
+}
+
+export interface ClinicalTeamMemberCreateRequest {
+  name: string;
+  role: string;
+  specialty?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  display_order?: number;
+}
+
+export type ClinicalTeamMemberUpdateRequest = Partial<ClinicalTeamMemberCreateRequest>;
+
+export interface ClinicalTeamMemberCreateResponse {
+  id: string;
+  message: string;
+  team_member: ClinicalTeamMemberApi;
+}
+
+export interface ClinicalTeamMemberUpdateResponse {
+  message: string;
+  team_member: ClinicalTeamMemberApi;
+}

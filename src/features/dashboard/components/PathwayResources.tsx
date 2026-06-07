@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronRight, ChevronDown, Video, FileText, ExternalLink as ExternalLinkIcon } from 'lucide-react'
+import { ChevronRight, ChevronDown, Video, FileText, ExternalLink as ExternalLinkIcon, Compass } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeCard } from '../../../wireframes/components'
 import { youtubeToEmbedUrl } from '../../../wireframes/utils/youtubeEmbed'
@@ -13,33 +13,45 @@ interface Props {
 
 export function PathwayResources({ categories, hasStageSelected, basePath }: Props) {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
+  const stagePath = `${basePath}/profile/stage`
+
+  const helperText = hasStageSelected
+    ? categories.length > 0
+      ? 'Information from your clinical team.'
+      : 'No resources for your selection yet.'
+    : 'Set your pathway to see resources from your clinical team.'
 
   return (
-    <>
-      <div className="wf-section-header">
-        <span className="wf-section-title">Resources for your pathway</span>
-        {!hasStageSelected && (
-          <Link to={`${basePath}/profile/stage`} style={{ fontSize: 12, color: 'var(--wf-rose-500)', textDecoration: 'none' }}>
-            Set your pathway
-          </Link>
-        )}
-      </div>
-      <p style={{ fontSize: '13px', color: 'var(--wf-gray-600)', marginBottom: '12px' }}>
-        {hasStageSelected
-          ? categories.length > 0
-            ? 'All resources open within the app.'
-            : 'No resources are available for your selection yet.'
-          : 'Choose which area you\'d like information about to see resources from your clinical team.'}
-      </p>
-      <WireframeCard>
-        {categories.length === 0 && hasStageSelected ? (
-          <p style={{ fontSize: '14px', color: 'var(--wf-gray-500)', margin: 0, padding: '8px 4px' }}>
-            Your clinical team has not added resources for this area yet. Try a different selection or check back later.
-          </p>
-        ) : categories.map((cat) => {
+    <WireframeCard
+      title="Resources for your pathway"
+      subtitle={helperText}
+      action={
+        <Link to={stagePath} className="wf-card-action-link" style={{ fontSize: 12 }}>
+          <Compass size={14} />
+          {hasStageSelected ? 'Change pathway' : 'Set your pathway'}
+        </Link>
+      }
+    >
+      {!hasStageSelected ? (
+        <Link to={stagePath} className="wf-pathway-setup-row">
+          <span className="wf-pathway-setup-icon">
+            <Compass size={20} />
+          </span>
+          <span className="wf-pathway-setup-content">
+            <span className="wf-pathway-setup-title">Set your pathway</span>
+            <span className="wf-pathway-setup-sub">See resources tailored to your treatment stage</span>
+          </span>
+          <ChevronRight size={18} className="wf-pathway-setup-chevron" />
+        </Link>
+      ) : categories.length === 0 ? (
+        <p className="wf-pathway-empty-msg">
+          Your clinical team has not added resources for this area yet. Try a different selection or check back later.
+        </p>
+      ) : (
+        categories.map((cat) => {
           const isExpanded = expandedCategory === cat.id
           return (
-            <div key={cat.id} style={{ borderBottom: '1px solid var(--wf-gray-100)' }}>
+            <div key={cat.id} className="wf-pathway-category">
               <button
                 type="button"
                 className="wf-list-item"
@@ -87,8 +99,8 @@ export function PathwayResources({ categories, hasStageSelected, basePath }: Pro
               )}
             </div>
           )
-        })}
-      </WireframeCard>
-    </>
+        })
+      )}
+    </WireframeCard>
   )
 }

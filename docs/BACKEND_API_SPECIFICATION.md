@@ -25,6 +25,8 @@
 15. [NEW – GDPR / Data Rights](#15-new--gdpr--data-rights)
 16. [Error Handling Conventions](#16-error-handling-conventions)
 17. [Frontend Feature → API Mapping](#17-frontend-feature--api-mapping)
+18. [NEW – Community Events](#18-new--community-events)
+19. [NEW – Clinician Clinical Team](#19-new--clinician-clinical-team)
 
 ---
 
@@ -977,32 +979,21 @@ Delete a document.
 
 ## 12. NEW – Clinical Team
 
+> **Updated:** Team roster is clinician-managed (Section 19). Patient endpoint is **read-only**. Patient `POST`/`DELETE` on this path are **deprecated** — use admin CRUD at `/api/v2/admin/clinical-team` instead.
+
 ### GET `/api/v2/clinical-team`
 
-Get the patient's assigned clinical team.
+Get the clinical team roster for the patient's associated clinician.
 
 **Used by:** ClinicalTeamPage (Team tab)
 
-**Response:**
-```json
-{
-  "team_members": [
-    {
-      "id": "string",
-      "name": "string",
-      "role": "string (e.g. 'Consultant surgeon', 'CNS', 'Oncologist')",
-      "specialty": "string | null",
-      "avatar_url": "string | null",
-      "contact_email": "string | null",
-      "contact_phone": "string | null"
-    }
-  ]
-}
-```
+**Auth:** `Authorization: Bearer <patient_jwt>` required.
+
+**Response:** See Section 19.2.
 
 **Notes:**
-- If no team is assigned, return `{ "team_members": [] }`.
-- Team assignment is managed by hospital admin or via patient link (`POST /api/v2/profile/link`).
+- Scoped to `PatientProfiles.clinician_id` (after `POST /api/v2/me/associate`); not filtered by `X-Hospital-Id`.
+- If not associated or no roster, return `{ "team_members": [], "total_count": 0, "clinician_id": null }`.
 
 ---
 
@@ -1429,7 +1420,9 @@ Upload a document (multipart/form-data).
 - 422: `{ "detail": "Invalid file type" }` or `{ "detail": "Virus detected" }`
 - 409: `{ "detail": "Storage limit reached", "current_bytes": 104857600, "limit_bytes": 104857600 }`
 
-### POST `/api/v2/clinical-team`
+### POST `/api/v2/clinical-team` — DEPRECATED
+
+> **Deprecated:** Replaced by admin `POST /api/v2/admin/clinical-team` (Section 19). Patient self-report is no longer supported.
 
 Add a self-reported clinical team member.
 
@@ -1456,7 +1449,9 @@ Add a self-reported clinical team member.
 }
 ```
 
-### DELETE `/api/v2/clinical-team/{id}`
+### DELETE `/api/v2/clinical-team/{id}` — DEPRECATED
+
+> **Deprecated:** Replaced by admin `DELETE /api/v2/admin/clinical-team/{id}` (Section 19).
 
 Remove a clinical team member.
 
@@ -1526,7 +1521,11 @@ All API errors should follow this format:
 | **Upload document** | DocumentsPage | `POST /api/v2/documents/upload` | ❌ New |
 | **Download document** | DocumentsPage | `GET /api/v2/documents/{id}/download` | ❌ New |
 | **Delete document** | DocumentsPage | `DELETE /api/v2/documents/{id}` | ❌ New |
-| **Clinical team** | ClinicalTeamPage | `GET /api/v2/clinical-team` | ❌ New |
+| **Clinical team** | ClinicalTeamPage | `GET /api/v2/clinical-team` | ❌ New (read-only, Section 19) |
+| **Admin clinical team list** | AdminClinicalTeamPage | `GET /api/v2/admin/clinical-team` | ❌ New |
+| **Add team member** | AdminClinicalTeamPage | `POST /api/v2/admin/clinical-team` | ❌ New |
+| **Update team member** | AdminClinicalTeamPage | `PUT /api/v2/admin/clinical-team/{id}` | ❌ New |
+| **Remove team member** | AdminClinicalTeamPage | `DELETE /api/v2/admin/clinical-team/{id}` | ❌ New |
 | **Share data** | ShareDataPage | `POST /api/v2/share-to-clinician` | ❌ New |
 | **Log test result** | TestsPage | `POST /api/v2/tests/results` | ❌ New |
 | **Test history** | TestsPage | `GET /api/v2/tests/results` | ❌ New |
@@ -1535,6 +1534,391 @@ All API errors should follow this format:
 | **Get consent** | PrivacySettings | `GET /api/v2/consent` | ❌ New |
 | **Export data** | ProfilePage | `GET /api/v2/me/export` | ❌ New |
 | **Delete account** | ProfilePage | `DELETE /api/v2/me` | ❌ New |
+| **Admin events list** | AdminEventsPage | `GET /api/v2/admin/events` | ✅ Exists |
+| **Create event** | AdminEventsPage | `POST /api/v2/admin/events` | ✅ Exists |
+| **Update event** | AdminEventsPage | `PUT /api/v2/admin/events/{id}` | ✅ Exists |
+| **Cancel event** | AdminEventsPage | `DELETE /api/v2/admin/events/{id}` | ✅ Exists |
+| **List events** | EventsPage | `GET /api/v2/events` | ✅ Exists |
+| **Event detail** | EventsPage | `GET /api/v2/events/{id}` | ✅ Exists |
+| **RSVP to event** | EventsPage | `POST /api/v2/events/{id}/rsvp` | ✅ Exists |
+| **Cancel RSVP** | EventsPage | `DELETE /api/v2/events/{id}/rsvp` | ✅ Exists |
+
+---
+
+## 18. NEW – Community Events
+
+**Status:** ✅ Implemented (OpenAPI tag: Community Events / Admin Portal — `http://localhost:8000/docs`)
+
+Clinician-scoped community events with admin CRUD and patient read + RSVP.
+
+**Used by:** AdminEventsPage (`/admin/events`), EventsPage (`/community/events`), CommunityHub (optional upcoming count)
+
+**Base paths:** Admin `/api/v2/admin/events` · Patient `/api/v2/events`
+
+### Scoping (implemented behavior)
+
+| Topic | Backend behavior |
+|-------|------------------|
+| **Admin list** | Clinician-scoped via JWT `sub` — admin sees only events they created |
+| **Patient list** | Events from `PatientProfiles.clinician_id` (after `POST /api/v2/me/associate`); **not** filtered by `X-Hospital-Id` |
+| **`hospital_id` on Event** | Metadata from admin JWT (e.g. `"barts"` or `null`); not used for filtering |
+| **Event id in JSON** | Field is `id` (UUID). Use in URLs: `/events/{id}/rsvp` |
+| **`starts_at`** | Server combines admin `date` + `time` as UTC ISO8601 with `Z` suffix |
+| **Browse vs RSVP** | Patient `GET` requires auth only. RSVP requires `community` consent (`choices.community: true`) |
+
+**Auth:**
+- Admin: `Authorization: Bearer <admin_token>` (same as other `/api/v2/admin/*` routes)
+- Patient: `Authorization: Bearer <patient_jwt>` required for `GET` and RSVP. Optional `X-User-ID`, `X-Hospital-Id` headers are accepted but **not used** for event filtering.
+
+**Prerequisites:**
+- Patient must be associated with a clinician (`POST /api/v2/me/associate`) or event lists return empty / 404 on detail
+- Admin token `sub` must match the clinician who created the events
+
+**Out of scope (v1):** Patient-proposed events (FAB on EventsPage), calendar dot API, capacity limits / waitlists, email/push reminders, forum/buddy integration, hospital-wide event feed via `X-Hospital-Id` only.
+
+### Event object (response)
+
+```json
+{
+  "id": "uuid",
+  "hospital_id": "barts | null",
+  "title": "string",
+  "starts_at": "2026-07-01T14:30:00Z",
+  "location": "string | null",
+  "type": "wellness | support | education",
+  "is_virtual": "boolean",
+  "description": "string | null",
+  "status": "published | cancelled",
+  "attendee_count": "number",
+  "user_has_rsvp": "boolean (patient endpoints only; omitted or null on admin list)",
+  "created_at": "ISO8601",
+  "updated_at": "ISO8601"
+}
+```
+
+**Notes:**
+- `attendee_count` is the count of active RSVPs (replaces mock `attendees` in AdminEventsPage).
+- Admin `DELETE` sets `status` to `cancelled` (soft-delete); cancelled events are excluded from patient upcoming/past lists but remain visible in admin list.
+- JSON field names use snake_case (`is_virtual`, `attendee_count`, `user_has_rsvp`).
+
+### RSVP record (internal)
+
+```json
+{
+  "event_id": "string",
+  "user_id": "string",
+  "rsvp_at": "ISO8601"
+}
+```
+
+Unique constraint on `(event_id, user_id)`.
+
+---
+
+### 18.1 Admin Events
+
+**Base path:** `/api/v2/admin/events`
+
+#### GET `/api/v2/admin/events`
+
+List this clinician's events (including cancelled).
+
+**Query params:**
+
+| Param | Values | Default |
+|-------|--------|---------|
+| `status` | `all` \| `published` \| `cancelled` | `all` |
+| `limit` | number | `50` (max `200`) |
+| `offset` | number | `0` |
+
+**Response:**
+```json
+{
+  "events": ["(Event object without user_has_rsvp)"],
+  "total_count": "number"
+}
+```
+
+**Errors:** `404` — wrong id or event belongs to another clinician · `400` — invalid/placeholder id (e.g. `undefined`)
+
+#### POST `/api/v2/admin/events`
+
+Create event.
+
+**Request:**
+```json
+{
+  "title": "string (required)",
+  "date": "YYYY-MM-DD (required)",
+  "time": "HH:MM 24h (required)",
+  "location": "string | null (optional)",
+  "type": "wellness | support | education (default wellness)",
+  "is_virtual": "boolean (default false)",
+  "description": "string | null (optional)"
+}
+```
+
+**Response:** `201`
+```json
+{
+  "id": "uuid",
+  "message": "Event created",
+  "event": "(Event object)"
+}
+```
+
+#### PUT `/api/v2/admin/events/{id}`
+
+Update event. Same request shape as POST; all fields optional (partial update).
+
+**Schedule rule:** If updating date/time, **both** `date` and `time` must be sent together.
+
+**Response:**
+```json
+{
+  "message": "Event updated",
+  "event": "(Event object)"
+}
+```
+
+#### DELETE `/api/v2/admin/events/{id}`
+
+Soft-cancel event (`status → cancelled`). Preserves RSVP history.
+
+**Response:** `{ "message": "Event cancelled" }`
+
+---
+
+### 18.2 Patient Events & RSVP
+
+**Base path:** `/api/v2/events`
+
+#### GET `/api/v2/events`
+
+List published events for the patient's associated clinician.
+
+**Auth:** `Authorization: Bearer <patient_jwt>` required.
+
+**Query params:**
+
+| Param | Values | Default | Purpose |
+|-------|--------|---------|---------|
+| `when` | `upcoming` \| `past` | `upcoming` | Future vs history (`past` = all past published events) |
+| `type` | `wellness` \| `support` \| `education` | all | Optional filter |
+| `limit` | number | 50 | Pagination |
+| `offset` | number | 0 | Pagination |
+
+**Sorting:** `starts_at` ASC for upcoming, DESC for past.
+
+**Filtering:** Exclude `status: cancelled`. Scope to patient's associated clinician (not `X-Hospital-Id`).
+
+**Response:**
+```json
+{
+  "events": ["(Event object with user_has_rsvp)"],
+  "total_count": "number"
+}
+```
+
+**Frontend mapping:**
+
+| UI tab | API call |
+|--------|----------|
+| Upcoming | `GET /api/v2/events?when=upcoming` |
+| My Events | Same response, filter client-side where `user_has_rsvp === true` |
+| History (future UI) | `GET /api/v2/events?when=past` |
+
+**Errors:** `404` — no clinician association, wrong event, or cancelled/unpublished for detail
+
+#### GET `/api/v2/events/{id}`
+
+Single event detail (for "View Details" on My Events tab).
+
+**Response:** `{ "event": "(Event object with user_has_rsvp)" }`
+
+#### POST `/api/v2/events/{id}/rsvp`
+
+RSVP the authenticated user.
+
+**Consent:** Requires `community` consent. No new consent API — use existing endpoints:
+- Grant: `POST /api/v2/consent/data` with `choices.community: true`
+- Check: `GET /api/v2/consent` → `data_consent.choices.community`
+- On `403`, prompt user to enable community in Settings.
+
+**Rules:**
+- Event must exist, be `published`, and have `starts_at` in the future
+- Idempotent: second POST returns `200` with existing RSVP (no duplicate)
+
+**Response:**
+```json
+{
+  "message": "RSVP confirmed",
+  "event": "(Event object, user_has_rsvp: true, updated attendee_count)"
+}
+```
+
+**Errors:**
+- `422` — RSVP to past event
+- `403` — community consent missing:
+```json
+{
+  "detail": {
+    "message": "Community consent is required to RSVP to events...",
+    "consent_type": "community"
+  }
+}
+```
+
+#### DELETE `/api/v2/events/{id}/rsvp`
+
+Remove RSVP.
+
+**Rules:** Idempotent — deleting when not RSVP'd returns `200`.
+
+**Response:**
+```json
+{
+  "message": "RSVP removed",
+  "event": "(Event object, user_has_rsvp: false)"
+}
+```
+
+**Errors:** Standard 404 patterns from Section 16.
+
+---
+
+## 19. NEW – Clinician Clinical Team
+
+Clinician-managed care team roster. Admin CRUD; patient read-only on Team tab.
+
+**Used by:** AdminClinicalTeamPage (`/admin/clinical-team`), ClinicalTeamPage (`/team`)
+
+**Base paths:** Admin `/api/v2/admin/clinical-team` · Patient `/api/v2/clinical-team` (GET only)
+
+### Scoping
+
+| Topic | Backend behavior |
+|-------|------------------|
+| **Ownership** | Each team member belongs to one `clinician_id` (admin JWT `sub`) |
+| **Admin CRUD** | Clinician manages only their own roster |
+| **Patient GET** | Returns roster for `PatientProfiles.clinician_id` after associate; **not** filtered by `X-Hospital-Id` |
+| **Patient write** | No patient POST/PUT/DELETE — roster is clinician-managed only |
+
+**Auth:**
+- Admin: `Authorization: Bearer <admin_token>`
+- Patient: `Authorization: Bearer <patient_jwt>` required for GET
+
+**Prerequisites:** Patient must be associated with a clinician (`POST /api/v2/me/associate`) or team list is empty.
+
+**Out of scope (v1):** Hospital-wide team directory, patient self-reporting, avatar upload, linking members to user accounts.
+
+### Team member object (response)
+
+```json
+{
+  "id": "uuid",
+  "clinician_id": "string",
+  "name": "string",
+  "role": "string",
+  "specialty": "string | null",
+  "contact_email": "string | null",
+  "contact_phone": "string | null",
+  "avatar_url": "string | null",
+  "display_order": "number (default 0)",
+  "created_at": "ISO8601",
+  "updated_at": "ISO8601"
+}
+```
+
+**Sorting:** `display_order` ASC, then `name` ASC.
+
+---
+
+### 19.1 Admin Clinical Team
+
+**Base path:** `/api/v2/admin/clinical-team`
+
+#### GET `/api/v2/admin/clinical-team`
+
+List this clinician's team members.
+
+**Query params (optional):** `limit` (default `50`, max `200`), `offset` (default `0`)
+
+**Response:**
+```json
+{
+  "team_members": ["(Team member object)"],
+  "total_count": "number"
+}
+```
+
+#### POST `/api/v2/admin/clinical-team`
+
+Add a team member.
+
+**Request:**
+```json
+{
+  "name": "string (required)",
+  "role": "string (required)",
+  "specialty": "string | null (optional)",
+  "contact_email": "string | null (optional)",
+  "contact_phone": "string | null (optional)",
+  "display_order": "number (optional)"
+}
+```
+
+**Response:** `201`
+```json
+{
+  "id": "uuid",
+  "message": "Team member added",
+  "team_member": "(Team member object)"
+}
+```
+
+#### PUT `/api/v2/admin/clinical-team/{id}`
+
+Update team member. Same request shape as POST; all fields optional (partial update).
+
+**Response:**
+```json
+{
+  "message": "Team member updated",
+  "team_member": "(Team member object)"
+}
+```
+
+#### DELETE `/api/v2/admin/clinical-team/{id}`
+
+Remove team member (hard delete).
+
+**Response:** `{ "message": "Team member removed" }`
+
+**Errors:** `404` — wrong id or member belongs to another clinician · `400` — invalid/placeholder id
+
+---
+
+### 19.2 Patient Clinical Team (read-only)
+
+**Base path:** `/api/v2/clinical-team`
+
+#### GET `/api/v2/clinical-team`
+
+Get the care team roster for the patient's associated clinician.
+
+**Auth:** `Authorization: Bearer <patient_jwt>` required.
+
+**Response:**
+```json
+{
+  "team_members": ["(Team member object)"],
+  "total_count": "number",
+  "clinician_id": "string | null"
+}
+```
+
+**Errors:** Standard 401/404 patterns from Section 16. Empty list when patient has no clinician association.
 
 ---
 
@@ -1559,7 +1943,7 @@ All API errors should follow this format:
 | 15 | POST | `/api/v2/documents/upload` | High |
 | 16 | GET | `/api/v2/documents/{id}/download` | Medium |
 | 17 | DELETE | `/api/v2/documents/{id}` | Medium |
-| 18 | GET | `/api/v2/clinical-team` | High |
+| 18 | GET | `/api/v2/clinical-team` | High (read-only, Section 19) |
 | 19 | POST | `/api/v2/share-to-clinician` | High |
 | 20 | POST | `/api/v2/tests/results` | Medium |
 | 21 | GET | `/api/v2/tests/results` | Medium |
@@ -1568,5 +1952,19 @@ All API errors should follow this format:
 | 24 | GET | `/api/v2/consent` | High (GDPR) |
 | 25 | GET | `/api/v2/me/export` | High (GDPR) |
 | 26 | DELETE | `/api/v2/me` | High (GDPR) |
+| 27 | GET | `/api/v2/admin/events` | Medium ✅ |
+| 28 | POST | `/api/v2/admin/events` | Medium ✅ |
+| 29 | PUT | `/api/v2/admin/events/{id}` | Medium ✅ |
+| 30 | DELETE | `/api/v2/admin/events/{id}` | Medium ✅ |
+| 31 | GET | `/api/v2/events` | Medium ✅ |
+| 32 | GET | `/api/v2/events/{id}` | Medium ✅ |
+| 33 | POST | `/api/v2/events/{id}/rsvp` | Medium ✅ |
+| 34 | DELETE | `/api/v2/events/{id}/rsvp` | Medium ✅ |
+| 35 | GET | `/api/v2/admin/clinical-team` | Medium |
+| 36 | POST | `/api/v2/admin/clinical-team` | Medium |
+| 37 | PUT | `/api/v2/admin/clinical-team/{id}` | Medium |
+| 38 | DELETE | `/api/v2/admin/clinical-team/{id}` | Medium |
 
-**Total: 26 new endpoints** (15 High priority, 7 Medium, 4 Low)
+**Total: 38 new endpoints** (15 High priority, 19 Medium, 4 Low)
+
+**Deprecated:** Patient `POST` / `DELETE` on `/api/v2/clinical-team` (replaced by admin CRUD, Section 19).

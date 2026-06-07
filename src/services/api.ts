@@ -12,7 +12,11 @@ import type {
   ChatHistory,
   FeedbackRequest,
   HealthStatus,
-  IndexesResponse
+  IndexesResponse,
+  PatientEvent,
+  PatientEventListResponse,
+  PatientEventRsvpResponse,
+  ClinicalTeamResponse,
 } from '../types';
 
 const API_BASE_V1 = '/api/v1';
@@ -88,6 +92,37 @@ function getUserId(): string | null {
   return null;
 }
 
+function formatApiDetail(detail: unknown): string | undefined {
+  if (typeof detail === 'string') return detail;
+  if (detail != null && typeof detail === 'object' && !Array.isArray(detail)) {
+    if ('message' in detail && typeof (detail as { message: unknown }).message === 'string') {
+      return (detail as { message: string }).message;
+    }
+  }
+  if (Array.isArray(detail)) {
+    const messages = detail
+      .map((item) => {
+        if (typeof item === 'object' && item !== null && 'msg' in item) {
+          return String((item as { msg: unknown }).msg);
+        }
+        return typeof item === 'string' ? item : undefined;
+      })
+      .filter(Boolean);
+    return messages.length > 0 ? messages.join(' ') : undefined;
+  }
+  return undefined;
+}
+
+function consentTypeFromError(error: { consent_type?: string; detail?: unknown }): string | undefined {
+  if (typeof error.consent_type === 'string') return error.consent_type;
+  const detail = error.detail;
+  if (detail != null && typeof detail === 'object' && !Array.isArray(detail) && 'consent_type' in detail) {
+    const ct = (detail as { consent_type: unknown }).consent_type;
+    return typeof ct === 'string' ? ct : undefined;
+  }
+  return undefined;
+}
+
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const token = getAuthToken();
   const userId = getUserId();
@@ -125,13 +160,20 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
     }
 
     // 403 — consent required or guest blocked
-    if (response.status === 403 && error.consent_type) {
-      const apiErr = new ApiError(response.status, error.message || 'Consent required');
-      (apiErr as ApiErrorWithConsent).consentType = error.consent_type;
+    const consentType = consentTypeFromError(error);
+    if (response.status === 403 && consentType) {
+      const apiErr = new ApiError(
+        response.status,
+        formatApiDetail(error.detail) || error.message || 'Consent required'
+      );
+      (apiErr as ApiErrorWithConsent).consentType = consentType;
       throw apiErr;
     }
 
-    throw new ApiError(response.status, error.detail || error.message || 'An error occurred');
+    throw new ApiError(
+      response.status,
+      formatApiDetail(error.detail) || error.message || 'An error occurred',
+    );
   }
 
   return response.json();
@@ -339,7 +381,8 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
 
 export interface MoodEntry {
   entry_id: string;
-  mood_score: number;
+  entry_type?: 'basic' | 'advanced';
+  mood_score?: number;
   note: string | null;
   emotions: string[] | null;
   triggers: string[] | null;
@@ -352,7 +395,8 @@ export interface MoodEntry {
 }
 
 export interface MoodLogRequest {
-  mood_score: number;
+  entry_type?: 'basic' | 'advanced';
+  mood_score?: number;
   note?: string;
   emotions?: string[];
   triggers?: string[];
@@ -531,16 +575,9 @@ export async function downloadDocument(id: string): Promise<void> {
 // Clinical Team API (v2)
 // ================================
 
-export interface TeamMember {
-  id: string;
-  name: string;
-  role: string;
-  specialty: string | null;
-  avatar_url: string | null;
-  contact_email: string | null;
-}
+export type TeamMember = import('../types').ClinicalTeamMember;
 
-export async function getClinicalTeam(): Promise<{ team_members: TeamMember[] }> {
+export async function getClinicalTeam(): Promise<ClinicalTeamResponse> {
   return fetchJson(`${API_BASE_V2}/clinical-team`);
 }
 
@@ -606,25 +643,6 @@ export async function getShareHistory(): Promise<{ shares: ShareHistoryEntry[] }
   return fetchJson(`${API_BASE_V2}/share/history`);
 }
 
-
-// ================================
-// Clinical Team API (v2) — CRUD
-// ================================
-
-export interface AddTeamMemberRequest {
-  name: string;
-  role: string;
-  specialty?: string;
-  contact_email?: string;
-}
-
-export async function addClinicalTeamMember(data: AddTeamMemberRequest): Promise<TeamMember & { message: string }> {
-  return fetchJson(`${API_BASE_V2}/clinical-team`, { method: 'POST', body: JSON.stringify(data) });
-}
-
-export async function removeClinicalTeamMember(id: string): Promise<{ message: string }> {
-  return fetchJson(`${API_BASE_V2}/clinical-team/${id}`, { method: 'DELETE' });
-}
 
 // ================================
 // GDPR / Data Rights API (v2)
@@ -875,6 +893,40 @@ export async function getRecipeSuggestions(
 
 export async function getRecipe(mealId: string): Promise<Recipe> {
   return fetchJson<Recipe>(`${API_BASE_V2}/recipes/${mealId}`);
+}
+
+// ================================
+// Community Events API (v2)
+// ================================
+
+export interface GetEventsParams {
+  when?: 'upcoming' | 'past';
+  type?: 'wellness' | 'support' | 'education';
+  limit?: number;
+  offset?: number;
+}
+
+export async function getEvents(params: GetEventsParams = {}): Promise<PatientEventListResponse> {
+  const { when = 'upcoming', limit = 50, offset = 0, type } = params;
+  const query = new URLSearchParams({
+    when,
+    limit: String(limit),
+    offset: String(offset),
+  });
+  if (type) query.set('type', type);
+  return fetchJson(`${API_BASE_V2}/events?${query}`);
+}
+
+export async function getEvent(id: string): Promise<{ event: PatientEvent }> {
+  return fetchJson(`${API_BASE_V2}/events/${encodeURIComponent(id)}`);
+}
+
+export async function rsvpEvent(id: string): Promise<PatientEventRsvpResponse> {
+  return fetchJson(`${API_BASE_V2}/events/${encodeURIComponent(id)}/rsvp`, { method: 'POST' });
+}
+
+export async function cancelRsvp(id: string): Promise<PatientEventRsvpResponse> {
+  return fetchJson(`${API_BASE_V2}/events/${encodeURIComponent(id)}/rsvp`, { method: 'DELETE' });
 }
 
 export { ApiError };

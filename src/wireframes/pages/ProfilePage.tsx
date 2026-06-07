@@ -44,8 +44,8 @@ export function ProfilePage() {
   const [loadingActivity, setLoadingActivity] = useState(false)
   const [navMode, setNavMode] = useState<'ai' | 'search'>(() => {
     try {
-      return localStorage.getItem('nav_mode') === 'search' ? 'search' : 'ai'
-    } catch { return 'ai' }
+      return localStorage.getItem('nav_mode') === 'ai' ? 'ai' : 'search'
+    } catch { return 'search' }
   })
 
   const isIndia = isIndiaJurisdiction()

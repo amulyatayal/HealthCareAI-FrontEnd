@@ -1,9 +1,12 @@
+import { useState, useEffect } from 'react'
 import { MessageCircle, Users, Calendar, Heart, ShoppingBag, ChevronRight, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
 import { useBasePath } from '../hooks/useBasePath'
 import { ComingSoonBadge } from '../../features/dashboard/components/ComingSoonBadge'
+import { useAuth } from '../../contexts/AuthContext'
+import { getEvents } from '../../services/api'
 
 interface CommunityFeature {
   icon: typeof MessageCircle
@@ -18,13 +21,29 @@ interface CommunityFeature {
 
 export function CommunityHub() {
   const base = useBasePath()
+  const { user } = useAuth()
+  const [eventsBadge, setEventsBadge] = useState<string | undefined>()
+
+  useEffect(() => {
+    if (!user || user.isGuest) return
+    let cancelled = false
+    getEvents({ when: 'upcoming', limit: 1 })
+      .then((data) => {
+        if (!cancelled && data.total_count > 0) {
+          setEventsBadge(`${data.total_count} upcoming`)
+        }
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [user])
+
   const features: CommunityFeature[] = [
     {
       icon: Calendar,
       title: 'Events',
       subtitle: 'Community events and meetups',
       to: `${base}/community/events`,
-      badge: '2 upcoming',
+      badge: eventsBadge,
       iconColor: 'amber',
     },
     {
@@ -94,7 +113,9 @@ export function CommunityHub() {
         </div>
       </WireframeCard>
 
-      <div style={{
+      <div
+        className="wf-card-coming-soon"
+        style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

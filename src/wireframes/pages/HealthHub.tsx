@@ -7,6 +7,7 @@ import { useBasePath } from '../hooks/useBasePath'
 import { ComingSoonBadge } from '../../features/dashboard/components/ComingSoonBadge'
 import { getMoodHistory, getDashboardSummary } from '../../services/api'
 import type { MoodEntry } from '../../services/api'
+import { isBasicMoodEntry, normalizeMoodEntry } from '../utils/moodEntries'
 
 const MOOD_EMOJIS: Record<number, string> = {
   1: '😢', 2: '😔', 3: '😕', 4: '😐', 5: '🙂',
@@ -63,14 +64,17 @@ export function HealthHub() {
         if (cancelled) return
 
         if (moodData.status === 'fulfilled') {
-          const entries: MoodEntry[] = moodData.value.entries ?? []
+          const entries: MoodEntry[] = (moodData.value.entries ?? [])
+            .map((e) => normalizeMoodEntry(e as Parameters<typeof normalizeMoodEntry>[0]))
+            .filter(isBasicMoodEntry)
           const entryByDate = new Map<string, number>()
           for (const e of entries) {
+            if (e.mood_score == null) continue
             const key = toDateKey(new Date(e.timestamp))
             if (!entryByDate.has(key)) entryByDate.set(key, e.mood_score)
           }
           setWeekMoods(weekKeys.map((k) => entryByDate.get(k) ?? null))
-          setTotalEntries(moodData.value.total_count ?? entries.length)
+          setTotalEntries(entries.length)
           setAvgMood(moodData.value.avg_mood ?? null)
           setTrendDir(moodData.value.trend_direction ?? 'stable')
         }

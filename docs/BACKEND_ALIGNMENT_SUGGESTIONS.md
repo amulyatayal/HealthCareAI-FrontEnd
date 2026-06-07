@@ -100,15 +100,13 @@ DELETE /api/v2/consent/{consent_type}
 - Preserve existing data (do not delete on withdrawal)
 - Return 403 with `consent_required` on subsequent requests to disabled features
 
-### 3.3 Clinical Team CRUD
+### 3.3 Clinical Team CRUD — DEPRECATED
+
+> **Replaced by Section 3.7.** Patient self-report POST/DELETE is no longer used. See Section 19 in BACKEND_API_SPECIFICATION.md.
 
 ```
-POST   /api/v2/clinical-team
-  Request:  { name, role, specialty?, contact_email? }
-  Response: { id, name, role, specialty, contact_email, message }
-
-DELETE /api/v2/clinical-team/{id}
-  Response: { message: "Team member removed" }
+POST   /api/v2/clinical-team          (DEPRECATED)
+DELETE /api/v2/clinical-team/{id}    (DEPRECATED)
 ```
 
 ### 3.4 Activity Audit Log
@@ -135,6 +133,102 @@ POST   /api/v2/documents/upload     (multipart/form-data)
     422 → { detail: "Invalid file type" | "Virus detected" }
     409 → { detail: "Storage limit reached", current_bytes, limit_bytes }
 ```
+
+### 3.6 Community Events (Admin + Patient RSVP) — ✅ Implemented
+
+**Scoping:** Clinician-scoped (JWT `sub` for admin; `PatientProfiles.clinician_id` for patients after associate). **Not** hospital-filtered via `X-Hospital-Id`. `hospital_id` on Event is metadata only.
+
+**OpenAPI:** `http://localhost:8000/docs` (tag: Community Events / Admin Portal)
+
+**Admin** — `Authorization: Bearer <admin_token>`:
+
+```
+GET    /api/v2/admin/events?status=all|published|cancelled&limit=50&offset=0
+  Response: { events: [Event without user_has_rsvp], total_count }
+  Errors:   404 wrong id / other clinician's event; 400 invalid id (undefined, etc.)
+
+POST   /api/v2/admin/events
+  Request:  { title, date (YYYY-MM-DD), time (HH:MM 24h), location?, type?, is_virtual?, description? }
+  Response: 201 { id, message, event }
+  Note:     starts_at = UTC ISO8601 with Z from date + time
+
+PUT    /api/v2/admin/events/{id}
+  Request:  partial update (same fields as POST, all optional)
+  Rule:     if updating schedule, send both date AND time
+  Response: { message, event }
+
+DELETE /api/v2/admin/events/{id}
+  Response: { message: "Event cancelled" }   (soft-delete: status → cancelled)
+```
+
+**Patient** — `Authorization: Bearer <patient_jwt>` required for GET and RSVP:
+
+```
+GET    /api/v2/events?when=upcoming|past&type=&limit=50&offset=0
+  Response: { events: [Event with user_has_rsvp], total_count }
+  Notes:   exclude cancelled; scope to associated clinician (not X-Hospital-Id)
+  Errors:  404 no clinician association
+
+GET    /api/v2/events/{id}
+  Response: { event }
+  Errors:   404 no association, wrong event, cancelled/unpublished
+
+POST   /api/v2/events/{id}/rsvp
+  Response: { message: "RSVP confirmed", event }
+  Consent:  requires community consent (choices.community: true)
+  Grant:    POST /api/v2/consent/data
+  Check:    GET /api/v2/consent → data_consent.choices.community
+  Errors:   403 { detail: { message, consent_type: "community" } }; 422 past event
+  Rules:    event must be published and in the future; idempotent on repeat POST
+
+DELETE /api/v2/events/{id}/rsvp
+  Response: { message: "RSVP removed", event }
+  Rules:    idempotent — returns 200 even if not RSVP'd
+```
+
+**Event object:** `id` (UUID — use in `/events/{id}/rsvp` URLs), `hospital_id` (metadata, nullable), `title`, `starts_at` (UTC `Z`), `location`, `type`, `is_virtual`, `description`, `status`, `attendee_count`, `user_has_rsvp` (patient only), `created_at`, `updated_at`.
+
+**Frontend mapping:** EventsPage "Upcoming" → `when=upcoming`; "My Events" → filter client-side on `user_has_rsvp`; history → `when=past`. On RSVP 403, prompt user to enable community consent in Settings.
+
+**Prerequisites:** Patient associated via `POST /api/v2/me/associate`; admin JWT `sub` matches event creator.
+
+**Out of scope (v1):** patient-proposed events, calendar dot API, capacity/waitlists, reminders, hospital-wide feed via X-Hospital-Id only, frontend wiring (separate PR).
+
+### 3.7 Clinician Clinical Team (Admin + Patient read-only)
+
+**Scoping:** Clinician-scoped (`clinician_id` from admin JWT `sub`; patient reads via `PatientProfiles.clinician_id` after associate). **Not** hospital-filtered via `X-Hospital-Id`.
+
+**Admin** — `Authorization: Bearer <admin_token>`:
+
+```
+GET    /api/v2/admin/clinical-team?limit=50&offset=0
+  Response: { team_members: [TeamMember], total_count }
+
+POST   /api/v2/admin/clinical-team
+  Request:  { name, role, specialty?, contact_email?, contact_phone?, display_order? }
+  Response: 201 { id, message, team_member }
+
+PUT    /api/v2/admin/clinical-team/{id}
+  Request:  partial update (same fields as POST, all optional)
+  Response: { message, team_member }
+
+DELETE /api/v2/admin/clinical-team/{id}
+  Response: { message: "Team member removed" }
+```
+
+**Patient** — `Authorization: Bearer <patient_jwt>` required; **GET only**:
+
+```
+GET    /api/v2/clinical-team
+  Response: { team_members: [TeamMember], total_count, clinician_id }
+  Notes:   empty when not associated; sort display_order ASC, name ASC
+```
+
+**Team member:** `id`, `clinician_id`, `name`, `role`, `specialty`, `contact_email`, `contact_phone`, `avatar_url`, `display_order`, `created_at`, `updated_at`.
+
+**Replaces:** patient self-report `POST`/`DELETE` on `/api/v2/clinical-team` (Section 3.3).
+
+**Prerequisites:** Patient associated via `POST /api/v2/me/associate`.
 
 ---
 

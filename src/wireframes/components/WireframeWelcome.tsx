@@ -171,9 +171,8 @@ export function WireframeWelcome({ children, onSuggestionClick }: WireframeWelco
       </div>
 
       {/* Chat input renders here */}
-      <div style={{ 
-        width: '100%', 
-        maxWidth: '400px',
+      <div style={{
+        width: '100%',
         position: 'relative',
         zIndex: 1,
       }}>

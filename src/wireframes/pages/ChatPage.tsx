@@ -135,12 +135,15 @@ export function ChatPage() {
 
   return (
     <WireframeLayout showBack title="Ask Tara">
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        height: 'calc(100vh - 120px)',
-        overflow: 'hidden'
-      }}>
+      <div
+        className="wf-chat-layout"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: 'calc(100vh - 120px)',
+          overflow: 'hidden',
+        }}
+      >
         {!aiDisclosureDismissed && (
           <div style={{
             background: jurisdiction === 'india' ? '#eff6ff' : '#f0fdf4',
