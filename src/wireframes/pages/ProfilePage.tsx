@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { FileText, Calendar, Settings, Shield, LogOut, ChevronRight, User, Compass, Share2, Download, Trash2, ToggleLeft, Check, Clock, UserPlus, AlertTriangle, BookOpen, Database, Mail, Phone } from 'lucide-react'
+import { FileText, Calendar, Settings, Shield, LogOut, ChevronRight, User, Compass, Share2, Download, Trash2, ToggleLeft, Check, Clock, Search, MessageCircle, UserPlus, AlertTriangle, BookOpen, Database, Mail, Phone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
@@ -42,6 +42,11 @@ export function ProfilePage() {
   const [showActivityLog, setShowActivityLog] = useState(false)
   const [activityLog, setActivityLog] = useState<{ id: string; type: string; description: string; timestamp: string }[]>([])
   const [loadingActivity, setLoadingActivity] = useState(false)
+  const [navMode, setNavMode] = useState<'ai' | 'search'>(() => {
+    try {
+      return localStorage.getItem('nav_mode') === 'ai' ? 'ai' : 'search'
+    } catch { return 'search' }
+  })
 
   const isIndia = isIndiaJurisdiction()
   const ec = getEthicsCommittee()
@@ -260,13 +265,40 @@ export function ProfilePage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--wf-gray-800)', marginBottom: 4 }}>
-              Search Resources
+              {navMode === 'ai' ? 'Ask Tara (AI)' : 'Search Resources'}
             </div>
             <div style={{ fontSize: 12, color: 'var(--wf-gray-500)', lineHeight: 1.4 }}>
-              Keyword search across resources from your care team. Ask Tara (AI) is coming soon.
+              {navMode === 'ai'
+                ? 'AI-powered assistant answers your questions'
+                : 'Keyword search across resources from your care team'}
             </div>
           </div>
-          <ComingSoonBadge />
+          <button
+            type="button"
+            onClick={() => {
+              const next = navMode === 'ai' ? 'search' : 'ai'
+              setNavMode(next)
+              localStorage.setItem('nav_mode', next)
+              window.dispatchEvent(new Event('nav_mode_changed'))
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '8px 14px',
+              border: '1px solid var(--wf-gray-200)',
+              borderRadius: 20,
+              background: 'var(--wf-gray-50)',
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: 500,
+              color: 'var(--wf-gray-700)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {navMode === 'ai' ? <Search size={14} /> : <MessageCircle size={14} />}
+            Switch to {navMode === 'ai' ? 'Search' : 'Ask Tara'}
+          </button>
         </div>
       </WireframeCard>
 
