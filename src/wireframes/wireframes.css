@@ -1892,7 +1892,7 @@
   flex-shrink: 0;
 }
 
-/* Donate card — subtle warm giving feel */
+/* Donate card — compact warm giving strip */
 .wf-donate-card {
   position: relative;
   overflow: hidden;
@@ -1901,33 +1901,49 @@
   box-shadow: 0 2px 10px rgba(251, 191, 36, 0.06);
 }
 
+.wf-donate-card-compact {
+  padding: 12px 14px;
+}
+
 .wf-donate-card::before {
   content: '';
   position: absolute;
-  top: -40px;
-  right: -28px;
-  width: 120px;
-  height: 120px;
-  background: radial-gradient(circle, rgba(251, 191, 36, 0.14) 0%, transparent 70%);
+  top: -48px;
+  right: -32px;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.12) 0%, transparent 70%);
   pointer-events: none;
 }
 
-.wf-donate-card::after {
-  content: '♥';
-  position: absolute;
-  bottom: 6px;
-  left: 10px;
-  font-size: 44px;
-  line-height: 1;
-  color: rgba(244, 63, 94, 0.055);
-  pointer-events: none;
-  user-select: none;
-}
-
-.wf-donate-card .wf-card-header,
-.wf-donate-card > button {
+.wf-donate-compact-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   position: relative;
   z-index: 1;
+}
+
+.wf-donate-compact-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.wf-donate-compact-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--wf-gray-800);
+  line-height: 1.3;
+}
+
+.wf-donate-compact-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .wf-donate-card .wf-btn-disabled,
@@ -1940,10 +1956,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
-  border-radius: 10px;
+  border-radius: 8px;
   background: rgba(253, 164, 175, 0.3);
 }
 
