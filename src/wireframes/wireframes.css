@@ -2506,6 +2506,11 @@
   color: #a855f7;
 }
 
+.wf-quick-strip-icon.recipes {
+  background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  color: #22c55e;
+}
+
 .wf-quick-strip-label {
   font-size: 11px;
   font-weight: 600;

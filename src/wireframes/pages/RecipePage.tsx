@@ -6,12 +6,42 @@ import {
   getRecipeConfig,
   getRecipeSuggestions,
   getRecipe,
+  recipeImageUrl,
   type DietOption,
   type MealSummary,
   type Recipe,
 } from '../../services/api'
 
 type Step = 'diet' | 'allergies' | 'meals' | 'recipe'
+
+/** Recipe photo with graceful fallback to the emoji when absent or broken. */
+function RecipeThumb({
+  image,
+  emoji,
+  name,
+  size,
+  emojiSize,
+}: {
+  image?: string | null
+  emoji: string
+  name: string
+  size: number
+  emojiSize: number
+}) {
+  const [error, setError] = useState(false)
+  const url = recipeImageUrl(image)
+  if (url && !error) {
+    return (
+      <img
+        src={url}
+        alt={name}
+        onError={() => setError(true)}
+        style={{ width: size, height: size, borderRadius: 12, objectFit: 'cover', flexShrink: 0 }}
+      />
+    )
+  }
+  return <span style={{ fontSize: emojiSize, flexShrink: 0 }}>{emoji}</span>
+}
 
 export function RecipePage() {
   const [step, setStep] = useState<Step>('diet')
@@ -252,7 +282,7 @@ export function RecipePage() {
                   onClick={() => openRecipe(meal.id)}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span style={{ fontSize: 34 }}>{meal.emoji}</span>
+                    <RecipeThumb image={meal.image} emoji={meal.emoji} name={meal.name} size={44} emojiSize={34} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--wf-gray-700)' }}>{meal.name}</div>
                       <div style={{ fontSize: 13, color: 'var(--wf-gray-500)', marginTop: 2 }}>{meal.desc}</div>
@@ -294,9 +324,34 @@ export function RecipePage() {
             </WireframeCard>
           ) : (
             <>
+              {/* Compact choices + recipe allergen / side-effect summary */}
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--wf-gray-500)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
+                  Your choices
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 3 }}>
+                  <span style={{ fontSize: 11, color: 'var(--wf-gray-500)', minWidth: 64, paddingTop: 2 }}>Preference</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', background: 'var(--wf-gray-100)', borderRadius: 999, fontSize: 12, color: 'var(--wf-gray-700)', fontWeight: 500 }}>
+                    {dietOptions.find((o) => o.value === diet)?.emoji} {diet}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 3 }}>
+                  <span style={{ fontSize: 11, color: 'var(--wf-gray-500)', minWidth: 64, paddingTop: 2 }}>Allergies</span>
+                  {allergies.length > 0 ? (
+                    <span style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                      {allergies.map((a) => (
+                        <span key={a} style={{ padding: '2px 8px', background: '#fef2f2', color: '#991b1b', borderRadius: 999, fontSize: 12, fontWeight: 500 }}>{a}</span>
+                      ))}
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: 12, color: 'var(--wf-gray-500)', paddingTop: 2 }}>None mentioned</span>
+                  )}
+                </div>
+              </div>
+
               <WireframeCard>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{ fontSize: 40 }}>{recipe.emoji}</span>
+                  <RecipeThumb image={recipe.image} emoji={recipe.emoji} name={recipe.name} size={56} emojiSize={40} />
                   <div>
                     <div style={{ fontWeight: 700, fontSize: 17, color: 'var(--wf-gray-700)' }}>{recipe.name}</div>
                     <div style={{ display: 'flex', gap: 14, marginTop: 4, fontSize: 12, color: 'var(--wf-gray-500)' }}>
@@ -304,6 +359,30 @@ export function RecipePage() {
                       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Flame size={13} /> {recipe.calories} cal</span>
                     </div>
                   </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 12 }}>
+                  <span style={{ fontSize: 11, color: 'var(--wf-gray-500)', minWidth: 64, paddingTop: 2 }}>Allergens</span>
+                  {recipe.allergens.length > 0 ? (
+                    <span style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                      {recipe.allergens.map((a) => (
+                        <span key={a} style={{ padding: '2px 8px', background: '#fffbeb', color: '#92400e', borderRadius: 999, fontSize: 12, fontWeight: 500 }}>{a}</span>
+                      ))}
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: 12, color: 'var(--wf-gray-500)', paddingTop: 2 }}>No major allergens</span>
+                  )}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 6 }}>
+                  <span style={{ fontSize: 11, color: 'var(--wf-gray-500)', minWidth: 64, paddingTop: 2 }}>Supports</span>
+                  {recipe.symptom_support.length > 0 ? (
+                    <span style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                      {recipe.symptom_support.map((s) => (
+                        <span key={s} style={{ padding: '2px 8px', background: '#f0fdf4', color: '#166534', borderRadius: 999, fontSize: 12, fontWeight: 500 }}>{s}</span>
+                      ))}
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: 12, color: 'var(--wf-gray-500)', paddingTop: 2 }}>—</span>
+                  )}
                 </div>
               </WireframeCard>
 
@@ -336,34 +415,6 @@ export function RecipePage() {
         </>
       )}
 
-      {/* Persistent summary of the user's choices */}
-      {diet && (
-        <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--wf-gray-100)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--wf-gray-500)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 }}>
-            Your choices
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <span style={{ fontSize: 12, color: 'var(--wf-gray-500)', minWidth: 72 }}>Preference</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', background: 'var(--wf-gray-100)', borderRadius: 999, fontSize: 13, color: 'var(--wf-gray-700)', fontWeight: 500 }}>
-              {dietOptions.find((o) => o.value === diet)?.emoji} {diet}
-            </span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-            <span style={{ fontSize: 12, color: 'var(--wf-gray-500)', minWidth: 72, paddingTop: 4 }}>Allergies</span>
-            {allergies.length > 0 ? (
-              <span style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {allergies.map((a) => (
-                  <span key={a} style={{ padding: '4px 10px', background: '#fef2f2', color: '#991b1b', borderRadius: 999, fontSize: 13, fontWeight: 500 }}>
-                    {a}
-                  </span>
-                ))}
-              </span>
-            ) : (
-              <span style={{ fontSize: 13, color: 'var(--wf-gray-500)', paddingTop: 4 }}>None mentioned</span>
-            )}
-          </div>
-        </div>
-      )}
     </WireframeLayout>
   )
 }

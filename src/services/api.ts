@@ -868,13 +868,21 @@ export interface MealSummary {
   desc: string;
   time: string;
   calories: number;
+  image?: string | null; // API path, e.g. /recipes/images/recipe-001.png
 }
 
 export interface Recipe extends MealSummary {
   diets: string[];
   allergens: string[];
+  symptom_support: string[];
   ingredients: string[];
   steps: string[];
+}
+
+/** Build a loadable URL for a recipe image path returned by the API. */
+export function recipeImageUrl(path?: string | null): string | null {
+  if (!path) return null;
+  return `${API_BASE_V2}${path}`;
 }
 
 export async function getRecipeConfig(): Promise<RecipeConfig> {

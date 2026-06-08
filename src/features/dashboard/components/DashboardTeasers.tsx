@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Calendar, ClipboardList, Stethoscope } from 'lucide-react'
+import { Calendar, ChefHat, ClipboardList, Stethoscope } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
 import { getClinicalTeam, getEvents } from '../../../services/api'
@@ -77,6 +77,14 @@ export function DashboardTeasers({ basePath }: Props) {
       label: 'PROM',
       summary: 'Complete survey',
       iconClass: 'prom',
+    },
+    {
+      key: 'recipes',
+      to: `${basePath}/recipes`,
+      icon: ChefHat,
+      label: 'Recipes',
+      summary: 'Healthy meals',
+      iconClass: 'recipes',
     },
   ] as const
 
