@@ -14,11 +14,11 @@ export function WireframeCard({ title, subtitle, children, action, className = '
     <div className={`wf-card ${className}`} style={style}>
       {(title || action) && (
         <div className="wf-card-header">
-          <div>
+          <div className="wf-card-header-body">
             {title && <h3 className="wf-card-title">{title}</h3>}
             {subtitle && <p className="wf-card-subtitle">{subtitle}</p>}
           </div>
-          {action}
+          {action && <div className="wf-card-header-action">{action}</div>}
         </div>
       )}
       {children}
