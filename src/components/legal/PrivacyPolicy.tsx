@@ -503,38 +503,23 @@ export function PrivacyPolicy() {
 
       {/* ------------------------------------------------------------------ */}
       <Section title="17. Ethics Committee Oversight">
-        {tab === 'uk' ? (
-          <>
-            <p>
-              This application has been reviewed and approved by the relevant Institutional Ethics Committee.
-              If you have concerns about how this application handles your data or the ethical conduct of
-              AI features, you may contact the Ethics Committee directly.
-            </p>
-            <ul style={{ listStyle: 'none', paddingLeft: 0, fontSize: 14 }}>
-              <li><strong>Committee:</strong> Barts Health NHS Trust Research Ethics Committee</li>
-              <li><strong>Approval Reference:</strong> IRAS 2025/001234</li>
-              <li><strong>Valid until:</strong> 31 January 2027</li>
-              <li><strong>Email:</strong> <a href="mailto:research.ethics@bartshealth.nhs.uk">research.ethics@bartshealth.nhs.uk</a></li>
-            </ul>
-          </>
-        ) : (
-          <>
-            <p>
-              This application has been reviewed and approved by the relevant Institutional Ethics Committee.
-              Under ICMR Ethical Guidelines for AI in Healthcare (2023), all applications processing health
-              data must operate under Institutional Ethics Committee oversight.
-            </p>
-            <ul style={{ listStyle: 'none', paddingLeft: 0, fontSize: 14 }}>
-              <li><strong>Committee:</strong> Apollo Hospitals Institutional Ethics Committee</li>
-              <li><strong>Approval Reference:</strong> AH-IEC/2025/056</li>
-              <li><strong>Valid until:</strong> 31 March 2027</li>
-              <li><strong>Email:</strong> <a href="mailto:iec@apollohospitals.com">iec@apollohospitals.com</a></li>
-              <li><strong>Phone:</strong> +91 44 2829 3333</li>
-            </ul>
-          </>
-        )}
         <p>
-          If you have concerns about how this application handles your data, you may contact the Ethics Committee directly.
+          This application is intended to operate under review and approval by the relevant Institutional
+          Ethics Committee for your participating care setting.
+          {tab === 'india' && (
+            <> Under ICMR Ethical Guidelines for AI in Healthcare (2023), all applications processing health
+            data must operate under Institutional Ethics Committee oversight.</>
+          )}
+        </p>
+        <p>
+          Ethics committee approval details for your site are provided at onboarding or available on request
+          via <a href="mailto:contact-us@anvega.ai">contact-us@anvega.ai</a>.
+        </p>
+        <p>
+          If you have concerns about how this application handles your data or the ethical conduct of AI
+          features, contact us at{' '}
+          <a href="mailto:contact-us@anvega.ai">contact-us@anvega.ai</a> and we will direct you to the
+          appropriate ethics committee.
         </p>
       </Section>
 
