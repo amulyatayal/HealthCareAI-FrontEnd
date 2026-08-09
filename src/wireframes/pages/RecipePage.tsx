@@ -43,6 +43,29 @@ function RecipeThumb({
   return <span style={{ fontSize: emojiSize, flexShrink: 0 }}>{emoji}</span>
 }
 
+/** Most of the recipe book is index entries — a dish name and description with
+ * no ingredients or method. Say so plainly rather than rendering empty lists. */
+function NotRecorded({ what }: { what: string }) {
+  return (
+    <p style={{ fontSize: 14, color: 'var(--wf-gray-500)', lineHeight: 1.5, margin: 0 }}>
+      {what} hasn't been added for this dish yet.
+    </p>
+  )
+}
+
+/** Time is missing for every recipe in the current book; only show the chip
+ * when there is something to show. */
+function MealStats({ time, calories }: { time: string; calories: number }) {
+  return (
+    <div style={{ display: 'flex', gap: 14, marginTop: 8, fontSize: 12, color: 'var(--wf-gray-500)' }}>
+      {time && (
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={13} /> {time}</span>
+      )}
+      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Flame size={13} /> {calories} cal</span>
+    </div>
+  )
+}
+
 export function RecipePage() {
   const [step, setStep] = useState<Step>('diet')
 
@@ -159,7 +182,13 @@ export function RecipePage() {
           {step === 'diet' && "Hi! I'm your recipe helper. What kind of meals are you looking for?"}
           {step === 'allergies' && 'Got it! Do you have any allergies I should avoid? Pick from the list or type your own.'}
           {step === 'meals' && `Here are some ${diet?.toLowerCase()} meals${allergies.length ? ' that avoid your allergies' : ''}. Tap one to see the recipe — or tap "Show more meals" if none appeal.`}
-          {step === 'recipe' && (recipe ? `Great choice! Here's how to make ${recipe.name}.` : 'Fetching your recipe…')}
+          {step === 'recipe' && (
+            recipe
+              ? recipe.steps.length > 0
+                ? `Great choice! Here's how to make ${recipe.name}.`
+                : `${recipe.name} is in our recipe book, but the full method isn't written up yet. Here's what we do know.`
+              : 'Fetching your recipe…'
+          )}
         </div>
       </div>
 
@@ -286,10 +315,7 @@ export function RecipePage() {
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--wf-gray-700)' }}>{meal.name}</div>
                       <div style={{ fontSize: 13, color: 'var(--wf-gray-500)', marginTop: 2 }}>{meal.desc}</div>
-                      <div style={{ display: 'flex', gap: 14, marginTop: 8, fontSize: 12, color: 'var(--wf-gray-500)' }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={13} /> {meal.time}</span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Flame size={13} /> {meal.calories} cal</span>
-                      </div>
+                      <MealStats time={meal.time} calories={meal.calories} />
                     </div>
                   </div>
                 </button>
@@ -354,12 +380,15 @@ export function RecipePage() {
                   <RecipeThumb image={recipe.image} emoji={recipe.emoji} name={recipe.name} size={56} emojiSize={40} />
                   <div>
                     <div style={{ fontWeight: 700, fontSize: 17, color: 'var(--wf-gray-700)' }}>{recipe.name}</div>
-                    <div style={{ display: 'flex', gap: 14, marginTop: 4, fontSize: 12, color: 'var(--wf-gray-500)' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={13} /> {recipe.time}</span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Flame size={13} /> {recipe.calories} cal</span>
-                    </div>
+                    <MealStats time={recipe.time} calories={recipe.calories} />
                   </div>
                 </div>
+                {/* For index-only dishes this description is the only content there is. */}
+                {recipe.desc && (
+                  <p style={{ fontSize: 14, color: 'var(--wf-gray-700)', lineHeight: 1.5, margin: '12px 0 0' }}>
+                    {recipe.desc}
+                  </p>
+                )}
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 12 }}>
                   <span style={{ fontSize: 11, color: 'var(--wf-gray-500)', minWidth: 64, paddingTop: 2 }}>Allergens</span>
                   {recipe.allergens.length > 0 ? (
@@ -386,21 +415,41 @@ export function RecipePage() {
                 </div>
               </WireframeCard>
 
-              <WireframeCard title="Ingredients">
-                <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {recipe.ingredients.map((ing) => (
-                    <li key={ing} style={{ fontSize: 14, color: 'var(--wf-gray-700)', lineHeight: 1.4 }}>{ing}</li>
-                  ))}
-                </ul>
-              </WireframeCard>
+              {recipe.ingredients.length === 0 && recipe.steps.length === 0 ? (
+                <WireframeCard title="Full recipe not available yet">
+                  <p style={{ fontSize: 14, color: 'var(--wf-gray-500)', lineHeight: 1.5, margin: 0 }}>
+                    This dish is listed in our recipe book as an idea rather than a written-up
+                    recipe, so there are no ingredients or method to show. The allergen and
+                    nutrition notes above still apply.
+                  </p>
+                </WireframeCard>
+              ) : (
+                <>
+                  <WireframeCard title="Ingredients">
+                    {recipe.ingredients.length > 0 ? (
+                      <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {recipe.ingredients.map((ing) => (
+                          <li key={ing} style={{ fontSize: 14, color: 'var(--wf-gray-700)', lineHeight: 1.4 }}>{ing}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <NotRecorded what="An ingredient list" />
+                    )}
+                  </WireframeCard>
 
-              <WireframeCard title="Method">
-                <ol style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {recipe.steps.map((s, i) => (
-                    <li key={i} style={{ fontSize: 14, color: 'var(--wf-gray-700)', lineHeight: 1.5 }}>{s}</li>
-                  ))}
-                </ol>
-              </WireframeCard>
+                  <WireframeCard title="Method">
+                    {recipe.steps.length > 0 ? (
+                      <ol style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        {recipe.steps.map((s, i) => (
+                          <li key={i} style={{ fontSize: 14, color: 'var(--wf-gray-700)', lineHeight: 1.5 }}>{s}</li>
+                        ))}
+                      </ol>
+                    ) : (
+                      <NotRecorded what="A step-by-step method" />
+                    )}
+                  </WireframeCard>
+                </>
+              )}
             </>
           )}
 
