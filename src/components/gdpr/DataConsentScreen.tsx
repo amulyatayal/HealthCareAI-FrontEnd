@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Shield, Heart, Activity, FileText, Users, ChevronDown, ChevronUp, Globe } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { getJurisdiction, getEthicsCommittee } from '../../utils/jurisdiction'
+import { getJurisdiction } from '../../utils/jurisdiction'
 import { recordDataConsent } from '../../services/api'
 import type { DataConsentPayload } from '../../services/api'
 
@@ -174,7 +174,6 @@ const CONSENT_ITEMS: ConsentItem[] = [
 
 export function DataConsentScreen({ onConsent }: Props) {
   const jurisdiction = getJurisdiction()
-  const ec = getEthicsCommittee()
   const isIndia = jurisdiction === 'india'
 
   const [choices, setChoices] = useState<Omit<DataConsentChoices, 'coreService' | 'clinicalSharing'>>({
@@ -274,11 +273,6 @@ export function DataConsentScreen({ onConsent }: Props) {
             ? 'Under the Digital Personal Data Protection Act 2023 (DPDPA), you have the right to decide exactly what personal data we process. Your consent must be free, specific, informed, and unambiguous. You can change these choices at any time in Settings.'
             : 'Tara collects data to provide its features. Under UK GDPR, you have the right to decide exactly what we process. You can change these choices at any time in Settings.'}
         </p>
-        {ec && (
-          <p style={{ fontSize: 11, opacity: 0.85, margin: '8px 0 0', lineHeight: 1.4 }}>
-            This application has been reviewed and approved by {ec.name} (Ref: {ec.approvalRef}).
-          </p>
-        )}
         <p style={{ fontSize: 11, opacity: 0.7, margin: '8px 0 0', lineHeight: 1.4 }}>
           Consent applies to Privacy Policy version January 2026.{' '}
           {isIndia && 'Regulated under DPDPA 2023 and DPDP Rules 2025.'}

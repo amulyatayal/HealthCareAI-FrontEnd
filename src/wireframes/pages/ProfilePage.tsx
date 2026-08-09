@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { FileText, Calendar, Settings, Shield, LogOut, ChevronRight, User, Compass, Share2, Download, Trash2, ToggleLeft, Check, Clock, Search, MessageCircle, UserPlus, AlertTriangle, BookOpen, Database, Mail, Phone } from 'lucide-react'
+import { FileText, Calendar, Settings, Shield, LogOut, ChevronRight, User, Compass, Share2, Download, Trash2, ToggleLeft, Check, Clock, Search, MessageCircle, UserPlus, AlertTriangle, Database } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { WireframeLayout } from '../WireframeLayout'
 import { WireframeCard } from '../components'
 import { useBasePath } from '../hooks/useBasePath'
 import { useAuth } from '../../contexts/AuthContext'
 import { getStoredDataConsent, saveDataConsent, clearDataConsent, type DataConsentChoices } from '../../components/gdpr/DataConsentScreen'
-import { getEthicsCommittee, isIndiaJurisdiction } from '../../utils/jurisdiction'
+import { isIndiaJurisdiction } from '../../utils/jurisdiction'
 import { recordDataConsent, withdrawConsent, exportMyData, deleteMyAccount, saveNominee, getNominee } from '../../services/api'
 import type { DataConsentPayload } from '../../services/api'
 import { ComingSoonBadge } from '../../features/dashboard/components/ComingSoonBadge'
@@ -49,7 +49,6 @@ export function ProfilePage() {
   })
 
   const isIndia = isIndiaJurisdiction()
-  const ec = getEthicsCommittee()
 
   const [showNominee, setShowNominee] = useState(false)
   const [nominee, setNominee] = useState(() => {
@@ -64,7 +63,6 @@ export function ProfilePage() {
   const [grievance, setGrievance] = useState({ subject: '', description: '' })
   const [grievanceSubmitted, setGrievanceSubmitted] = useState(false)
 
-  const [showEthicsCommittee, setShowEthicsCommittee] = useState(false)
   const [showRetention, setShowRetention] = useState(false)
 
   const [exportError, setExportError] = useState('')
@@ -153,6 +151,7 @@ export function ProfilePage() {
       title: 'Share my Data',
       subtitle: 'Send my data to my clinician',
       to: `${base}/profile/share`,
+      comingSoon: true,
     },
     {
       icon: Settings,
@@ -200,15 +199,15 @@ export function ProfilePage() {
 
       {/* Quick Stats */}
       <div className="wf-grid-3">
-        <WireframeCard className="wf-stat-card">
+        <WireframeCard className="wf-stat-card wf-card-coming-soon">
           <div className="wf-stat-value" style={{ fontSize: '24px' }}>45</div>
           <div className="wf-stat-label">Days Active</div>
         </WireframeCard>
-        <WireframeCard className="wf-stat-card">
+        <WireframeCard className="wf-stat-card wf-card-coming-soon">
           <div className="wf-stat-value" style={{ fontSize: '24px' }}>12</div>
           <div className="wf-stat-label">Documents</div>
         </WireframeCard>
-        <WireframeCard className="wf-stat-card">
+        <WireframeCard className="wf-stat-card wf-card-coming-soon">
           <div className="wf-stat-value" style={{ fontSize: '24px' }}>3</div>
           <div className="wf-stat-label">Buddies</div>
         </WireframeCard>
@@ -261,7 +260,12 @@ export function ProfilePage() {
         <span className="wf-section-title">Navigation Mode</span>
       </div>
 
-      <WireframeCard>
+      <WireframeCard style={navMode === 'search' ? { position: 'relative' } : undefined}>
+        {navMode === 'search' && (
+          <div style={{ position: 'absolute', top: 12, right: 12 }}>
+            <ComingSoonBadge />
+          </div>
+        )}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--wf-gray-800)', marginBottom: 4 }}>
@@ -275,8 +279,11 @@ export function ProfilePage() {
           </div>
           <button
             type="button"
+            disabled={navMode === 'search'}
+            className={navMode === 'search' ? 'wf-btn-disabled' : undefined}
             onClick={() => {
-              const next = navMode === 'ai' ? 'search' : 'ai'
+              if (navMode === 'search') return
+              const next = 'search'
               setNavMode(next)
               localStorage.setItem('nav_mode', next)
               window.dispatchEvent(new Event('nav_mode_changed'))
@@ -289,11 +296,12 @@ export function ProfilePage() {
               border: '1px solid var(--wf-gray-200)',
               borderRadius: 20,
               background: 'var(--wf-gray-50)',
-              cursor: 'pointer',
+              cursor: navMode === 'search' ? 'not-allowed' : 'pointer',
               fontSize: 13,
               fontWeight: 500,
               color: 'var(--wf-gray-700)',
               whiteSpace: 'nowrap',
+              flexShrink: 0,
             }}
           >
             {navMode === 'ai' ? <Search size={14} /> : <MessageCircle size={14} />}
@@ -497,59 +505,6 @@ export function ProfilePage() {
                 </div>
               </div>
             ))
-          )}
-        </WireframeCard>
-      )}
-
-      {/* Ethics Committee Disclosure — all jurisdictions */}
-      <button
-        type="button"
-        onClick={() => setShowEthicsCommittee(!showEthicsCommittee)}
-        className="wf-list-item"
-        style={{ background: 'white', borderRadius: '12px', marginBottom: '8px', width: '100%', border: 'none', cursor: 'pointer', textAlign: 'left' }}
-      >
-        <div className="wf-icon-btn" style={{ background: '#ecfdf5', color: '#059669' }}>
-          <BookOpen size={20} />
-        </div>
-        <div className="wf-list-content">
-          <div className="wf-list-title">Ethics Committee Approval</div>
-          <div className="wf-list-subtitle">Institutional review and oversight details</div>
-        </div>
-        <ChevronRight size={18} style={{ color: 'var(--wf-gray-400)', transform: showEthicsCommittee ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
-      </button>
-
-      {showEthicsCommittee && (
-        <WireframeCard>
-          {ec ? (
-            <div style={{ fontSize: 13, color: 'var(--wf-gray-700)', lineHeight: 1.7 }}>
-              <p style={{ fontWeight: 600, marginBottom: 8, color: 'var(--wf-gray-800)' }}>
-                This application has been reviewed and approved by:
-              </p>
-              <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: 14, marginBottom: 12 }}>
-                <p style={{ fontWeight: 600, marginBottom: 4 }}>{ec.name}</p>
-                <p>Approval Reference: <strong>{ec.approvalRef}</strong></p>
-                <p>Valid until: {new Date(ec.validUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-              </div>
-              <p style={{ fontWeight: 600, marginBottom: 6 }}>Contact the Ethics Committee:</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <a href={`mailto:${ec.contactEmail}`} style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#2563eb', textDecoration: 'none', fontSize: 13 }}>
-                  <Mail size={14} /> {ec.contactEmail}
-                </a>
-                {ec.contactPhone && (
-                  <a href={`tel:${ec.contactPhone}`} style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#2563eb', textDecoration: 'none', fontSize: 13 }}>
-                    <Phone size={14} /> {ec.contactPhone}
-                  </a>
-                )}
-              </div>
-              <p style={{ marginTop: 12, fontSize: 12, color: 'var(--wf-gray-500)', lineHeight: 1.5 }}>
-                If you have concerns about how this app handles your data, you may contact the Ethics Committee directly.
-                {isIndia && ' Under ICMR guidelines, all health data applications must have IEC oversight and approval.'}
-              </p>
-            </div>
-          ) : (
-            <p style={{ fontSize: 13, color: 'var(--wf-gray-500)', textAlign: 'center', padding: 12 }}>
-              Ethics committee details are available once a hospital is selected.
-            </p>
           )}
         </WireframeCard>
       )}
